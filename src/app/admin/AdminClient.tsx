@@ -409,7 +409,18 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                                     </td>
                                                     <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>#{index + 1}</td>
                                                     <td>
-                                                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{student.name}</div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{student.name}</div>
+                                                            <Link
+                                                                href={`/${student.registerNumber}`}
+                                                                target="_blank"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                style={{ color: 'var(--accent-primary)', opacity: 0.6, display: 'flex' }}
+                                                                title="View Public Profile"
+                                                            >
+                                                                <ExternalLink size={14} />
+                                                            </Link>
+                                                        </div>
                                                         <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{student.registerNumber}</div>
                                                     </td>
                                                     <td style={{ fontSize: '13px' }}>{student.department}</td>
