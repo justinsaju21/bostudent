@@ -237,7 +237,7 @@ export async function initializeSheet(): Promise<void> {
     // Check if headers exist
     const res = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: 'Sheet1!A1:AH1',
+        range: 'Sheet1!A1:AZ1',
     });
 
     if (!res.data.values || res.data.values.length === 0) {
@@ -289,7 +289,7 @@ export async function appendStudent(app: StudentApplication): Promise<void> {
     const row = applicationToRow(app);
     await sheets.spreadsheets.values.append({
         spreadsheetId: sheetId,
-        range: 'Sheet1!A:AH',
+        range: 'Sheet1!A:AZ',
         valueInputOption: 'RAW',
         requestBody: { values: [row] },
     });
@@ -302,7 +302,7 @@ export async function getAllStudents(): Promise<StudentApplication[]> {
 
     const res = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: 'Sheet1!A2:AH',
+        range: 'Sheet1!A2:AZ',
     });
 
     if (!res.data.values) return [];
