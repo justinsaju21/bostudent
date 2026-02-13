@@ -381,13 +381,14 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                     <th>Department</th>
                                     <th style={{ width: '120px' }}>Score</th>
                                     <th style={{ width: '150px' }}>Params</th>
+                                    <th style={{ width: '80px' }}>Profile</th>
                                     <th style={{ width: '40px' }}></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filtered.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                                        <td colSpan={8} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
                                             {students.length === 0 ? 'No applications yet.' : 'No results found.'}
                                         </td>
                                     </tr>
@@ -409,18 +410,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                                     </td>
                                                     <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>#{index + 1}</td>
                                                     <td>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{student.name}</div>
-                                                            <Link
-                                                                href={`/${student.registerNumber}`}
-                                                                target="_blank"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                                style={{ color: 'var(--accent-primary)', opacity: 0.6, display: 'flex' }}
-                                                                title="View Public Profile"
-                                                            >
-                                                                <ExternalLink size={14} />
-                                                            </Link>
-                                                        </div>
+                                                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{student.name}</div>
                                                         <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{student.registerNumber}</div>
                                                     </td>
                                                     <td style={{ fontSize: '13px' }}>{student.department}</td>
@@ -454,13 +444,27 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                                             <div style={{ width: `${Math.min(displayScore, 100)}%`, height: '100%', background: 'var(--accent-gradient)' }} />
                                                         </div>
                                                     </td>
+                                                    <td>
+                                                        <Link
+                                                            href={`/${student.registerNumber}`}
+                                                            target="_blank"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            style={{
+                                                                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                                padding: '4px 8px', borderRadius: '4px', background: 'rgba(3,77,161,0.05)',
+                                                                color: 'var(--accent-primary)', textDecoration: 'none', fontSize: '12px', fontWeight: 600
+                                                            }}
+                                                        >
+                                                            View <ExternalLink size={12} />
+                                                        </Link>
+                                                    </td>
                                                     <td style={{ textAlign: 'center' }}>
                                                         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                                     </td>
                                                 </tr>
                                                 {isExpanded && fullStudent && (
                                                     <tr>
-                                                        <td colSpan={7} style={{ padding: 0 }}>
+                                                        <td colSpan={8} style={{ padding: 0 }}>
                                                             <StudentDetailPanel
                                                                 student={fullStudent}
                                                                 regNo={student.registerNumber}
@@ -548,6 +552,21 @@ function StudentDetailPanel({
 
     return (
         <div style={{ padding: '24px 32px', background: 'rgba(3,77,161,0.02)', borderTop: '1px solid var(--border-subtle)' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+                <Link
+                    href={`/${regNo}`}
+                    target="_blank"
+                    style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                        padding: '10px 20px', borderRadius: 'var(--radius-md)',
+                        background: 'var(--accent-primary)', color: 'white',
+                        textDecoration: 'none', fontWeight: 600, fontSize: '14px',
+                        boxShadow: '0 4px 12px rgba(3, 77, 161, 0.2)'
+                    }}
+                >
+                    Open Full Public Profile <ExternalLink size={16} />
+                </Link>
+            </div>
             {/* Personal Details */}
             <div style={sectionStyle}>
                 <h4 style={headingStyle}>👤 Personal Details</h4>
