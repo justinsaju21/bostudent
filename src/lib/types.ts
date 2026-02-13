@@ -23,7 +23,7 @@ export interface AcademicRecord {
 
 // ---- Post-College Status ----
 export interface PostCollegeStatus {
-    status: 'placed' | 'higher_studies' | 'entrepreneur' | 'other';
+    status: 'placed' | 'higher_studies' | 'entrepreneur' | 'unplaced' | 'other';
     placedCompany?: string;
     offerLetterLink?: string;
     universityName?: string;

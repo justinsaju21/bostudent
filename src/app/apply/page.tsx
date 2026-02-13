@@ -14,6 +14,7 @@ import {
     AchievementsStep,
     FinalStep,
 } from '@/components/FormSteps';
+import { FormDataLists } from '@/components/FormSteps';
 import {
     User,
     GraduationCap,
@@ -248,6 +249,7 @@ export default function ApplyPage() {
                         )}
                     </div>
                 </form>
+                <FormDataLists />
             </main>
         </>
     );

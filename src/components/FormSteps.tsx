@@ -1,10 +1,42 @@
 'use client';
 
 import React from 'react';
-import { UseFormRegister, FieldErrors, Control, useFieldArray } from 'react-hook-form';
+import { UseFormRegister, FieldErrors, Control, useFieldArray, useWatch } from 'react-hook-form';
 import { ApplicationFormData } from '@/lib/schemas';
 import { Plus, Trash2 } from 'lucide-react';
 import { generateId } from '@/lib/utils';
+
+// ===== CURATED OPTION LISTS =====
+const TOP_COMPANIES = [
+    'TCS', 'Infosys', 'Wipro', 'Cognizant', 'HCL Technologies', 'Tech Mahindra',
+    'Google', 'Microsoft', 'Amazon', 'Apple', 'Meta', 'Netflix', 'Adobe',
+    'Accenture', 'Deloitte', 'IBM', 'Oracle', 'SAP', 'Capgemini', 'Zoho',
+    'Flipkart', 'Samsung', 'Intel', 'Qualcomm', 'Goldman Sachs', 'JP Morgan',
+    'Morgan Stanley', 'Cisco', 'Salesforce', 'PayPal', 'Uber', 'Freshworks',
+    'Ola', 'PhonePe', 'Razorpay', 'BYJU\'S', 'Swiggy', 'Zomato',
+    'L&T Infotech', 'Mphasis', 'Mindtree', 'Robert Bosch',
+];
+
+const TOP_HACKATHONS = [
+    'Smart India Hackathon (SIH)', 'SIH 2024', 'SIH 2023',
+    'HackMIT', 'HackHarvard', 'PennApps', 'TreeHacks', 'CalHacks',
+    'MLH Local Hack Day', 'MLH Global Hack Week',
+    'DevFolio Hackathon', 'ETHIndia', 'HackCBS', 'Hack36',
+    'Google Code Jam', 'Meta Hacker Cup', 'ICPC',
+    'AngelHack', 'Junction', 'HackZurich', 'TechCrunch Disrupt Hackathon',
+    'NASA Space Apps Challenge', 'Kavach Hackathon', 'Toycathon',
+    'IIIT Hackathon', 'CodeSangam', 'Hackfest',
+];
+
+const TOP_VOLUNTEERING_ORGS = [
+    'NSS (National Service Scheme)', 'NCC (National Cadet Corps)',
+    'Rotaract Club', 'Leo Club', 'Red Cross Society',
+    'UNICEF', 'WWF', 'Teach India', 'CRY (Child Rights and You)',
+    'Habitat for Humanity', 'Bhumi', 'Make A Wish Foundation',
+    'Robin Hood Army', 'Goonj', 'Akshaya Patra Foundation',
+    'Youth For Seva', 'iVolunteer', 'Pratham',
+    'SRM Community Service', 'IEEE Humanitarian',
+];
 
 interface StepProps {
     register: UseFormRegister<ApplicationFormData>;
@@ -28,7 +60,10 @@ export function PersonalDetailsStep({ register, errors }: StepProps) {
                     <input className="form-input" placeholder="e.g. RA2111003010xxx" {...register('personalDetails.registerNumber')} />
                 </Field>
                 <Field label="Department *" error={errors.personalDetails?.department?.message}>
-                    <input className="form-input" placeholder="e.g. Computer Science Engineering" {...register('personalDetails.department')} />
+                    <select className="form-input" {...register('personalDetails.department')}>
+                        <option value="">Select Department</option>
+                        <option value="Electronics and Communication Engineering">Electronics and Communication Engineering (ECE)</option>
+                    </select>
                 </Field>
                 <Field label="Specialization *" error={errors.personalDetails?.specialization?.message}>
                     <input className="form-input" placeholder="e.g. AI & ML" {...register('personalDetails.specialization')} />
@@ -51,7 +86,7 @@ export function PersonalDetailsStep({ register, errors }: StepProps) {
 }
 
 // ===== STEP 2: Academic Record =====
-export function AcademicStep({ register, errors }: StepProps) {
+export function AcademicStep({ register, errors, control }: StepProps) {
     return (
         <div>
             <h2 className="section-title">
@@ -88,23 +123,7 @@ export function AcademicStep({ register, errors }: StepProps) {
                 <span className="icon">🎯</span>
                 Post-College Status
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                <Field label="Current Status *" error={errors.postCollegeStatus?.status?.message}>
-                    <select className="form-input" {...register('postCollegeStatus.status')}>
-                        <option value="">Select...</option>
-                        <option value="placed">Placed</option>
-                        <option value="higher_studies">Higher Studies</option>
-                        <option value="entrepreneur">Entrepreneur</option>
-                        <option value="other">Other</option>
-                    </select>
-                </Field>
-                <Field label="Company / University Name" error={errors.postCollegeStatus?.placedCompany?.message}>
-                    <input className="form-input" placeholder="e.g. Google, MIT" {...register('postCollegeStatus.placedCompany')} />
-                </Field>
-                <Field label="Offer Letter / Admit Card Link" error={errors.postCollegeStatus?.offerLetterLink?.message}>
-                    <input className="form-input" placeholder="Google Drive link" {...register('postCollegeStatus.offerLetterLink')} />
-                </Field>
-            </div>
+            <PostCollegeSection register={register} errors={errors} control={control} />
         </div>
     );
 }
@@ -132,7 +151,7 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
                             <Field label="Company *" error={errors.internships?.[index]?.company?.message}>
-                                <input className="form-input" placeholder="Company Name" {...register(`internships.${index}.company`)} />
+                                <input className="form-input" list="companyList" placeholder="Type or select company" {...register(`internships.${index}.company`)} />
                             </Field>
                             <Field label="Role *" error={errors.internships?.[index]?.role?.message}>
                                 <input className="form-input" placeholder="Software Engineer Intern" {...register(`internships.${index}.role`)} />
@@ -205,7 +224,7 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
                             <Field label="Hackathon Name *" error={errors.hackathons?.[index]?.name?.message}>
-                                <input className="form-input" placeholder="SIH 2024" {...register(`hackathons.${index}.name`)} />
+                                <input className="form-input" list="hackathonList" placeholder="Type or select hackathon" {...register(`hackathons.${index}.name`)} />
                             </Field>
                             <Field label="Project Built *" error={errors.hackathons?.[index]?.projectBuilt?.message}>
                                 <input className="form-input" placeholder="What you built" {...register(`hackathons.${index}.projectBuilt`)} />
@@ -371,7 +390,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <button type="button" className="btn-danger" onClick={() => volunteering.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                            <Field label="Organization *"><input className="form-input" placeholder="NSS / NCC / NGO" {...register(`volunteering.${index}.organization`)} /></Field>
+                            <Field label="Organization *"><input className="form-input" list="volunteerOrgList" placeholder="Type or select organization" {...register(`volunteering.${index}.organization`)} /></Field>
                             <Field label="Role *"><input className="form-input" {...register(`volunteering.${index}.role`)} /></Field>
                             <Field label="Hours Served"><input className="form-input" type="number" {...register(`volunteering.${index}.hoursServed`)} /></Field>
                             <Field label="Impact"><input className="form-input" placeholder="Describe impact" {...register(`volunteering.${index}.impact`)} /></Field>
@@ -546,6 +565,56 @@ export function FinalStep({ register, errors, control }: StepProps) {
     );
 }
 
+// ===== POST-COLLEGE STATUS (with conditional fields) =====
+function PostCollegeSection({ register, errors, control }: StepProps) {
+    const statusValue = useWatch({ control, name: 'postCollegeStatus.status' });
+
+    return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+            <Field label="Current Status *" error={errors.postCollegeStatus?.status?.message}>
+                <select className="form-input" {...register('postCollegeStatus.status')}>
+                    <option value="">Select...</option>
+                    <option value="placed">Placed</option>
+                    <option value="higher_studies">Higher Studies</option>
+                    <option value="entrepreneur">Entrepreneur</option>
+                    <option value="unplaced">Unplaced</option>
+                    <option value="other">Other</option>
+                </select>
+            </Field>
+            {statusValue === 'placed' && (
+                <>
+                    <Field label="Company Name *" error={errors.postCollegeStatus?.placedCompany?.message}>
+                        <input className="form-input" placeholder="e.g. Google, TCS" {...register('postCollegeStatus.placedCompany')} />
+                    </Field>
+                    <Field label="Offer Letter Link" error={errors.postCollegeStatus?.offerLetterLink?.message}>
+                        <input className="form-input" placeholder="Google Drive link" {...register('postCollegeStatus.offerLetterLink')} />
+                    </Field>
+                </>
+            )}
+            {statusValue === 'higher_studies' && (
+                <>
+                    <Field label="University Name *" error={errors.postCollegeStatus?.placedCompany?.message}>
+                        <input className="form-input" placeholder="e.g. MIT, Stanford" {...register('postCollegeStatus.placedCompany')} />
+                    </Field>
+                    <Field label="Admit Card Link" error={errors.postCollegeStatus?.offerLetterLink?.message}>
+                        <input className="form-input" placeholder="Google Drive link" {...register('postCollegeStatus.offerLetterLink')} />
+                    </Field>
+                </>
+            )}
+            {statusValue === 'entrepreneur' && (
+                <Field label="Startup / Venture Name" error={errors.postCollegeStatus?.placedCompany?.message}>
+                    <input className="form-input" placeholder="e.g. My Startup" {...register('postCollegeStatus.placedCompany')} />
+                </Field>
+            )}
+            {statusValue === 'other' && (
+                <Field label="Please specify *" error={errors.postCollegeStatus?.otherDetails?.message}>
+                    <input className="form-input" placeholder="Describe your current status" {...register('postCollegeStatus.otherDetails')} />
+                </Field>
+            )}
+        </div>
+    );
+}
+
 // ===== HELPER COMPONENTS =====
 
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
@@ -587,5 +656,22 @@ function ArraySection({
             )}
             {children}
         </div>
+    );
+}
+
+// ===== GLOBAL DATALISTS (rendered once) =====
+export function FormDataLists() {
+    return (
+        <>
+            <datalist id="companyList">
+                {TOP_COMPANIES.map(c => <option key={c} value={c} />)}
+            </datalist>
+            <datalist id="hackathonList">
+                {TOP_HACKATHONS.map(h => <option key={h} value={h} />)}
+            </datalist>
+            <datalist id="volunteerOrgList">
+                {TOP_VOLUNTEERING_ORGS.map(o => <option key={o} value={o} />)}
+            </datalist>
+        </>
     );
 }

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getAllStudents } from '@/lib/googleSheets';
 import { rankStudents } from '@/lib/ranking';
 import { RankedStudent } from '@/lib/types';
+import { StudentApplication } from '@/lib/types';
 import { verifyAdminToken } from '@/lib/adminAuth';
 import AdminClient from './AdminClient';
 
@@ -23,10 +24,12 @@ export default async function AdminPage() {
     }
 
     let rankedStudents: RankedStudent[];
+    let allStudents: StudentApplication[] = [];
     let error = '';
 
     try {
         const students = await getAllStudents();
+        allStudents = students;
         rankedStudents = rankStudents(students);
     } catch (err) {
         console.error('Admin error:', err);
@@ -34,5 +37,5 @@ export default async function AdminPage() {
         rankedStudents = [];
     }
 
-    return <AdminClient students={rankedStudents} error={error} />;
+    return <AdminClient students={rankedStudents} fullStudents={allStudents} error={error} />;
 }

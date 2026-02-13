@@ -32,7 +32,7 @@ export const academicRecordSchema = z.object({
 
 // ===== Post-College Status Schema =====
 export const postCollegeStatusSchema = z.object({
-    status: z.enum(['placed', 'higher_studies', 'entrepreneur', 'other']),
+    status: z.enum(['placed', 'higher_studies', 'entrepreneur', 'unplaced', 'other']),
     placedCompany: z.string().optional(),
     offerLetterLink: z.string().url().optional().or(z.literal('')),
     universityName: z.string().optional(),
