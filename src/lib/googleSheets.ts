@@ -216,6 +216,9 @@ function rowToApplication(row: string[]): StudentApplication | null {
                     app.discardedItems = JSON.parse(row[discardedItemsIdx]);
                 } catch { app.discardedItems = []; }
             }
+            // Verify essential fields exist
+            if (!app.personalDetails || !app.personalDetails.registerNumber) return null;
+
             return app;
         }
         return null;

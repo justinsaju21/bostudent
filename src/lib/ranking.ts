@@ -108,6 +108,7 @@ export function rankStudents(
     weights: RankingWeights = DEFAULT_WEIGHTS
 ): RankedStudent[] {
     return students
+        .filter(student => student.personalDetails && student.personalDetails.registerNumber)
         .map((student) => {
             const { totalScore, breakdown } = calculateScore(student, weights);
             return {

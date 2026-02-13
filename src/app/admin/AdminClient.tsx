@@ -43,7 +43,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
     const [discardedItems, setDiscardedItems] = useState<Record<string, Set<string>>>(() => {
         const initial: Record<string, Set<string>> = {};
         fullStudents.forEach(s => {
-            if (s.discardedItems && s.discardedItems.length > 0) {
+            if (s.discardedItems && s.discardedItems.length > 0 && s.personalDetails?.registerNumber) {
                 initial[s.personalDetails.registerNumber] = new Set(s.discardedItems);
             }
         });
@@ -53,7 +53,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
     const [scoreOverrides, setScoreOverrides] = useState<Record<string, number>>(() => {
         const initial: Record<string, number> = {};
         fullStudents.forEach(s => {
-            if (s.facultyScore !== undefined) {
+            if (s.facultyScore !== undefined && s.personalDetails?.registerNumber) {
                 initial[s.personalDetails.registerNumber] = s.facultyScore;
             }
         });
@@ -122,7 +122,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
     // Get full student data by register number
     const getFullStudent = (regNo: string): StudentApplication | undefined => {
-        return fullStudents.find(s => s.personalDetails.registerNumber === regNo);
+        return fullStudents.find(s => s.personalDetails?.registerNumber === regNo);
     };
 
     // Persist changes
@@ -501,7 +501,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                 <ComparisonModal
                     isOpen={isCompareModalOpen}
                     onClose={() => setIsCompareModalOpen(false)}
-                    students={fullStudents.filter(s => selectedStudents.includes(s.personalDetails.registerNumber))}
+                    students={fullStudents.filter(s => s.personalDetails?.registerNumber && selectedStudents.includes(s.personalDetails.registerNumber))}
                     rankedData={students}
                     scoreOverrides={scoreOverrides}
                 />
