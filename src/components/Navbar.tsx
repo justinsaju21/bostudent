@@ -49,7 +49,7 @@ export default function Navbar() {
                     >
                         {/* SRM Logo */}
                         <img
-                            src="https://upload.wikimedia.org/wikipedia/en/f/fe/srm_seal.png"
+                            src="/srm-logo.png"
                             alt="SRM Logo"
                             style={{ height: '100%', width: 'auto', objectFit: 'contain' }}
                         />
