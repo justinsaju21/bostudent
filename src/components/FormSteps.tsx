@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
-import { UseFormRegister, FieldErrors, Control, useFieldArray, useWatch } from 'react-hook-form';
+import { UseFormRegister, FieldErrors, Control, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { ApplicationFormData } from '@/lib/schemas';
 import { Plus, Trash2 } from 'lucide-react';
 import { generateId } from '@/lib/utils';
+import { SearchableSelect } from './SearchableSelect';
 
 // ===== CURATED OPTION LISTS =====
 const TOP_COMPANIES = [
@@ -151,7 +152,19 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
                             <Field label="Company *" error={errors.internships?.[index]?.company?.message}>
-                                <input className="form-input" list="companyList" placeholder="Type or select company" {...register(`internships.${index}.company`)} />
+                                <Controller
+                                    control={control}
+                                    name={`internships.${index}.company`}
+                                    render={({ field }) => (
+                                        <SearchableSelect
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            options={TOP_COMPANIES}
+                                            placeholder="Type or select company"
+                                            error={errors.internships?.[index]?.company?.message}
+                                        />
+                                    )}
+                                />
                             </Field>
                             <Field label="Role *" error={errors.internships?.[index]?.role?.message}>
                                 <input className="form-input" placeholder="Software Engineer Intern" {...register(`internships.${index}.role`)} />
@@ -224,7 +237,19 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
                             <Field label="Hackathon Name *" error={errors.hackathons?.[index]?.name?.message}>
-                                <input className="form-input" list="hackathonList" placeholder="Type or select hackathon" {...register(`hackathons.${index}.name`)} />
+                                <Controller
+                                    control={control}
+                                    name={`hackathons.${index}.name`}
+                                    render={({ field }) => (
+                                        <SearchableSelect
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            options={TOP_HACKATHONS}
+                                            placeholder="Type or select hackathon"
+                                            error={errors.hackathons?.[index]?.name?.message}
+                                        />
+                                    )}
+                                />
                             </Field>
                             <Field label="Project Built *" error={errors.hackathons?.[index]?.projectBuilt?.message}>
                                 <input className="form-input" placeholder="What you built" {...register(`hackathons.${index}.projectBuilt`)} />
@@ -390,7 +415,21 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <button type="button" className="btn-danger" onClick={() => volunteering.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                            <Field label="Organization *"><input className="form-input" list="volunteerOrgList" placeholder="Type or select organization" {...register(`volunteering.${index}.organization`)} /></Field>
+                            <Field label="Organization *" error={errors.volunteering?.[index]?.organization?.message}>
+                                <Controller
+                                    control={control}
+                                    name={`volunteering.${index}.organization`}
+                                    render={({ field }) => (
+                                        <SearchableSelect
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            options={TOP_VOLUNTEERING_ORGS}
+                                            placeholder="Type or select organization"
+                                            error={errors.volunteering?.[index]?.organization?.message}
+                                        />
+                                    )}
+                                />
+                            </Field>
                             <Field label="Role *"><input className="form-input" {...register(`volunteering.${index}.role`)} /></Field>
                             <Field label="Hours Served"><input className="form-input" type="number" {...register(`volunteering.${index}.hoursServed`)} /></Field>
                             <Field label="Impact"><input className="form-input" placeholder="Describe impact" {...register(`volunteering.${index}.impact`)} /></Field>
