@@ -61,6 +61,8 @@ const HEADERS = [
     'Video Pitch URL',
     'Master Proof Folder',
     'Submitted At',
+    'Faculty_Score',
+    'Discarded_Items',
     // JSON columns (hidden by faculty)
     'JSON_Full_Data',
 ];
@@ -186,6 +188,8 @@ function applicationToRow(app: StudentApplication): string[] {
         app.videoPitchUrl,
         app.masterProofFolderUrl || '',
         app.submittedAt || new Date().toISOString(),
+        app.facultyScore?.toString() || '',
+        app.discardedItems ? JSON.stringify(app.discardedItems) : '[]',
         // JSON column
         JSON.stringify(app),
     ];
@@ -197,7 +201,22 @@ function rowToApplication(row: string[]): StudentApplication | null {
         // The last column is the full JSON
         const jsonStr = row[row.length - 1];
         if (jsonStr) {
-            return JSON.parse(jsonStr) as StudentApplication;
+            const app = JSON.parse(jsonStr) as StudentApplication;
+
+            // Enrich with sheet columns if JSON is stale (e.g. faculty made updates)
+            const facultyScoreIdx = HEADERS.indexOf('Faculty_Score');
+            const discardedItemsIdx = HEADERS.indexOf('Discarded_Items');
+
+            if (facultyScoreIdx !== -1 && row[facultyScoreIdx]) {
+                const score = parseFloat(row[facultyScoreIdx]);
+                if (!isNaN(score)) app.facultyScore = score;
+            }
+            if (discardedItemsIdx !== -1 && row[discardedItemsIdx]) {
+                try {
+                    app.discardedItems = JSON.parse(row[discardedItemsIdx]);
+                } catch { app.discardedItems = []; }
+            }
+            return app;
         }
         return null;
     } catch {
@@ -272,6 +291,83 @@ export async function getStudentByRegNo(regNo: string): Promise<StudentApplicati
 }
 
 export async function checkDuplicateRegNo(regNo: string): Promise<boolean> {
-    const student = await getStudentByRegNo(regNo);
-    return !!student;
+    const students = await getAllStudents();
+    return students.some(s => s.personalDetails.registerNumber === regNo);
+}
+
+export async function updateStudentEvaluation(
+    regNo: string,
+    facultyScore?: number,
+    discardedItems?: string[]
+): Promise<boolean> {
+    const auth = getAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+    const sheetId = getSheetId();
+
+    try {
+        // 1. Find the row index
+        const range = 'Sheet1!A:A'; // Register Number is column A
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range,
+        });
+
+        const rows = response.data.values;
+        if (!rows) return false;
+
+        const rowIndex = rows.findIndex(row => row[0] === regNo); // 0-indexed
+        if (rowIndex === -1) return false;
+
+        const sheetRow = rowIndex + 1; // 1-indexed for API
+
+        // 2. Determine column indices
+        const scoreColIndex = HEADERS.indexOf('Faculty_Score');
+        const discardedColIndex = HEADERS.indexOf('Discarded_Items');
+
+        if (scoreColIndex === -1 || discardedColIndex === -1) return false;
+
+        // Convert column index to letter (A, B, ... AA, AB...)
+        const getColLetter = (n: number) => {
+            let s = '';
+            while (n >= 0) {
+                s = String.fromCharCode(n % 26 + 65) + s;
+                n = Math.floor(n / 26) - 1;
+            }
+            return s;
+        };
+
+        const scoreCol = getColLetter(scoreColIndex);
+        const discardedCol = getColLetter(discardedColIndex);
+
+        const updates = [];
+
+        if (facultyScore !== undefined) {
+            updates.push({
+                range: `Sheet1!${scoreCol}${sheetRow}`,
+                values: [[facultyScore.toString()]],
+            });
+        }
+
+        if (discardedItems !== undefined) {
+            updates.push({
+                range: `Sheet1!${discardedCol}${sheetRow}`,
+                values: [[JSON.stringify(discardedItems)]],
+            });
+        }
+
+        if (updates.length > 0) {
+            await sheets.spreadsheets.values.batchUpdate({
+                spreadsheetId: sheetId,
+                requestBody: {
+                    valueInputOption: 'RAW',
+                    data: updates,
+                },
+            });
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error updating evaluation:', error);
+        return false;
+    }
 }

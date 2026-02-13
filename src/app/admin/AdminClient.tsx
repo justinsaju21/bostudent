@@ -35,8 +35,29 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
     const [search, setSearch] = useState('');
     const [deptFilter, setDeptFilter] = useState('');
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
-    const [discardedItems, setDiscardedItems] = useState<Record<string, Set<string>>>({});
-    const [scoreOverrides, setScoreOverrides] = useState<Record<string, number>>({});
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Initialize state from fullStudents
+    const [discardedItems, setDiscardedItems] = useState<Record<string, Set<string>>>(() => {
+        const initial: Record<string, Set<string>> = {};
+        fullStudents.forEach(s => {
+            if (s.discardedItems && s.discardedItems.length > 0) {
+                initial[s.personalDetails.registerNumber] = new Set(s.discardedItems);
+            }
+        });
+        return initial;
+    });
+
+    const [scoreOverrides, setScoreOverrides] = useState<Record<string, number>>(() => {
+        const initial: Record<string, number> = {};
+        fullStudents.forEach(s => {
+            if (s.facultyScore !== undefined) {
+                initial[s.personalDetails.registerNumber] = s.facultyScore;
+            }
+        });
+        return initial;
+    });
+
     const [editingScore, setEditingScore] = useState<string | null>(null);
     const [tempScore, setTempScore] = useState('');
     const router = useRouter();
@@ -66,17 +87,41 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         return fullStudents.find(s => s.personalDetails.registerNumber === regNo);
     };
 
+    // Persist changes
+    const persistEvaluation = async (regNo: string, score: number | undefined, discarded: Set<string> | undefined) => {
+        setIsSaving(true);
+        try {
+            await fetch('/api/admin/evaluate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    regNo,
+                    facultyScore: score,
+                    discardedItems: discarded ? Array.from(discarded) : [],
+                }),
+            });
+        } catch (err) {
+            console.error('Failed to save', err);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     // Discard logic
     const toggleDiscard = (regNo: string, section: string, itemId: string) => {
         setDiscardedItems(prev => {
             const key = `${regNo}::${section}::${itemId}`;
-            const newSet = new Set(prev[regNo] || []);
-            if (newSet.has(key)) {
-                newSet.delete(key);
+            const currentSet = new Set(prev[regNo] || []);
+            if (currentSet.has(key)) {
+                currentSet.delete(key);
             } else {
-                newSet.add(key);
+                currentSet.add(key);
             }
-            return { ...prev, [regNo]: newSet };
+
+            // Persist immediately
+            persistEvaluation(regNo, scoreOverrides[regNo], currentSet);
+
+            return { ...prev, [regNo]: currentSet };
         });
     };
 
@@ -95,6 +140,8 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         const val = parseFloat(tempScore);
         if (!isNaN(val) && val >= 0 && val <= 100) {
             setScoreOverrides(prev => ({ ...prev, [regNo]: val }));
+            // Persist
+            persistEvaluation(regNo, val, discardedItems[regNo]);
         }
         setEditingScore(null);
     };
@@ -182,6 +229,19 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                             </button>
                         </div>
                     </div>
+                    {isSaving && (
+                        <div style={{
+                            position: 'fixed', bottom: '24px', right: '24px',
+                            background: 'var(--bg-card)', padding: '12px 20px',
+                            borderRadius: 'var(--radius-full)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            border: '1px solid var(--border-subtle)', zIndex: 100,
+                            fontSize: '13px', fontWeight: 500, color: 'var(--accent-primary)'
+                        }}>
+                            <div className="animate-spin" style={{ width: '14px', height: '14px', border: '2px solid var(--accent-primary)', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                            Saving changes...
+                        </div>
+                    )}
                 </motion.div>
 
                 {error && (

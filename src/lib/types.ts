@@ -194,6 +194,9 @@ export interface StudentApplication {
     masterProofFolderUrl?: string;
     consentGiven: boolean;
     submittedAt?: string;
+    // Admin fields
+    facultyScore?: number;
+    discardedItems?: string[]; // Array of item IDs
 }
 
 // ===== RANKING =====
