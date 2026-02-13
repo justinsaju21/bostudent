@@ -1,6 +1,6 @@
 'use server';
 
-import { appendStudent, checkDuplicateRegNo } from '@/lib/googleSheets';
+import { appendStudent, checkDuplicateRegNo, getDeadline } from '@/lib/googleSheets';
 import { applicationSchema } from '@/lib/schemas';
 import { StudentApplication } from '@/lib/types';
 
@@ -12,6 +12,12 @@ export interface SubmitResult {
 
 export async function submitApplication(data: unknown): Promise<SubmitResult> {
     try {
+        // Check Deadline
+        const deadline = await getDeadline();
+        if (deadline && new Date() > new Date(deadline)) {
+            return { success: false, message: "Applications are closed." };
+        }
+
         // Validate with Zod
         const parsed = applicationSchema.safeParse(data);
         if (!parsed.success) {

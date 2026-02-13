@@ -245,6 +245,35 @@ export async function initializeSheet(): Promise<void> {
             requestBody: { values: [HEADERS] },
         });
     }
+
+    // Check if Settings sheet exists/init
+    try {
+        await sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: 'Settings!A1',
+        });
+    } catch {
+        // Likely sheet doesn't exist, create it (adding sheet is complex with values API, usually requires batchUpdate)
+        // For simplicity, we assume the user might need to create it, OR we try to add it.
+        // Actually, 'values' API cannot creating sheets. We need 'batchUpdate' with 'addSheet'.
+        try {
+            await sheets.spreadsheets.batchUpdate({
+                spreadsheetId: sheetId,
+                requestBody: {
+                    requests: [{ addSheet: { properties: { title: 'Settings' } } }]
+                }
+            });
+            // Initialize headers
+            await sheets.spreadsheets.values.update({
+                spreadsheetId: sheetId,
+                range: 'Settings!A1',
+                valueInputOption: 'RAW',
+                requestBody: { values: [['Key', 'Value'], ['DEADLINE', '']] },
+            });
+        } catch (e) {
+            console.log('Settings sheet might already exist or error creating:', e);
+        }
+    }
 }
 
 export async function appendStudent(app: StudentApplication): Promise<void> {
@@ -368,6 +397,69 @@ export async function updateStudentEvaluation(
         return true;
     } catch (error) {
         console.error('Error updating evaluation:', error);
+        return false;
+    }
+}
+
+// ===== SETTINGS (Deadline) =====
+
+export async function getDeadline(): Promise<string | null> {
+    const auth = getAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+    const sheetId = getSheetId();
+
+    try {
+        const res = await sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: 'Settings!A2:B10', // Look for DEADLINE key
+        });
+
+        const rows = res.data.values;
+        if (!rows) return null;
+
+        const deadlineRow = rows.find(r => r[0] === 'DEADLINE');
+        return deadlineRow ? deadlineRow[1] : null;
+    } catch {
+        return null;
+    }
+}
+
+export async function setDeadline(dateStr: string): Promise<boolean> {
+    const auth = getAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+    const sheetId = getSheetId();
+
+    try {
+        // We need to find the row for DEADLINE or append it.
+        // Simpler: Just read all, find index, update.
+        const res = await sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: 'Settings!A:A',
+        });
+
+        const rows = res.data.values || [];
+        let rowIndex = rows.findIndex(r => r[0] === 'DEADLINE');
+
+        if (rowIndex === -1) {
+            // Append
+            await sheets.spreadsheets.values.append({
+                spreadsheetId: sheetId,
+                range: 'Settings!A:B',
+                valueInputOption: 'RAW',
+                requestBody: { values: [['DEADLINE', dateStr]] },
+            });
+        } else {
+            // Update
+            await sheets.spreadsheets.values.update({
+                spreadsheetId: sheetId,
+                range: `Settings!B${rowIndex + 1}`,
+                valueInputOption: 'RAW',
+                requestBody: { values: [[dateStr]] },
+            });
+        }
+        return true;
+    } catch (e) {
+        console.error('Error setting deadline:', e);
         return false;
     }
 }

@@ -13,8 +13,8 @@ import {
     TechnicalStep,
     AchievementsStep,
     FinalStep,
+    FormDataLists,
 } from '@/components/FormSteps';
-import { FormDataLists } from '@/components/FormSteps';
 import {
     User,
     GraduationCap,
@@ -25,8 +25,11 @@ import {
     ChevronRight,
     Check,
     Loader2,
+    X,
 } from 'lucide-react';
 import Link from 'next/link';
+
+
 
 const STEPS = [
     { id: 0, label: 'Personal', icon: User },
@@ -36,10 +39,12 @@ const STEPS = [
     { id: 4, label: 'Submit', icon: Send },
 ];
 
-export default function ApplyPage() {
+export default function ApplicationForm() {
     const [currentStep, setCurrentStep] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [result, setResult] = useState<SubmitResult | null>(null);
+    const [deadlinePassed, setDeadlinePassed] = useState(false);
+    const [isLoadingDeadline, setIsLoadingDeadline] = useState(true);
 
     const form = useForm<ApplicationFormData>({
         resolver: zodResolver(applicationSchema) as any,
@@ -74,6 +79,19 @@ export default function ApplyPage() {
         },
         mode: 'onTouched',
     });
+
+    // Check deadline
+    React.useEffect(() => {
+        fetch('/api/deadline')
+            .then(res => res.json())
+            .then(data => {
+                if (data.deadline && new Date() > new Date(data.deadline)) {
+                    setDeadlinePassed(true);
+                }
+            })
+            .catch(err => console.error(err))
+            .finally(() => setIsLoadingDeadline(false));
+    }, []);
 
     // Load draft
     React.useEffect(() => {
@@ -126,6 +144,47 @@ export default function ApplyPage() {
             setIsSubmitting(false);
         }
     };
+
+
+
+    if (isLoadingDeadline) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-app)' }}>
+                <Loader2 className="animate-spin" size={32} color="var(--accent-primary)" />
+            </div>
+        );
+    }
+
+    if (deadlinePassed) {
+        return (
+            <>
+                <Navbar />
+                <main style={{ paddingTop: '64px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        style={{ textAlign: 'center', maxWidth: '500px', padding: '40px' }}
+                    >
+                        <div style={{
+                            width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.1)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px auto',
+                        }}>
+                            <X size={40} color="#DC2626" />
+                        </div>
+                        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '2rem', fontWeight: 700, marginBottom: '12px' }}>
+                            Applications Closed
+                        </h1>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', lineHeight: 1.6 }}>
+                            The deadline for the Best Outgoing Student application has passed. We are no longer accepting new submissions.
+                        </p>
+                        <Link href="/" style={{ textDecoration: 'none' }}>
+                            <button className="btn-secondary">Back to Home</button>
+                        </Link>
+                    </motion.div>
+                </main>
+            </>
+        );
+    }
 
     // Success screen
     if (result?.success) {

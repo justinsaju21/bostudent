@@ -4,8 +4,10 @@ import { RankedStudent, StudentApplication } from '@/lib/types';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Award, ExternalLink, Search, LogOut, Download, ChevronDown, ChevronUp, X, Edit3, Save, XCircle } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { Award, ExternalLink, Search, LogOut, Download, ChevronDown, ChevronUp, X, Edit3, Save, XCircle, Calendar, CheckSquare, Square, BarChart2 } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import React from 'react';
+import ComparisonModal from '@/components/ComparisonModal';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -60,7 +62,43 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
     const [editingScore, setEditingScore] = useState<string | null>(null);
     const [tempScore, setTempScore] = useState('');
+
+
+    // Deadline State
+    const [deadline, setDeadline] = useState<string>('');
+    const [isSettingDeadline, setIsSettingDeadline] = useState(false);
+
+    // Comparison State
+    const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+    const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+
     const router = useRouter();
+
+    useEffect(() => {
+        // Fetch deadline
+        fetch('/api/admin/settings').then(res => res.json()).then(data => {
+            if (data.deadline) setDeadline(new Date(data.deadline).toISOString().slice(0, 16));
+        });
+    }, []);
+
+    const saveDeadline = async (val: string) => {
+        setDeadline(val);
+        try {
+            await fetch('/api/admin/settings', {
+                method: 'POST',
+                body: JSON.stringify({ deadline: val }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const toggleSelection = (regNo: string) => {
+        setSelectedStudents(prev =>
+            prev.includes(regNo) ? prev.filter(id => id !== regNo) : [...prev, regNo]
+        );
+    };
 
     const departments = [...new Set(students.map((s) => s.department))];
 
@@ -220,9 +258,24 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                 </p>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-card)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                                <Calendar size={16} className="text-muted" />
+                                <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Form Deadline</span>
+                                    <input
+                                        type="datetime-local"
+                                        value={deadline}
+                                        onChange={(e) => saveDeadline(e.target.value)}
+                                        style={{
+                                            background: 'transparent', border: 'none', color: 'var(--text-primary)',
+                                            fontSize: '13px', fontWeight: 500, outline: 'none', cursor: 'pointer'
+                                        }}
+                                    />
+                                </div>
+                            </div>
                             <button onClick={downloadCSV} className="btn-secondary" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <Download size={18} /> Export CSV
+                                <Download size={18} /> Export
                             </button>
                             <button onClick={handleLogout} className="btn-secondary" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 <LogOut size={18} /> Logout
@@ -315,145 +368,94 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                         <table className="data-table">
                             <thead>
                                 <tr>
+                                    <th style={{ width: '40px' }}>
+                                        <div
+                                            onClick={() => setSelectedStudents(selectedStudents.length === filtered.length && filtered.length > 0 ? [] : filtered.map(s => s.registerNumber))}
+                                            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                        >
+                                            {selectedStudents.length > 0 && selectedStudents.length === filtered.length ? <CheckSquare size={16} /> : <Square size={16} />}
+                                        </div>
+                                    </th>
                                     <th style={{ width: '50px' }}>Rank</th>
                                     <th>Name</th>
-                                    <th>Register No.</th>
                                     <th>Department</th>
                                     <th style={{ width: '120px' }}>Score</th>
-                                    <th style={{ width: '150px' }}>Score Bar</th>
-                                    <th style={{ width: '160px' }}>Actions</th>
+                                    <th style={{ width: '150px' }}>Params</th>
+                                    <th style={{ width: '40px' }}></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filtered.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
-                                            {students.length === 0
-                                                ? 'No applications yet. Students can apply via the Apply page.'
-                                                : 'No results match your search.'}
+                                            {students.length === 0 ? 'No applications yet.' : 'No results found.'}
                                         </td>
                                     </tr>
                                 ) : (
-                                    filtered.map((student) => {
-                                        const originalRank = students.findIndex(
-                                            (s) => s.registerNumber === student.registerNumber
-                                        ) + 1;
-                                        const maxScore = students.length > 0 ? students[0].totalScore : 100;
-                                        const displayScore = getDisplayScore(student);
+                                    filtered.map((student, index) => {
                                         const isExpanded = expandedRow === student.registerNumber;
-                                        const fullData = getFullStudent(student.registerNumber);
+                                        const displayScore = getDisplayScore(student);
+                                        const isSelected = selectedStudents.includes(student.registerNumber);
+                                        const fullStudent = getFullStudent(student.registerNumber);
 
                                         return (
                                             <React.Fragment key={student.registerNumber}>
                                                 <tr
-                                                    style={{ cursor: 'pointer', background: isExpanded ? 'rgba(3,77,161,0.03)' : undefined }}
+                                                    style={{ borderBottom: '1px solid var(--border-subtle)', background: isExpanded ? 'var(--bg-surface)' : 'transparent', transition: 'background 0.2s' }}
                                                     onClick={() => setExpandedRow(isExpanded ? null : student.registerNumber)}
                                                 >
-                                                    <td style={{ textAlign: 'center' }}>
-                                                        <span style={{
-                                                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                                                            width: '32px', height: '32px', borderRadius: '50%',
-                                                            background: originalRank <= 3 ? 'var(--accent-gradient)' : 'var(--bg-card)',
-                                                            color: originalRank <= 3 ? 'white' : 'var(--text-secondary)',
-                                                            fontSize: '13px', fontWeight: 700,
-                                                        }}>
-                                                            {originalRank}
-                                                        </span>
+                                                    <td style={{ textAlign: 'center' }} onClick={e => { e.stopPropagation(); toggleSelection(student.registerNumber); }}>
+                                                        {isSelected ? <CheckSquare size={16} color="var(--accent-primary)" /> : <Square size={16} color="var(--text-muted)" />}
                                                     </td>
-                                                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{student.name}</td>
-                                                    <td style={{ fontFamily: "'Space Grotesk', monospace", fontSize: '13px' }}>{student.registerNumber}</td>
-                                                    <td>{student.department}</td>
+                                                    <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>#{index + 1}</td>
                                                     <td>
+                                                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{student.name}</div>
+                                                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{student.registerNumber}</div>
+                                                    </td>
+                                                    <td style={{ fontSize: '13px' }}>{student.department}</td>
+                                                    <td style={{ fontFamily: 'monospace', fontWeight: 700, textAlign: 'right' }}>
                                                         {editingScore === student.registerNumber ? (
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={e => e.stopPropagation()}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }} onClick={e => e.stopPropagation()}>
                                                                 <input
-                                                                    className="form-input"
-                                                                    type="number"
-                                                                    step="0.1"
-                                                                    min="0"
-                                                                    max="100"
-                                                                    value={tempScore}
-                                                                    onChange={(e) => setTempScore(e.target.value)}
-                                                                    style={{ width: '70px', padding: '4px 6px', fontSize: '13px' }}
                                                                     autoFocus
-                                                                    onKeyDown={(e) => {
+                                                                    type="number"
+                                                                    value={tempScore}
+                                                                    onChange={e => setTempScore(e.target.value)}
+                                                                    onClick={e => e.stopPropagation()}
+                                                                    onKeyDown={e => {
                                                                         if (e.key === 'Enter') saveScore(student.registerNumber);
-                                                                        if (e.key === 'Escape') cancelEditScore();
+                                                                        if (e.key === 'Escape') setEditingScore(null);
                                                                     }}
+                                                                    style={{ width: '60px', padding: '4px', fontSize: '13px', borderRadius: '4px', border: '1px solid var(--accent-primary)' }}
                                                                 />
-                                                                <button onClick={() => saveScore(student.registerNumber)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#16A34A', padding: '2px' }}>
-                                                                    <Save size={14} />
-                                                                </button>
-                                                                <button onClick={cancelEditScore} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '2px' }}>
-                                                                    <XCircle size={14} />
-                                                                </button>
+                                                                <button onClick={() => saveScore(student.registerNumber)} style={{ color: '#16A34A' }}><Save size={14} /></button>
+                                                                <button onClick={cancelEditScore} style={{ color: '#DC2626' }}><XCircle size={14} /></button>
                                                             </div>
                                                         ) : (
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <span className="gradient-text" style={{ fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>
-                                                                    {displayScore.toFixed(1)}
-                                                                </span>
-                                                                {scoreOverrides[student.registerNumber] !== undefined && (
-                                                                    <span style={{ fontSize: '10px', background: 'rgba(228,179,22,0.15)', color: '#B8860B', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                                                                        MANUAL
-                                                                    </span>
-                                                                )}
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); startEditScore(student.registerNumber, student.totalScore); }}
-                                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px' }}
-                                                                    title="Override score"
-                                                                >
-                                                                    <Edit3 size={12} />
-                                                                </button>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                                                                {displayScore.toFixed(2)}
+                                                                <Edit3 size={12} style={{ opacity: 0.5, cursor: 'pointer' }} onClick={e => { e.stopPropagation(); startEditScore(student.registerNumber, displayScore); }} />
                                                             </div>
                                                         )}
                                                     </td>
                                                     <td>
-                                                        <div className="score-bar">
-                                                            <div className="score-bar-fill" style={{ width: `${(displayScore / maxScore) * 100}%` }} />
+                                                        <div style={{ width: '100%', height: '6px', background: 'var(--bg-card)', borderRadius: '3px', overflow: 'hidden' }}>
+                                                            <div style={{ width: `${Math.min(displayScore, 100)}%`, height: '100%', background: 'var(--accent-gradient)' }} />
                                                         </div>
                                                     </td>
-                                                    <td>
-                                                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                                                            <Link
-                                                                href={`/${student.registerNumber}`}
-                                                                style={{
-                                                                    display: 'inline-flex', alignItems: 'center', gap: '4px',
-                                                                    fontSize: '12px', color: 'var(--accent-primary)', textDecoration: 'none',
-                                                                    padding: '4px 10px', borderRadius: 'var(--radius-sm)',
-                                                                    border: '1px solid rgba(3, 77, 161, 0.25)',
-                                                                }}
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            >
-                                                                View <ExternalLink size={10} />
-                                                            </Link>
-                                                            <span style={{ color: 'var(--text-muted)' }}>
-                                                                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                                            </span>
-                                                        </div>
+                                                    <td style={{ textAlign: 'center' }}>
+                                                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                                     </td>
                                                 </tr>
-
-                                                {/* Expandable Detail Row */}
-                                                {isExpanded && fullData && (
+                                                {isExpanded && fullStudent && (
                                                     <tr>
                                                         <td colSpan={7} style={{ padding: 0 }}>
-                                                            <AnimatePresence>
-                                                                <motion.div
-                                                                    initial={{ height: 0, opacity: 0 }}
-                                                                    animate={{ height: 'auto', opacity: 1 }}
-                                                                    exit={{ height: 0, opacity: 0 }}
-                                                                    transition={{ duration: 0.3 }}
-                                                                    style={{ overflow: 'hidden' }}
-                                                                >
-                                                                    <StudentDetailPanel
-                                                                        student={fullData}
-                                                                        regNo={student.registerNumber}
-                                                                        isDiscarded={isDiscarded}
-                                                                        toggleDiscard={toggleDiscard}
-                                                                    />
-                                                                </motion.div>
-                                                            </AnimatePresence>
+                                                            <StudentDetailPanel
+                                                                student={fullStudent}
+                                                                regNo={student.registerNumber}
+                                                                isDiscarded={isDiscarded}
+                                                                toggleDiscard={toggleDiscard}
+                                                            />
                                                         </td>
                                                     </tr>
                                                 )}
@@ -465,13 +467,51 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                         </table>
                     </div>
                 </motion.div>
+
+                {/* Compare Button */}
+                <AnimatePresence>
+                    {selectedStudents.length > 0 && (
+                        <motion.div
+                            initial={{ y: 100, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 100, opacity: 0 }}
+                            style={{
+                                position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+                                background: 'var(--accent-primary)', color: 'white',
+                                padding: '12px 24px', borderRadius: 'var(--radius-full)',
+                                boxShadow: '0 8px 32px rgba(3, 77, 161, 0.4)',
+                                display: 'flex', alignItems: 'center', gap: '12px', zIndex: 50,
+                                cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)'
+                            }}
+                            onClick={() => setIsCompareModalOpen(true)}
+                        >
+                            <BarChart2 size={20} />
+                            <span style={{ fontWeight: 600 }}>Compare {selectedStudents.length} Candidates</span>
+                            <div style={{
+                                background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px'
+                            }} onClick={(e) => { e.stopPropagation(); setSelectedStudents([]); }}>
+                                <X size={12} />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Comparison Modal */}
+                <ComparisonModal
+                    isOpen={isCompareModalOpen}
+                    onClose={() => setIsCompareModalOpen(false)}
+                    students={fullStudents.filter(s => selectedStudents.includes(s.personalDetails.registerNumber))}
+                    rankedData={students}
+                    scoreOverrides={scoreOverrides}
+                />
             </main>
         </>
     );
 }
 
 // Need React import for React.Fragment
-import React from 'react';
+
 
 // ===== STUDENT DETAIL PANEL =====
 function StudentDetailPanel({
