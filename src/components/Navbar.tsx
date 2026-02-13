@@ -40,16 +40,19 @@ export default function Navbar() {
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
                     <div
                         style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '10px',
-                            background: 'var(--accent-gradient)',
+                            width: '48px',
+                            height: '48px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
                     >
-                        <GraduationCap size={22} color="white" />
+                        {/* SRM Logo */}
+                        <img
+                            src="https://upload.wikimedia.org/wikipedia/en/f/fe/srm_seal.png"
+                            alt="SRM Logo"
+                            style={{ height: '100%', width: 'auto', objectFit: 'contain' }}
+                        />
                     </div>
                     <div>
                         <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>
