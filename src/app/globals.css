@@ -458,6 +458,16 @@ body {
   background: linear-gradient(180deg, #f0f5ff 0%, #ffffff 100%);
 }
 
+@media (max-width: 640px) {
+  .hero-section {
+    padding: 40px 16px;
+    align-items: flex-start;
+    /* Align to top to avoid centering issues on small screens */
+    padding-top: 80px;
+    /* Add space for navbar */
+  }
+}
+
 .hero-stats {
   display: flex;
   gap: 48px;

@@ -425,7 +425,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                 ) : (
                                     filtered.map((student, index) => {
                                         const isExpanded = expandedRow === student.registerNumber;
-                                        const displayScore = (scoreOverrides[student.registerNumber] ?? student.totalScore);
+                                        const displayScore = getDisplayScore(student);
                                         const isSelected = selectedStudents.includes(student.registerNumber);
                                         const fullStudent = fullStudents.find(s => s.personalDetails?.registerNumber === student.registerNumber);
 

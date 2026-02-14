@@ -88,7 +88,7 @@ export default function HomePage() {
               transition={{ duration: 0.7, delay: 0.1 }}
               style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+                fontSize: 'clamp(2rem, 6vw, 4.5rem)',
                 fontWeight: 800,
                 lineHeight: 1.1,
                 marginBottom: '24px',
@@ -106,7 +106,7 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
               style={{
-                fontSize: '18px',
+                fontSize: 'clamp(1rem, 4vw, 18px)',
                 color: 'var(--text-secondary)',
                 maxWidth: '600px',
                 margin: '0 auto 40px auto',
