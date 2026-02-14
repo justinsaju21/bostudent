@@ -31,9 +31,12 @@ export default async function AdminPage() {
         const students = await getAllStudents();
         allStudents = students;
         rankedStudents = rankStudents(students);
-    } catch (err) {
+    } catch (err: any) {
         console.error('Admin error:', err);
-        error = 'Google Sheets is not configured yet. Please set up .env.local credentials.';
+        error = err?.message || 'An unexpected error occurred while fetching or ranking students.';
+        if (error.includes('credentials not configured')) {
+            error = 'Google Sheets is not configured yet. Please set up .env.local credentials.';
+        }
         rankedStudents = [];
     }
 

@@ -93,20 +93,20 @@ export function calculateScore(
     }
 
     // List-based scores (filtered)
-    breakdown.internships = scoreListItems(filter(student.internships, 'internships')) * weights.internships;
-    breakdown.projects = scoreListItems(filter(student.projects, 'projects')) * weights.projects;
-    breakdown.hackathons = scoreListItems(filter(student.hackathons, 'hackathons')) * weights.hackathons;
-    breakdown.research = scoreResearch(filter(student.research, 'research')) * weights.research;
-    breakdown.entrepreneurship = scoreListItems(filter(student.entrepreneurship, 'entrepreneurship'), 3) * weights.entrepreneurship;
-    breakdown.certifications = scoreListItems(filter(student.certifications, 'certifications')) * weights.certifications;
-    breakdown.competitiveExams = scoreListItems(filter(student.competitiveExams, 'exams'), 3) * weights.competitiveExams;
-    breakdown.sportsOrCultural = scoreSportsOrCultural(filter(student.sportsOrCultural, 'sports')) * weights.sportsOrCultural;
-    breakdown.volunteering = scoreListItems(filter(student.volunteering, 'volunteering')) * weights.volunteering;
-    breakdown.scholarships = scoreListItems(filter(student.scholarships, 'scholarships'), 3) * weights.scholarships;
-    breakdown.clubActivities = scoreListItems(filter(student.clubActivities, 'clubs')) * weights.clubActivities;
-    breakdown.departmentContributions = scoreListItems(filter(student.departmentContributions, 'deptContrib')) * weights.departmentContributions;
-    breakdown.professionalMemberships = scoreListItems(filter(student.professionalMemberships, 'profMembership')) * weights.professionalMemberships;
-    breakdown.references = scoreListItems(student.references, 3) * weights.references; // References usually not discarded, but can be if needed
+    breakdown.internships = scoreListItems(filter(student.internships || [], 'internships')) * weights.internships;
+    breakdown.projects = scoreListItems(filter(student.projects || [], 'projects')) * weights.projects;
+    breakdown.hackathons = scoreListItems(filter(student.hackathons || [], 'hackathons')) * weights.hackathons;
+    breakdown.research = scoreResearch(filter(student.research || [], 'research')) * weights.research;
+    breakdown.entrepreneurship = scoreListItems(filter(student.entrepreneurship || [], 'entrepreneurship'), 3) * weights.entrepreneurship;
+    breakdown.certifications = scoreListItems(filter(student.certifications || [], 'certifications')) * weights.certifications;
+    breakdown.competitiveExams = scoreListItems(filter(student.competitiveExams || [], 'exams'), 3) * weights.competitiveExams;
+    breakdown.sportsOrCultural = scoreSportsOrCultural(filter(student.sportsOrCultural || [], 'sports')) * weights.sportsOrCultural;
+    breakdown.volunteering = scoreListItems(filter(student.volunteering || [], 'volunteering')) * weights.volunteering;
+    breakdown.scholarships = scoreListItems(filter(student.scholarships || [], 'scholarships'), 3) * weights.scholarships;
+    breakdown.clubActivities = scoreListItems(filter(student.clubActivities || [], 'clubs')) * weights.clubActivities;
+    breakdown.departmentContributions = scoreListItems(filter(student.departmentContributions || [], 'deptContrib')) * weights.departmentContributions;
+    breakdown.professionalMemberships = scoreListItems(filter(student.professionalMemberships || [], 'profMembership')) * weights.professionalMemberships;
+    breakdown.references = scoreListItems(student.references || [], 3) * weights.references; // References usually not discarded, but can be if needed
 
     // Total
     const totalScore = Object.values(breakdown).reduce((sum, val) => sum + val, 0);
