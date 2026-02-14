@@ -509,29 +509,42 @@ for (let i = 0; i < 15; i++) {
 
 export async function GET() {
     try {
-        let count = 0;
-        const skipped: string[] = [];
+        // 1. Fetch ALL existing students once (Efficient Read)
+        const existingStudents = await getAllStudents();
+        const existingRegNos = new Set(existingStudents.map(s => s.personalDetails.registerNumber));
 
-        for (const student of MOCK_STUDENTS) {
-            // Check for duplicates
-            const exists = await checkDuplicateRegNo(student.personalDetails.registerNumber);
-            if (exists) {
-                // Update existing
-                await updateFullStudentApplication(student);
-                // Keep track of updated ones if needed, or just count them
-                count++;
-                continue;
+        const newStudents: StudentApplication[] = [];
+        const studentsToUpdate: StudentApplication[] = [];
+        let createdCount = 0;
+        let updatedCount = 0;
+
+        // 2. Classify: New vs Existing
+        for (const mockStudent of MOCK_STUDENTS) {
+            if (existingRegNos.has(mockStudent.personalDetails.registerNumber)) {
+                studentsToUpdate.push(mockStudent);
+            } else {
+                newStudents.push(mockStudent);
             }
-            await appendStudent(student);
-            count++;
+        }
+
+        // 3. Batch Insert New Students (1 API Call)
+        if (newStudents.length > 0) {
+            await addStudentsBatch(newStudents);
+            createdCount = newStudents.length;
+        }
+
+        // 4. Update Existing (Must be individual updates unfortunately, but fewer than full scan)
+        for (const student of studentsToUpdate) {
+            await updateFullStudentApplication(student);
+            updatedCount++;
         }
 
         return NextResponse.json({
             success: true,
-            message: `Processed ${count} students (Created/Updated).`
+            message: `Processed ${createdCount + updatedCount} students (${createdCount} created, ${updatedCount} updated). Batching active.`
         });
     } catch (error) {
-        console.error("Seeding failed:", error);
-        return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+        console.error('Seeding error:', error);
+        return NextResponse.json({ success: false, error: 'Failed to seed data' }, { status: 500 });
     }
 }
