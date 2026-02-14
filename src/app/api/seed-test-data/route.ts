@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { appendStudent, checkDuplicateRegNo, updateFullStudentApplication } from '@/lib/googleSheets';
+import { appendStudent, checkDuplicateRegNo, updateFullStudentApplication, getAllStudents, addStudentsBatch } from '@/lib/googleSheets';
 import { StudentApplication } from '@/lib/types';
 
 // Simple UUID generator
@@ -544,7 +544,7 @@ export async function GET() {
             message: `Processed ${createdCount + updatedCount} students (${createdCount} created, ${updatedCount} updated). Batching active.`
         });
     } catch (error) {
-        console.error('Seeding error:', error);
-        return NextResponse.json({ success: false, error: 'Failed to seed data' }, { status: 500 });
+        console.error('Seeding error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        return NextResponse.json({ success: false, error: 'Failed to seed data', details: String(error) }, { status: 500 });
     }
 }
