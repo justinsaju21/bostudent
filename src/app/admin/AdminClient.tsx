@@ -484,7 +484,9 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                     }}
                 >
                     <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}> {/* Add touch scrolling */}
-                        <table className="data-table" style={{ minWidth: '800px' }}> {/* Force min-width to trigger scroll */}
+                        {/* Force min-width to trigger scroll */}
+                        <table className="data-table" style={{ minWidth: '800px' }}>
+
                             <thead>
                                 <tr>
                                     <th style={{ width: '40px' }}>
