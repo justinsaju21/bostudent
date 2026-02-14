@@ -219,20 +219,26 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
 
     const downloadCSV = () => {
-        const headers = ['Rank', 'Register Number', 'Name', 'Department', 'Auto Score', 'Faculty Score', 'CGPA', 'Research', 'Internships', 'Projects', 'Hackathons'];
-        const rows = students.map((s, i) => [
-            i + 1,
-            s.registerNumber,
-            s.name,
-            s.department,
-            s.totalScore.toFixed(2),
-            (scoreOverrides[s.registerNumber] ?? s.totalScore).toFixed(2),
-            s.breakdown.cgpa,
-            s.breakdown.research,
-            s.breakdown.internships,
-            s.breakdown.projects,
-            s.breakdown.hackathons,
-        ]);
+        const headers = ['Rank', 'Register Number', 'Name', 'Department', 'Section', 'Faculty Advisor', 'Auto Score', 'Faculty Score', 'CGPA', 'Research', 'Internships', 'Projects', 'Hackathons'];
+        const rows = students.map((s, i) => {
+            const fullStudent = fullStudents.find(fs => fs.personalDetails?.registerNumber === s.registerNumber);
+            return [
+                i + 1,
+                s.registerNumber,
+                s.name,
+                s.department,
+                fullStudent?.personalDetails.section || '',
+                fullStudent?.personalDetails.facultyAdvisor || '',
+                s.totalScore.toFixed(2),
+                (scoreOverrides[s.registerNumber] ?? s.totalScore).toFixed(2),
+                s.breakdown.cgpa,
+                s.breakdown.research,
+                s.breakdown.internships,
+                s.breakdown.projects,
+                s.breakdown.projects,
+                s.breakdown.hackathons,
+            ];
+        });
 
         const csvContent = "data:text/csv;charset=utf-8,"
             + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
