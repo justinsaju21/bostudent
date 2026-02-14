@@ -292,6 +292,25 @@ export async function appendStudent(app: StudentApplication): Promise<void> {
     });
 }
 
+export async function addStudentsBatch(apps: StudentApplication[]): Promise<void> {
+    const auth = getAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+    const sheetId = getSheetId();
+
+    if (apps.length === 0) return;
+
+    await initializeSheet();
+
+    const rows = apps.map(applicationToRow);
+
+    await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetId,
+        range: 'Sheet1!A:AZ',
+        valueInputOption: 'RAW',
+        requestBody: { values: rows },
+    });
+}
+
 export async function getAllStudents(): Promise<StudentApplication[]> {
     const auth = getAuth();
     const sheets = google.sheets({ version: 'v4', auth });
