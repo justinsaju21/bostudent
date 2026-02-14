@@ -29,8 +29,8 @@ function getSheetId(): string {
 
 // ===== Column Headers for the Sheet =====
 const HEADERS = [
-    'Register Number',
     'Name',
+    'Register Number',
     'Department',
     'Specialization',
     'Section',
@@ -158,8 +158,8 @@ function postCollegeDetails(pc: StudentApplication['postCollegeStatus']): string
 // ===== Convert StudentApplication to a Row =====
 function applicationToRow(app: StudentApplication): string[] {
     return [
-        app.personalDetails.registerNumber,
         app.personalDetails.name,
+        app.personalDetails.registerNumber,
         app.personalDetails.department,
         app.personalDetails.specialization,
         app.personalDetails.section || '',
