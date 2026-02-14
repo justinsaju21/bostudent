@@ -65,11 +65,25 @@ function scoreSportsOrCultural(items: { level: string }[]): number {
     return totalScore / maxItems;
 }
 
+// Helper to check if an item is discarded
+function isDiscarded(regNo: string, section: string, itemId: string, discardedList?: string[]): boolean {
+    if (!discardedList || discardedList.length === 0) return false;
+    const key = `${regNo}::${section}::${itemId}`;
+    return discardedList.includes(key);
+}
+
 export function calculateScore(
     student: StudentApplication,
-    weights: RankingWeights = DEFAULT_WEIGHTS
+    weights: RankingWeights = DEFAULT_WEIGHTS,
+    discardedItems: string[] = []
 ): { totalScore: number; breakdown: Record<string, number> } {
     const breakdown: Record<string, number> = {};
+    const regNo = student.personalDetails.registerNumber;
+
+    // Helper to filter a list
+    const filter = <T extends { id: string }>(items: T[], section: string) => {
+        return items.filter(item => !isDiscarded(regNo, section, item.id, discardedItems));
+    };
 
     // CGPA
     breakdown.cgpa = scoreCGPA(student.academicRecord.cgpa) * weights.cgpa;
@@ -77,20 +91,20 @@ export function calculateScore(
         breakdown.cgpa *= 0.85; // 15% penalty for arrears
     }
 
-    // List-based scores
-    breakdown.internships = scoreListItems(student.internships) * weights.internships;
-    breakdown.projects = scoreListItems(student.projects) * weights.projects;
-    breakdown.hackathons = scoreListItems(student.hackathons) * weights.hackathons;
-    breakdown.research = scoreResearch(student.research) * weights.research;
-    breakdown.entrepreneurship = scoreListItems(student.entrepreneurship, 3) * weights.entrepreneurship;
-    breakdown.certifications = scoreListItems(student.certifications) * weights.certifications;
-    breakdown.competitiveExams = scoreListItems(student.competitiveExams, 3) * weights.competitiveExams;
-    breakdown.sportsOrCultural = scoreSportsOrCultural(student.sportsOrCultural) * weights.sportsOrCultural;
-    breakdown.volunteering = scoreListItems(student.volunteering) * weights.volunteering;
-    breakdown.scholarships = scoreListItems(student.scholarships, 3) * weights.scholarships;
-    breakdown.clubActivities = scoreListItems(student.clubActivities) * weights.clubActivities;
-    breakdown.departmentContributions = scoreListItems(student.departmentContributions) * weights.departmentContributions;
-    breakdown.references = scoreListItems(student.references, 3) * weights.references;
+    // List-based scores (filtered)
+    breakdown.internships = scoreListItems(filter(student.internships, 'internships')) * weights.internships;
+    breakdown.projects = scoreListItems(filter(student.projects, 'projects')) * weights.projects;
+    breakdown.hackathons = scoreListItems(filter(student.hackathons, 'hackathons')) * weights.hackathons;
+    breakdown.research = scoreResearch(filter(student.research, 'research')) * weights.research;
+    breakdown.entrepreneurship = scoreListItems(filter(student.entrepreneurship, 'entrepreneurship'), 3) * weights.entrepreneurship;
+    breakdown.certifications = scoreListItems(filter(student.certifications, 'certifications')) * weights.certifications;
+    breakdown.competitiveExams = scoreListItems(filter(student.competitiveExams, 'exams'), 3) * weights.competitiveExams;
+    breakdown.sportsOrCultural = scoreSportsOrCultural(filter(student.sportsOrCultural, 'sports')) * weights.sportsOrCultural;
+    breakdown.volunteering = scoreListItems(filter(student.volunteering, 'volunteering')) * weights.volunteering;
+    breakdown.scholarships = scoreListItems(filter(student.scholarships, 'scholarships'), 3) * weights.scholarships;
+    breakdown.clubActivities = scoreListItems(filter(student.clubActivities, 'clubs')) * weights.clubActivities;
+    breakdown.departmentContributions = scoreListItems(filter(student.departmentContributions, 'deptContrib')) * weights.departmentContributions;
+    breakdown.references = scoreListItems(student.references, 3) * weights.references; // References usually not discarded, but can be if needed
 
     // Total
     const totalScore = Object.values(breakdown).reduce((sum, val) => sum + val, 0);

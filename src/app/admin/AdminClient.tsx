@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Award, ExternalLink, Search, LogOut, Download, ChevronDown, ChevronUp, X, Edit3, Save, XCircle, Calendar, CheckSquare, Square, BarChart2 } from 'lucide-react';
+import { calculateScore } from '@/lib/ranking';
 import { useState, useMemo, useEffect } from 'react';
 import React from 'react';
 import ComparisonModal from '@/components/ComparisonModal';
@@ -190,7 +191,20 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
     };
 
     const getDisplayScore = (student: RankedStudent) => {
-        return scoreOverrides[student.registerNumber] ?? student.totalScore;
+        // 1. If manual override exists, use it
+        if (scoreOverrides[student.registerNumber] !== undefined) {
+            return scoreOverrides[student.registerNumber];
+        }
+
+        // 2. Otherwise, recalculate based on discarded items
+        const fullData = getFullStudent(student.registerNumber);
+        if (!fullData) return student.totalScore;
+
+        const currentDiscarded = Array.from(discardedItems[student.registerNumber] || []);
+        if (currentDiscarded.length === 0) return student.totalScore;
+
+        // Recalculate
+        return calculateScore(fullData, undefined, currentDiscarded).totalScore;
     };
 
     const downloadCSV = () => {
@@ -362,10 +376,15 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}
+                    style={{
+                        borderRadius: 'var(--radius-md)',
+                        overflow: 'hidden',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'var(--bg-card)' // Ensure background for scrolling
+                    }}
                 >
-                    <div style={{ overflowX: 'auto' }}>
-                        <table className="data-table">
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}> {/* Add touch scrolling */}
+                        <table className="data-table" style={{ minWidth: '800px' }}> {/* Force min-width to trigger scroll */}
                             <thead>
                                 <tr>
                                     <th style={{ width: '40px' }}>
