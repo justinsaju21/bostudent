@@ -154,13 +154,23 @@ function MobileNavLink({ href, children, onClick }: { href: string; children: Re
             style={{
                 color: 'var(--text-secondary)',
                 textDecoration: 'none',
-                fontSize: '15px',
+                fontSize: '16px', // Increased font size for better readability
                 fontWeight: 500,
-                padding: '12px 16px',
+                padding: '16px 20px', // Larger touch target
                 borderRadius: 'var(--radius-sm)',
                 transition: 'all 0.2s ease',
-                display: 'block',
+                display: 'flex', // Flex for potential icons
+                alignItems: 'center',
                 background: 'var(--bg-secondary)',
+                border: '1px solid transparent',
+            }}
+            onTouchStart={(e) => {
+                e.currentTarget.style.background = 'var(--bg-card-hover)';
+                e.currentTarget.style.borderColor = 'var(--border-subtle)';
+            }}
+            onTouchEnd={(e) => {
+                e.currentTarget.style.background = 'var(--bg-secondary)';
+                e.currentTarget.style.borderColor = 'transparent';
             }}
         >
             {children}
