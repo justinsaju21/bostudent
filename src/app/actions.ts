@@ -10,6 +10,21 @@ export interface SubmitResult {
     errors?: Record<string, string>;
 }
 
+// Helper for exponential backoff retry
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+    try {
+        return await fn();
+    } catch (error) {
+        if (retries === 0) throw error;
+
+        // Wait for delay
+        await new Promise(resolve => setTimeout(resolve, delay));
+
+        // Retry with exponential backoff (double the delay)
+        return withRetry(fn, retries - 1, delay * 2);
+    }
+}
+
 export async function submitApplication(data: unknown): Promise<SubmitResult> {
     try {
         // Check Deadline
@@ -44,8 +59,8 @@ export async function submitApplication(data: unknown): Promise<SubmitResult> {
             };
         }
 
-        // Submit to Google Sheets
-        await appendStudent(application);
+        // Submit to Google Sheets with Retry Logic
+        await withRetry(() => appendStudent(application));
 
         return {
             success: true,
