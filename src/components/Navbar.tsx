@@ -40,8 +40,8 @@ export default function Navbar() {
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
                     <div
                         style={{
-                            width: '48px',
-                            height: '48px',
+                            width: 'clamp(32px, 8vw, 48px)',
+                            height: 'clamp(32px, 8vw, 48px)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -54,11 +54,19 @@ export default function Navbar() {
                             style={{ height: '100%', width: 'auto', objectFit: 'contain' }}
                         />
                     </div>
-                    <div>
-                        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>
+                    <div style={{ minWidth: 0 }}> {/* Prevent shrinking below content */}
+                        <div style={{
+                            fontFamily: "'Space Grotesk', sans-serif",
+                            fontWeight: 700,
+                            fontSize: 'clamp(14px, 4vw, 16px)',
+                            color: 'var(--text-primary)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                        }}>
                             Best Outgoing Student
                         </div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+                        <div className="hidden sm:block" style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
                             SRM IST KTR
                         </div>
                     </div>

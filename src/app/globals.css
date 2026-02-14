@@ -483,6 +483,14 @@ body {
   flex-wrap: wrap;
 }
 
+@media (max-width: 640px) {
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-section {
     min-height: auto;
