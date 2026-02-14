@@ -440,7 +440,73 @@ const MOCK_STUDENTS: StudentApplication[] = [
         consentGiven: true,
         submittedAt: new Date().toISOString()
     }
+    }
 ];
+
+// ===== GENERATE 15 MORE RANDOM STUDENTS =====
+const NAMES = ["David Kim", "Eva Green", "Frank Chen", "Grace Hopper", "Hank Moody", "Ivy Thomas", "Jack Ryan", "Kelly Kapoor", "Leo Das", "Mia Wong", "Nina Simone", "Oscar Isaac", "Paul Rudd", "Quinn Fabray", "Rachel Zane"];
+const SECTIONS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
+const SPECIALIZATIONS = ["VLSI Design", "Embedded Systems", "Communication Systems", "Signal Processing", "Robotics"];
+const FACULTY = ["Dr. A. Smith", "Prof. R. Johnson", "Dr. P. Sharma", "Dr. K. Lee", "Prof. M. Gupta"];
+
+function generateRandomStudent(index: number): StudentApplication {
+    const name = NAMES[index % NAMES.length];
+    const section = SECTIONS[index % SECTIONS.length];
+    const spec = SPECIALIZATIONS[index % SPECIALIZATIONS.length];
+    const advisor = FACULTY[index % FACULTY.length];
+    const cgpa = 6 + Math.random() * 4; // 6.0 to 10.0
+    const regNo = `RA22110530100${(index + 4).toString().padStart(2, '0')}`;
+
+    return {
+        personalDetails: {
+            name,
+            registerNumber: regNo,
+            department: "Electronics and Communication Engineering",
+            specialization: spec,
+            personalEmail: `${name.toLowerCase().replace(' ', '.')}@gmail.com`,
+            srmEmail: `${name[0].toLowerCase()}${name.split(' ')[1].toLowerCase()}123@srmist.edu.in`,
+            mobileNumber: `98765${index.toString().padStart(5, '0')}`,
+            facultyAdvisor: advisor,
+            section,
+            profilePhotoUrl: `https://ui-avatars.com/api/?name=${name.replace(' ', '+')}&background=random`
+        },
+        academicRecord: {
+            cgpa: parseFloat(cgpa.toFixed(2)),
+            tenthPercentage: 80 + Math.floor(Math.random() * 20),
+            twelfthPercentage: 75 + Math.floor(Math.random() * 25),
+            historyOfArrears: Math.random() > 0.8,
+            numberOfArrears: Math.random() > 0.8 ? Math.floor(Math.random() * 3) + 1 : 0
+        },
+        postCollegeStatus: {
+            status: Math.random() > 0.5 ? 'placed' : (Math.random() > 0.5 ? 'higher_studies' : 'unplaced'),
+            placedCompany: Math.random() > 0.5 ? "TCS" : undefined,
+            universityName: Math.random() > 0.8 ? "ASU" : undefined
+        },
+        internships: [],
+        projects: [],
+        hackathons: [],
+        research: [],
+        entrepreneurship: [],
+        certifications: [],
+        competitiveExams: [],
+        sportsOrCultural: [],
+        volunteering: [],
+        scholarships: [],
+        clubActivities: [],
+        departmentContributions: [],
+        references: [],
+        socialMedia: { linkedin: `https://linkedin.com/in/${name.replace(' ', '')}` },
+        futureGoal: { description: "To become a successful engineer." },
+        videoPitchUrl: "https://youtube.com",
+        consentGiven: true,
+        submittedAt: new Date().toISOString()
+    };
+}
+
+// Append 15 random students
+for (let i = 0; i < 15; i++) {
+    MOCK_STUDENTS.push(generateRandomStudent(i));
+}
 
 export async function GET() {
     try {
