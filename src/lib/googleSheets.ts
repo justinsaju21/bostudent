@@ -335,7 +335,20 @@ export async function updateStudentEvaluation(
 
     try {
         // 1. Find the row index
-        const range = 'Sheet1!A:A'; // Register Number is column A
+        const regNoIndex = HEADERS.indexOf('Register Number');
+        if (regNoIndex === -1) return false;
+
+        const getColLetter = (n: number) => {
+            let s = '';
+            while (n >= 0) {
+                s = String.fromCharCode(n % 26 + 65) + s;
+                n = Math.floor(n / 26) - 1;
+            }
+            return s;
+        };
+        const regNoCol = getColLetter(regNoIndex);
+
+        const range = `Sheet1!${regNoCol}:${regNoCol}`;
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: sheetId,
             range,
@@ -356,15 +369,20 @@ export async function updateStudentEvaluation(
         if (scoreColIndex === -1 || discardedColIndex === -1) return false;
 
         // Convert column index to letter (A, B, ... AA, AB...)
-        const getColLetter = (n: number) => {
-            let s = '';
-            while (n >= 0) {
-                s = String.fromCharCode(n % 26 + 65) + s;
-                n = Math.floor(n / 26) - 1;
-            }
-            return s;
-        };
+        // (Helper function defined above currently)
+        // Reuse getColLetter if possible or just use it from scope if I structured it well. 
+        // Note: The previous chunk defined getColLetter inside the function scope, so it is available below in the specific function? 
+        // No, I need to be careful with scope. The previous replacement was inside updateStudentEvaluation.
+        // Let's just redefine getColLetter at top level or duplicate or use safely.
 
+        // Actually, to make it clean, I will NOT rely on previous definition being hoisted if I am not sure.
+        // The previous chunk inserted getColLetter *inside* updateStudentEvaluation before usage.
+        // So I can remove the *duplicate* definition further down if I want, or just leave it if I didn't touch it.
+        // But the Original Code had getColLetter *later* at line 367.
+        // My previous chunk inserted it at line 347 approx.
+        // So I should remove the old definition at 367 to avoid duplication/errors.
+
+        // Let's Delete the old definition block.
         const scoreCol = getColLetter(scoreColIndex);
         const discardedCol = getColLetter(discardedColIndex);
 
@@ -409,7 +427,21 @@ export async function updateFullStudentApplication(app: StudentApplication): Pro
     await initializeSheet();
 
     try {
-        const range = 'Sheet1!A:A';
+        const regNoIndex = HEADERS.indexOf('Register Number');
+        if (regNoIndex === -1) return false;
+
+        // Simple col letter helper
+        const getColLetter = (n: number) => {
+            let s = '';
+            while (n >= 0) {
+                s = String.fromCharCode(n % 26 + 65) + s;
+                n = Math.floor(n / 26) - 1;
+            }
+            return s;
+        };
+        const regNoCol = getColLetter(regNoIndex);
+
+        const range = `Sheet1!${regNoCol}:${regNoCol}`;
         const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range });
         const rows = response.data.values;
         if (!rows) return false;
