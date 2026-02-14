@@ -258,7 +258,11 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
     return (
         <>
             <Navbar />
-            <main style={{ paddingTop: '80px', padding: '80px 24px 60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+            <main style={{
+                padding: 'clamp(80px, 10vh, 120px) clamp(12px, 5vw, 24px) 60px clamp(12px, 5vw, 24px)',
+                maxWidth: '1200px',
+                margin: '0 auto'
+            }}>
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -266,27 +270,63 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                     transition={{ duration: 0.5 }}
                     style={{ marginBottom: '40px' }}
                 >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px' }}>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        marginBottom: '32px',
+                        flexDirection: 'column',
+                        gap: '24px'
+                    }} className="lg:flex-row lg:items-center">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div style={{
-                                width: '48px', height: '48px', borderRadius: 'var(--radius-sm)',
-                                background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                width: 'clamp(40px, 10vw, 48px)',
+                                height: 'clamp(40px, 10vw, 48px)',
+                                borderRadius: 'var(--radius-sm)',
+                                background: 'var(--accent-gradient)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0
                             }}>
                                 <Award size={24} color="white" />
                             </div>
                             <div>
-                                <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '2rem', fontWeight: 700 }}>
+                                <h1 style={{
+                                    fontFamily: "'Space Grotesk', sans-serif",
+                                    fontSize: 'clamp(1.5rem, 6vw, 2rem)',
+                                    fontWeight: 700,
+                                    lineHeight: 1.2
+                                }}>
                                     Faculty Dashboard
                                 </h1>
-                                <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
-                                    Evaluate and rank Best Outgoing Student candidates
+                                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                                    Evaluate and rank candidates
                                 </p>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-card)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+
+                        <div style={{
+                            display: 'flex',
+                            gap: '12px',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            width: '100%',
+                            justifyContent: 'flex-start'
+                        }} className="lg:width-auto lg:justify-end">
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                background: 'var(--bg-card)',
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border-subtle)',
+                                flex: 1,
+                                minWidth: '200px'
+                            }}>
                                 <Calendar size={16} className="text-muted" />
-                                <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', width: '100%' }}>
                                     <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Form Deadline</span>
                                     <input
                                         type="datetime-local"
@@ -294,17 +334,20 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                         onChange={(e) => saveDeadline(e.target.value)}
                                         style={{
                                             background: 'transparent', border: 'none', color: 'var(--text-primary)',
-                                            fontSize: '13px', fontWeight: 500, outline: 'none', cursor: 'pointer'
+                                            fontSize: '13px', fontWeight: 500, outline: 'none', cursor: 'pointer',
+                                            width: '100%'
                                         }}
                                     />
                                 </div>
                             </div>
-                            <button onClick={downloadCSV} className="btn-secondary" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <Download size={18} /> Export
-                            </button>
-                            <button onClick={handleLogout} className="btn-secondary" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <LogOut size={18} /> Logout
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px', width: '100%' }} className="sm:width-auto">
+                                <button onClick={downloadCSV} className="btn-secondary" style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
+                                    <Download size={18} /> Export
+                                </button>
+                                <button onClick={handleLogout} className="btn-secondary" style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
+                                    <LogOut size={18} /> Logout
+                                </button>
+                            </div>
                         </div>
                     </div>
                     {isSaving && (
@@ -408,7 +451,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                     </th>
                                     <th style={{ width: '50px' }}>Rank</th>
                                     <th>Name</th>
-                                    <th>Department</th>
+                                    <th className="hide-on-mobile">Department</th>
                                     <th style={{ width: '120px' }}>Score</th>
                                     <th style={{ width: '150px' }}>Params</th>
                                     <th style={{ width: '80px' }}>Profile</th>
@@ -440,10 +483,10 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                                     </td>
                                                     <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>#{index + 1}</td>
                                                     <td>
-                                                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{student.name}</div>
-                                                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{student.registerNumber}</div>
+                                                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>{student.name}</div>
+                                                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{student.registerNumber}</div>
                                                     </td>
-                                                    <td style={{ fontSize: '13px' }}>{student.department}</td>
+                                                    <td style={{ fontSize: '13px' }} className="hide-on-mobile">{student.department}</td>
                                                     <td style={{ fontFamily: 'monospace', fontWeight: 700, textAlign: 'right' }}>
                                                         {editingScore === student.registerNumber ? (
                                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }} onClick={e => e.stopPropagation()}>
