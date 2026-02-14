@@ -123,15 +123,16 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
               className="hero-buttons"
+              style={{ width: '100%' }}
             >
-              <Link href="/apply" style={{ textDecoration: 'none' }}>
-                <button className="btn-primary" style={{ fontSize: '16px', padding: '14px 32px', minWidth: '200px', justifyContent: 'center' }}>
+              <Link href="/apply" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+                <button className="btn-primary" style={{ fontSize: '16px', padding: '14px 32px', minWidth: '220px', justifyContent: 'center' }}>
                   Apply Now
                   <ArrowRight size={18} />
                 </button>
               </Link>
-              <Link href="/admin" style={{ textDecoration: 'none' }}>
-                <button className="btn-secondary" style={{ fontSize: '16px', padding: '14px 32px', minWidth: '200px', justifyContent: 'center' }}>
+              <Link href="/admin" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+                <button className="btn-secondary" style={{ fontSize: '16px', padding: '14px 32px', minWidth: '220px', justifyContent: 'center' }}>
                   <Users size={18} />
                   Faculty Dashboard
                 </button>

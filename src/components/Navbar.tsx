@@ -75,11 +75,10 @@ export default function Navbar() {
                 {/* Desktop Links */}
                 <div
                     style={{
-                        display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
                     }}
-                    className="hidden lg:flex"
+                    className="nav-desktop"
                 >
                     <NavLink href="/">Home</NavLink>
                     <NavLink href="/apply">Apply Now</NavLink>
@@ -89,7 +88,7 @@ export default function Navbar() {
                 {/* Mobile Menu Button */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="lg:hidden"
+                    className="nav-mobile-btn"
                     style={{
                         background: 'transparent',
                         border: 'none',
@@ -116,7 +115,7 @@ export default function Navbar() {
                         gap: '8px',
                         background: 'white',
                     }}
-                    className="lg:hidden"
+                    className="nav-mobile-btn"
                 >
                     <MobileNavLink href="/" onClick={() => setIsOpen(false)}>Home</MobileNavLink>
                     <MobileNavLink href="/apply" onClick={() => setIsOpen(false)}>Apply Now</MobileNavLink>

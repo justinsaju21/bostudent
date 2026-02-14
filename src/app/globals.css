@@ -480,14 +480,39 @@ body {
   display: flex;
   gap: 16px;
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
 }
 
 @media (max-width: 640px) {
   .hero-buttons {
     flex-direction: column;
-    align-items: center;
     width: 100%;
+  }
+
+  .hero-buttons>* {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+/* ===== Navbar Visibility Utilities ===== */
+.nav-desktop {
+  display: none;
+}
+
+.nav-mobile-btn {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .nav-desktop {
+    display: flex;
+  }
+
+  .nav-mobile-btn {
+    display: none;
   }
 }
 
