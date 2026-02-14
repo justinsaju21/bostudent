@@ -219,13 +219,13 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
 
     const downloadCSV = () => {
-        const headers = ['Rank', 'Register Number', 'Name', 'Department', 'Section', 'Faculty Advisor', 'Auto Score', 'Faculty Score', 'CGPA', 'Research', 'Internships', 'Projects', 'Hackathons'];
+        const headers = ['Rank', 'Name', 'Register Number', 'Department', 'Section', 'Faculty Advisor', 'Auto Score', 'Faculty Score', 'CGPA', 'Research', 'Internships', 'Projects', 'Hackathons'];
         const rows = students.map((s, i) => {
             const fullStudent = fullStudents.find(fs => fs.personalDetails?.registerNumber === s.registerNumber);
             return [
                 i + 1,
-                s.registerNumber,
                 s.name,
+                s.registerNumber,
                 s.department,
                 fullStudent?.personalDetails.section || '',
                 fullStudent?.personalDetails.facultyAdvisor || '',
