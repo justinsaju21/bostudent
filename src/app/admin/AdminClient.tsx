@@ -452,6 +452,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                     <th style={{ width: '50px' }}>Rank</th>
                                     <th>Name</th>
                                     <th className="hide-on-mobile">Department</th>
+                                    <th style={{ width: '60px' }}>Sec</th>
                                     <th style={{ width: '120px' }}>Score</th>
                                     <th style={{ width: '150px' }}>Params</th>
                                     <th style={{ width: '80px' }}>Profile</th>
@@ -487,6 +488,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                                         <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{student.registerNumber}</div>
                                                     </td>
                                                     <td style={{ fontSize: '13px' }} className="hide-on-mobile">{student.department}</td>
+                                                    <td style={{ fontSize: '13px', textAlign: 'center' }}>{fullStudent?.personalDetails.section}</td>
                                                     <td style={{ fontFamily: 'monospace', fontWeight: 700, textAlign: 'right' }}>
                                                         {editingScore === student.registerNumber ? (
                                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }} onClick={e => e.stopPropagation()}>
@@ -646,6 +648,8 @@ function StudentDetailPanel({
                 <div style={gridStyle}>
                     <DetailField label="Name" value={pd.name} />
                     <DetailField label="Register No" value={pd.registerNumber} />
+                    <DetailField label="Section" value={pd.section} />
+                    <DetailField label="Faculty Advisor" value={pd.facultyAdvisor} />
                     <DetailField label="Department" value={pd.department} />
                     <DetailField label="Specialization" value={pd.specialization} />
                     <DetailField label="Personal Email" value={pd.personalEmail} />
