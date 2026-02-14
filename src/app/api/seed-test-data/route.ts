@@ -440,7 +440,6 @@ const MOCK_STUDENTS: StudentApplication[] = [
         consentGiven: true,
         submittedAt: new Date().toISOString()
     }
-    }
 ];
 
 // ===== GENERATE 15 MORE RANDOM STUDENTS =====
