@@ -52,6 +52,7 @@ export default function ApplicationForm() {
             personalDetails: {
                 name: '', registerNumber: '', department: '', specialization: '',
                 personalEmail: '', srmEmail: '', mobileNumber: '', profilePhotoUrl: '',
+                facultyAdvisor: '', section: '',
             },
             academicRecord: {
                 cgpa: 0, tenthPercentage: 0, twelfthPercentage: 0,

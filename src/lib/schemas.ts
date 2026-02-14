@@ -18,6 +18,8 @@ export const personalDetailsSchema = z.object({
         .string()
         .min(10, 'Mobile number must be at least 10 digits')
         .regex(/^[+]?\d{10,15}$/, 'Invalid mobile number'),
+    facultyAdvisor: z.string().min(2, 'Faculty Advisor name is required'),
+    section: z.string().min(1, 'Section is required').max(3, 'Section too long'),
     profilePhotoUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
 

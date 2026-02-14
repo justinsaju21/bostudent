@@ -34,6 +34,8 @@ const MOCK_STUDENTS: StudentApplication[] = [
             personalEmail: "alice.mehra@gmail.com",
             srmEmail: "am1234@srmist.edu.in",
             mobileNumber: "9876543210",
+            facultyAdvisor: "Dr. A. Smith",
+            section: "B",
             profilePhotoUrl: "https://ui-avatars.com/api/?name=Alice+Mehra&background=4F46E5&color=fff"
         },
         academicRecord: {
@@ -170,6 +172,8 @@ const MOCK_STUDENTS: StudentApplication[] = [
             personalEmail: "bob.krishnan@gmail.com",
             srmEmail: "bk5678@srmist.edu.in",
             mobileNumber: "9876543211",
+            facultyAdvisor: "Prof. R. Johnson",
+            section: "A",
             profilePhotoUrl: "https://ui-avatars.com/api/?name=Bob+Krishnan&background=059669&color=fff"
         },
         academicRecord: {
@@ -300,6 +304,8 @@ const MOCK_STUDENTS: StudentApplication[] = [
             personalEmail: "charlie.fern@gmail.com",
             srmEmail: "cf9012@srmist.edu.in",
             mobileNumber: "9876543212",
+            facultyAdvisor: "Dr. P. Sharma",
+            section: "C",
             profilePhotoUrl: "https://ui-avatars.com/api/?name=Charlie+F&background=DC2626&color=fff"
         },
         academicRecord: {

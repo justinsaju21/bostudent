@@ -54,11 +54,24 @@ export function PersonalDetailsStep({ register, errors }: StepProps) {
                 Personal Details
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                <Field label="Full Name *" error={errors.personalDetails?.name?.message}>
-                    <input className="form-input" placeholder="e.g. John Doe" {...register('personalDetails.name')} />
-                </Field>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <Field label="Full Name *" error={errors.personalDetails?.name?.message}>
+                        <input className="form-input" placeholder="e.g. John Doe" {...register('personalDetails.name')} />
+                    </Field>
+                    <Field label="Section *" error={errors.personalDetails?.section?.message}>
+                        <select className="form-input" {...register('personalDetails.section')}>
+                            <option value="">Select</option>
+                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'].map(s => (
+                                <option key={s} value={s}>{s}</option>
+                            ))}
+                        </select>
+                    </Field>
+                </div>
                 <Field label="Register Number *" error={errors.personalDetails?.registerNumber?.message}>
                     <input className="form-input" placeholder="e.g. RA2111003010xxx" {...register('personalDetails.registerNumber')} />
+                </Field>
+                <Field label="Faculty Advisor Name *" error={errors.personalDetails?.facultyAdvisor?.message}>
+                    <input className="form-input" placeholder="e.g. Dr. A. Smith" {...register('personalDetails.facultyAdvisor')} />
                 </Field>
                 <Field label="Department *" error={errors.personalDetails?.department?.message}>
                     <select className="form-input" {...register('personalDetails.department')}>

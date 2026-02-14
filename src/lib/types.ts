@@ -9,6 +9,8 @@ export interface PersonalDetails {
     personalEmail: string;
     srmEmail: string;
     mobileNumber: string;
+    facultyAdvisor: string;
+    section: string;
     profilePhotoUrl?: string;
 }
 
