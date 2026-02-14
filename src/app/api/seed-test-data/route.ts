@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { appendStudent, checkDuplicateRegNo } from '@/lib/googleSheets';
+import { appendStudent, checkDuplicateRegNo, updateFullStudentApplication } from '@/lib/googleSheets';
 import { StudentApplication } from '@/lib/types';
 
 // Simple UUID generator
@@ -448,10 +448,13 @@ export async function GET() {
         const skipped: string[] = [];
 
         for (const student of MOCK_STUDENTS) {
-            // Check for duplicates before inserting
+            // Check for duplicates
             const exists = await checkDuplicateRegNo(student.personalDetails.registerNumber);
             if (exists) {
-                skipped.push(student.personalDetails.registerNumber);
+                // Update existing
+                await updateFullStudentApplication(student);
+                // Keep track of updated ones if needed, or just count them
+                count++;
                 continue;
             }
             await appendStudent(student);
@@ -460,7 +463,7 @@ export async function GET() {
 
         return NextResponse.json({
             success: true,
-            message: `Seeded ${count} students.${skipped.length > 0 ? ` Skipped ${skipped.length} duplicates: ${skipped.join(', ')}` : ''}`
+            message: `Processed ${count} students (Created/Updated).`
         });
     } catch (error) {
         console.error("Seeding failed:", error);

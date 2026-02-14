@@ -239,20 +239,13 @@ export async function initializeSheet(): Promise<void> {
     const sheets = google.sheets({ version: 'v4', auth });
     const sheetId = getSheetId();
 
-    // Check if headers exist
-    const res = await sheets.spreadsheets.values.get({
+    // Always update headers to ensure new columns are added
+    await sheets.spreadsheets.values.update({
         spreadsheetId: sheetId,
         range: 'Sheet1!A1:AZ1',
+        valueInputOption: 'RAW',
+        requestBody: { values: [HEADERS] },
     });
-
-    if (!res.data.values || res.data.values.length === 0) {
-        await sheets.spreadsheets.values.update({
-            spreadsheetId: sheetId,
-            range: 'Sheet1!A1',
-            valueInputOption: 'RAW',
-            requestBody: { values: [HEADERS] },
-        });
-    }
 
     // Check if Settings sheet exists/init
     try {
@@ -405,6 +398,39 @@ export async function updateStudentEvaluation(
         return true;
     } catch (error) {
         console.error('Error updating evaluation:', error);
+        return false;
+    }
+}
+
+export async function updateFullStudentApplication(app: StudentApplication): Promise<boolean> {
+    const auth = getAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+    const sheetId = getSheetId();
+
+    await initializeSheet();
+
+    try {
+        const range = 'Sheet1!A:A';
+        const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range });
+        const rows = response.data.values;
+        if (!rows) return false;
+
+        const rowIndex = rows.findIndex(row => row[0] === app.personalDetails.registerNumber);
+        if (rowIndex === -1) return false; // Not found
+
+        const sheetRow = rowIndex + 1;
+        const rowData = applicationToRow(app);
+
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: `Sheet1!A${sheetRow}:AZ${sheetRow}`,
+            valueInputOption: 'RAW',
+            requestBody: { values: [rowData] },
+        });
+
+        return true;
+    } catch (error) {
+        console.error('Error updating student application:', error);
         return false;
     }
 }
