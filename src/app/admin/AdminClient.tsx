@@ -37,6 +37,8 @@ function fmtStatus(s: string) {
 export default function AdminClient({ students, fullStudents, error }: Props) {
     const [search, setSearch] = useState('');
     const [deptFilter, setDeptFilter] = useState('');
+    const [sectionFilter, setSectionFilter] = useState('');
+    const [advisorFilter, setAdvisorFilter] = useState('');
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -134,12 +136,26 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
     const departments = [...new Set(students.map((s) => s.department))];
 
+    const sections = useMemo(() => {
+        const s = new Set(fullStudents.map(fs => fs.personalDetails?.section).filter(Boolean));
+        return Array.from(s).sort();
+    }, [fullStudents]);
+
+    const advisors = useMemo(() => {
+        const a = new Set(fullStudents.map(fs => fs.personalDetails?.facultyAdvisor).filter(Boolean));
+        return Array.from(a).sort();
+    }, [fullStudents]);
+
     const filtered = sortedStudents.filter((s) => {
+        const fullStudent = getFullStudent(s.registerNumber);
         const matchesSearch =
             s.name.toLowerCase().includes(search.toLowerCase()) ||
             s.registerNumber.toLowerCase().includes(search.toLowerCase());
         const matchesDept = !deptFilter || s.department === deptFilter;
-        return matchesSearch && matchesDept;
+        const matchesSection = !sectionFilter || fullStudent?.personalDetails?.section === sectionFilter;
+        const matchesAdvisor = !advisorFilter || fullStudent?.personalDetails?.facultyAdvisor === advisorFilter;
+
+        return matchesSearch && matchesDept && matchesSection && matchesAdvisor;
     });
 
     // Analytics
@@ -420,13 +436,37 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                     </div>
                     <select
                         className="form-input"
-                        style={{ width: 'auto', minWidth: '200px' }}
+                        style={{ width: 'auto', minWidth: '150px' }}
                         value={deptFilter}
                         onChange={(e) => setDeptFilter(e.target.value)}
                     >
                         <option value="">All Departments</option>
                         {departments.map((dept) => (
                             <option key={dept} value={dept}>{dept}</option>
+                        ))}
+                    </select>
+
+                    <select
+                        className="form-input"
+                        style={{ width: 'auto', minWidth: '120px' }}
+                        value={sectionFilter}
+                        onChange={(e) => setSectionFilter(e.target.value)}
+                    >
+                        <option value="">All Sections</option>
+                        {sections.map((sec) => (
+                            <option key={sec} value={sec}>Section {sec}</option>
+                        ))}
+                    </select>
+
+                    <select
+                        className="form-input"
+                        style={{ width: 'auto', minWidth: '180px' }}
+                        value={advisorFilter}
+                        onChange={(e) => setAdvisorFilter(e.target.value)}
+                    >
+                        <option value="">All Advisors</option>
+                        {advisors.map((adv) => (
+                            <option key={adv} value={adv}>{adv}</option>
                         ))}
                     </select>
                 </div>
