@@ -446,3 +446,57 @@ body {
     width: 16px;
   }
 }
+
+/* ===== Hero Section ===== */
+.hero-section {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  position: relative;
+  background: linear-gradient(180deg, #f0f5ff 0%, #ffffff 100%);
+}
+
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  margin-top: 60px;
+  flex-wrap: wrap;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: auto;
+    /* Let content dictate height on mobile */
+    padding: 40px 20px 60px 20px;
+  }
+
+  .hero-stats {
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .hero-stats>div {
+    flex: 1 1 40%;
+    /* 2 items per row */
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-buttons button {
+    width: 100%;
+    justify-content: center;
+  }
+}

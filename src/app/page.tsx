@@ -40,17 +40,7 @@ export default function HomePage() {
       <Navbar />
       <main style={{ paddingTop: '64px', background: 'var(--bg-primary)' }}>
         {/* Hero Section */}
-        <section
-          style={{
-            minHeight: 'calc(100vh - 64px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '60px 24px',
-            position: 'relative',
-            background: 'linear-gradient(180deg, #f0f5ff 0%, #ffffff 100%)',
-          }}
-        >
+        <section className="hero-section">
           {/* Radial glow behind hero */}
           <div
             style={{
@@ -63,6 +53,7 @@ export default function HomePage() {
               left: '50%',
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'none',
+              maxWidth: '100vw', // Prevent overflow
             }}
           />
 
@@ -131,16 +122,16 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
-              style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}
+              className="hero-buttons"
             >
-              <Link href="/apply" style={{ textDecoration: 'none' }}>
-                <button className="btn-primary" style={{ fontSize: '16px', padding: '14px 32px' }}>
+              <Link href="/apply" style={{ textDecoration: 'none', width: '100%', maxWidth: '200px' }}>
+                <button className="btn-primary" style={{ fontSize: '16px', padding: '14px 32px', width: '100%', justifyContent: 'center' }}>
                   Apply Now
                   <ArrowRight size={18} />
                 </button>
               </Link>
-              <Link href="/admin" style={{ textDecoration: 'none' }}>
-                <button className="btn-secondary" style={{ fontSize: '16px', padding: '14px 32px' }}>
+              <Link href="/admin" style={{ textDecoration: 'none', width: '100%', maxWidth: '220px' }}>
+                <button className="btn-secondary" style={{ fontSize: '16px', padding: '14px 32px', width: '100%', justifyContent: 'center' }}>
                   <Users size={18} />
                   Faculty Dashboard
                 </button>
@@ -152,13 +143,7 @@ export default function HomePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.7, delay: 0.5 }}
-              style={{
-                display: 'flex',
-                gap: '48px',
-                justifyContent: 'center',
-                marginTop: '60px',
-                flexWrap: 'wrap',
-              }}
+              className="hero-stats"
             >
               {[
                 { value: '15+', label: 'Categories Evaluated' },
