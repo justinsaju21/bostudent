@@ -554,3 +554,15 @@ export async function setDeadline(dateStr: string): Promise<boolean> {
         return false;
     }
 }
+
+export async function clearAllStudents(): Promise<void> {
+    const auth = getAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+    const sheetId = getSheetId();
+
+    // Clear everything from row 2 onwards to preserve headers
+    await sheets.spreadsheets.values.clear({
+        spreadsheetId: sheetId,
+        range: 'Sheet1!A2:AZ1000',
+    });
+}

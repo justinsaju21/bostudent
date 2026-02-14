@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { appendStudent, checkDuplicateRegNo, updateFullStudentApplication, getAllStudents, addStudentsBatch } from '@/lib/googleSheets';
+import { NextRequest, NextResponse } from 'next/server';
+import { clearAllStudents, addStudentsBatch } from '@/lib/googleSheets';
 import { StudentApplication } from '@/lib/types';
 
 // Simple UUID generator
@@ -10,545 +10,156 @@ function uuid() {
     });
 }
 
-// ===== MOCK DATA MATCHING FORM CONSTRAINTS =====
-// Department: "Electronics and Communication Engineering" (only option in dropdown)
-// Register Number: Must match /^RA\d+$/i
-// SRM Email: Must end with @srmist.edu.in
-// Social Media URLs: Must be valid https:// URLs
-// Sports level: 'zone' | 'district' | 'state' | 'national' | 'international'
-// Research indexStatus: 'scopus' | 'sci' | 'ugc' | 'other' | 'none'
-// Research publicationStatus: 'filed' | 'published' | 'granted' | 'under_review'
-// Post-college status: 'placed' | 'higher_studies' | 'entrepreneur' | 'unplaced' | 'other'
-// Company names: from TOP_COMPANIES list in FormSteps
-// Hackathon names: from TOP_HACKATHONS list in FormSteps
-// Volunteering orgs: from TOP_VOLUNTEERING_ORGS list in FormSteps
+const DEPARTMENTS = ["Electronics and Communication Engineering"];
+const SECTIONS = ["A", "B", "C", "D", "E", "F"];
+const ADVISORS = ["Dr. Ramesh Kumar", "Dr. Priya Sharma", "Prof. Lakshmi Narayanan", "Dr. A. Smith", "Prof. R. Johnson"];
+const SPECIALIZATIONS = ["VLSI Design", "Embedded Systems", "Communication Systems", "Signal Processing", "Robotics & Automation"];
 
-const MOCK_STUDENTS: StudentApplication[] = [
-    // ===== STUDENT 1: Research-focused topper =====
-    {
-        personalDetails: {
-            name: "Alice Mehra",
-            registerNumber: "RA2211053010001",
-            department: "Electronics and Communication Engineering",
-            specialization: "VLSI Design",
-            personalEmail: "alice.mehra@gmail.com",
-            srmEmail: "am1234@srmist.edu.in",
-            mobileNumber: "9876543210",
-            facultyAdvisor: "Dr. A. Smith",
-            section: "B",
-            profilePhotoUrl: "https://ui-avatars.com/api/?name=Alice+Mehra&background=4F46E5&color=fff"
-        },
-        academicRecord: {
-            cgpa: 9.8,
-            tenthPercentage: 95,
-            twelfthPercentage: 94,
-            historyOfArrears: false
-        },
-        postCollegeStatus: {
-            status: "higher_studies",
-            universityName: "Stanford University",
-            otherDetails: "Accepted for MS in EE"
-        },
-        internships: [
-            {
-                id: uuid(),
-                company: "Texas Instruments",
-                role: "VLSI Design Intern",
-                startDate: "2024-05-01",
-                endDate: "2024-07-31",
-                certificateLink: "https://drive.google.com/cert-alice-ti",
-                description: "Designed low-power ASIC blocks for automotive chips."
-            },
-            {
-                id: uuid(),
-                company: "Intel",
-                role: "Research Intern",
-                startDate: "2023-12-01",
-                endDate: "2024-02-28",
-                certificateLink: "https://drive.google.com/cert-alice-intel",
-                description: "Worked on next-gen FPGA architectures."
-            }
-        ],
-        projects: [
-            {
-                id: uuid(),
-                title: "Low-Power Neural Accelerator",
-                techStack: "Verilog, Cadence Virtuoso, Python",
-                description: "Designed a custom neural network accelerator achieving 3x power efficiency over baseline.",
-                githubLink: "https://github.com/alicemehra/neural-accel"
-            }
-        ],
-        hackathons: [],
-        research: [
-            {
-                id: uuid(),
-                title: "Novel Low-Power SRAM Cell Design for IoT Applications",
-                journalOrConference: "IEEE TCAS-I",
-                indexStatus: "sci",
-                publicationStatus: "published",
-                link: "https://doi.org/10.1109/alice-sram"
-            },
-            {
-                id: uuid(),
-                title: "Energy-Efficient Neuromorphic Computing Architecture",
-                journalOrConference: "IEEE ISCAS 2025",
-                indexStatus: "scopus",
-                publicationStatus: "under_review"
-            }
-        ],
-        entrepreneurship: [],
-        certifications: [
-            {
-                id: uuid(),
-                provider: "Cadence",
-                certificateName: "Certified Virtuoso Layout Designer",
-                proofLink: "https://drive.google.com/cert-alice-cadence"
-            }
-        ],
-        competitiveExams: [
-            {
-                id: uuid(),
-                examName: "GRE",
-                scoreOrRank: "335/340"
-            },
-            {
-                id: uuid(),
-                examName: "GATE",
-                scoreOrRank: "AIR 42"
-            }
-        ],
-        sportsOrCultural: [],
-        volunteering: [
-            {
-                id: uuid(),
-                organization: "IEEE Humanitarian",
-                role: "Tech Educator",
-                hoursServed: 40,
-                impact: "Taught basic electronics to 200+ rural school students."
-            }
-        ],
-        scholarships: [
-            {
-                id: uuid(),
-                name: "Chancellor's Merit Scholarship",
-                awardingBody: "SRMIST",
-                amountOrPrestige: "Full tuition waiver"
-            }
-        ],
-        clubActivities: [],
-        departmentContributions: [
-            {
-                id: uuid(),
-                eventName: "ECE Tech Fest 2024",
-                role: "Technical Head",
-                contributionDescription: "Organized workshops on FPGA design for 300+ students."
-            }
-        ],
-        references: [
-            {
-                id: uuid(),
-                facultyName: "Dr. Ramesh Kumar",
-                contact: "ramesh.k@srmist.edu.in"
-            }
-        ],
-        socialMedia: {
-            linkedin: "https://linkedin.com/in/alicemehra",
-            github: "https://github.com/alicemehra"
-        },
-        futureGoal: { description: "Pursue a PhD in VLSI systems and contribute to next-generation low-power computing architectures for sustainable electronics." },
-        videoPitchUrl: "https://youtube.com/watch?v=alice-pitch",
-        masterProofFolderUrl: "https://drive.google.com/alice-proofs",
-        professionalMemberships: [],
-        consentGiven: true,
-        submittedAt: new Date().toISOString()
-    },
-
-    // ===== STUDENT 2: Hackathon-focused builder =====
-    {
-        personalDetails: {
-            name: "Bob Krishnan",
-            registerNumber: "RA2211053010002",
-            department: "Electronics and Communication Engineering",
-            specialization: "Embedded Systems",
-            personalEmail: "bob.krishnan@gmail.com",
-            srmEmail: "bk5678@srmist.edu.in",
-            mobileNumber: "9876543211",
-            facultyAdvisor: "Prof. R. Johnson",
-            section: "A",
-            profilePhotoUrl: "https://ui-avatars.com/api/?name=Bob+Krishnan&background=059669&color=fff"
-        },
-        academicRecord: {
-            cgpa: 8.5,
-            tenthPercentage: 90,
-            twelfthPercentage: 88,
-            historyOfArrears: false
-        },
-        postCollegeStatus: {
-            status: "placed",
-            placedCompany: "Qualcomm",
-            offerLetterLink: "https://drive.google.com/bob-offer"
-        },
-        internships: [
-            {
-                id: uuid(),
-                company: "Qualcomm",
-                role: "Embedded Systems Intern",
-                startDate: "2024-01-01",
-                endDate: "2024-06-30",
-                certificateLink: "https://drive.google.com/cert-bob-qualcomm",
-                description: "Developed firmware for 5G modem chipsets."
-            },
-            {
-                id: uuid(),
-                company: "Bosch",
-                role: "IoT Developer Intern",
-                startDate: "2023-05-01",
-                endDate: "2023-07-31",
-                certificateLink: "https://drive.google.com/cert-bob-bosch"
-            }
-        ],
-        projects: [
-            {
-                id: uuid(),
-                title: "Smart Agriculture Drone",
-                techStack: "STM32, ROS, Python, Computer Vision",
-                description: "Built an autonomous drone for crop health monitoring using NDVI imaging and real-time data relay.",
-                githubLink: "https://github.com/bobk/agri-drone",
-                deployedLink: "https://agridrone.vercel.app"
-            },
-            {
-                id: uuid(),
-                title: "BLE Mesh Network for Smart Campus",
-                techStack: "nRF52, Zephyr RTOS, React Native",
-                description: "Created Bluetooth mesh network for campus-wide IoT sensor deployment with mobile dashboard."
-            }
-        ],
-        hackathons: [
-            {
-                id: uuid(),
-                name: "Smart India Hackathon (SIH)",
-                projectBuilt: "Smart Grid Energy Monitor",
-                teamSize: 6,
-                position: "Winner",
-                proofLink: "https://drive.google.com/bob-sih"
-            },
-            {
-                id: uuid(),
-                name: "HackMIT",
-                projectBuilt: "Real-time Air Quality Dashboard",
-                teamSize: 4,
-                position: "Finalist"
-            },
-            {
-                id: uuid(),
-                name: "IEEE Xtreme",
-                projectBuilt: "Embedded CI/CD Pipeline",
-                teamSize: 3,
-                position: "Top 100 Global"
-            }
-        ],
-        research: [],
-        entrepreneurship: [],
-        certifications: [
-            {
-                id: uuid(),
-                provider: "ARM",
-                certificateName: "ARM Cortex-M Developer",
-                proofLink: "https://drive.google.com/cert-bob-arm"
-            },
-            {
-                id: uuid(),
-                provider: "AWS",
-                certificateName: "AWS IoT Core Specialty",
-                validationId: "AWS-IOT-BOB-2024"
-            }
-        ],
-        competitiveExams: [],
-        sportsOrCultural: [],
-        volunteering: [],
-        scholarships: [],
-        clubActivities: [
-            {
-                id: uuid(),
-                clubName: "SRM Robotics Club",
-                position: "Technical Lead",
-                keyEventsOrganized: "RoboWars 2024, IoT Workshop Series",
-                impactDescription: "Led a team of 25 members, organized 4 major events."
-            }
-        ],
-        departmentContributions: [],
-        references: [
-            {
-                id: uuid(),
-                facultyName: "Prof. Lakshmi Narayanan",
-                contact: "lakshmi.n@srmist.edu.in"
-            }
-        ],
-        socialMedia: {
-            linkedin: "https://linkedin.com/in/bobkrishnan",
-            github: "https://github.com/bobk",
-            twitter: "https://x.com/bobkrishnan"
-        },
-        futureGoal: { description: "Work on cutting-edge embedded systems at Qualcomm and eventually build a startup focused on affordable IoT solutions for Indian agriculture." },
-        videoPitchUrl: "https://youtube.com/watch?v=bob-pitch",
-        professionalMemberships: [],
-        consentGiven: true,
-        submittedAt: new Date().toISOString()
-    },
-
-    // ===== STUDENT 3: Sports + Volunteering =====
-    {
-        personalDetails: {
-            name: "Charlie Fernandez",
-            registerNumber: "RA2211053010003",
-            department: "Electronics and Communication Engineering",
-            specialization: "Communication Systems",
-            personalEmail: "charlie.fern@gmail.com",
-            srmEmail: "cf9012@srmist.edu.in",
-            mobileNumber: "9876543212",
-            facultyAdvisor: "Dr. P. Sharma",
-            section: "C",
-            profilePhotoUrl: "https://ui-avatars.com/api/?name=Charlie+F&background=DC2626&color=fff"
-        },
-        academicRecord: {
-            cgpa: 7.9,
-            tenthPercentage: 85,
-            twelfthPercentage: 80,
-            historyOfArrears: true,
-            numberOfArrears: 1
-        },
-        postCollegeStatus: {
-            status: "entrepreneur",
-            otherDetails: "Co-founding a sports-tech startup"
-        },
-        internships: [
-            {
-                id: uuid(),
-                company: "Samsung",
-                role: "RF Engineering Intern",
-                startDate: "2024-06-01",
-                endDate: "2024-08-31",
-                certificateLink: "https://drive.google.com/cert-charlie-samsung",
-                description: "Tested 5G antenna patterns for flagship smartphones."
-            }
-        ],
-        projects: [
-            {
-                id: uuid(),
-                title: "Smart Sports Analytics Band",
-                techStack: "ESP32, TensorFlow Lite, Flutter",
-                description: "Wearable device that tracks athlete performance metrics using IMU sensors and provides AI-driven coaching insights."
-            }
-        ],
-        hackathons: [
-            {
-                id: uuid(),
-                name: "Hack The Box",
-                projectBuilt: "Cybersecurity Training Gamification",
-                teamSize: 4,
-                position: "2nd Place"
-            }
-        ],
-        research: [],
-        entrepreneurship: [
-            {
-                id: uuid(),
-                startupName: "FitPro Analytics",
-                registrationDetails: "DPIIT recognized startup",
-                revenueOrFundingStatus: "Seed funded - ₹5L from SRM incubator",
-                description: "AI-powered sports performance analytics platform for athletes.",
-                proofLink: "https://drive.google.com/charlie-fitpro"
-            }
-        ],
-        certifications: [],
-        competitiveExams: [],
-        sportsOrCultural: [
-            {
-                id: uuid(),
-                eventName: "All India Inter-University Badminton",
-                level: "national",
-                positionWon: "Silver Medal",
-                proofLink: "https://drive.google.com/charlie-badminton"
-            },
-            {
-                id: uuid(),
-                eventName: "South Zone Inter-University Cricket",
-                level: "state",
-                positionWon: "Team Captain - Runners Up"
-            },
-            {
-                id: uuid(),
-                eventName: "SRM Cultural Fest - Western Dance",
-                level: "district",
-                positionWon: "1st Prize"
-            }
-        ],
-        volunteering: [
-            {
-                id: uuid(),
-                organization: "NSS",
-                role: "Unit Leader",
-                hoursServed: 120,
-                impact: "Led rural adoption drive benefiting 500+ families.",
-                proofLink: "https://drive.google.com/charlie-nss"
-            },
-            {
-                id: uuid(),
-                organization: "Rotaract Club",
-                role: "Events Coordinator",
-                hoursServed: 60,
-                impact: "Organized blood donation camps collecting 200+ units."
-            }
-        ],
-        scholarships: [
-            {
-                id: uuid(),
-                name: "Sports Excellence Award",
-                awardingBody: "SRMIST",
-                amountOrPrestige: "₹50,000 annual scholarship"
-            }
-        ],
-        clubActivities: [
-            {
-                id: uuid(),
-                clubName: "SRM Sports Council",
-                position: "General Secretary",
-                keyEventsOrganized: "Milan Sports Fest 2024, Inter-Dept League",
-                impactDescription: "Managed sports budget of ₹10L, coordinated 15+ events."
-            }
-        ],
-        departmentContributions: [
-            {
-                id: uuid(),
-                eventName: "ECE Sports Day",
-                role: "Chief Organizer",
-                contributionDescription: "Organized annual ECE sports day with 400+ participants."
-            }
-        ],
-        references: [
-            {
-                id: uuid(),
-                facultyName: "Dr. Priya Sharma",
-                contact: "priya.s@srmist.edu.in"
-            }
-        ],
-        socialMedia: {
-            linkedin: "https://linkedin.com/in/charliefern",
-            instagram: "https://instagram.com/charlie.sports"
-        },
-        futureGoal: { description: "Scale FitPro Analytics into India's leading sports-tech platform, combining my passion for athletics with technology to make professional coaching accessible to all." },
-        videoPitchUrl: "https://youtube.com/watch?v=charlie-pitch",
-        masterProofFolderUrl: "https://drive.google.com/charlie-proofs",
-        professionalMemberships: [],
-        consentGiven: true,
-        submittedAt: new Date().toISOString()
-    }
+const PROFESSIONAL_ORGS = [
+    { name: "IEEE", role: "Student Member" },
+    { name: "ACM", role: "Ambassador" },
+    { name: "IETE", role: "Contributor" },
+    { name: "CSI", role: "Member" },
+    { name: "Optica", role: "Chapter Head" }
 ];
 
-// ===== GENERATE 15 MORE RANDOM STUDENTS =====
-const NAMES = ["David Kim", "Eva Green", "Frank Chen", "Grace Hopper", "Hank Moody", "Ivy Thomas", "Jack Ryan", "Kelly Kapoor", "Leo Das", "Mia Wong", "Nina Simone", "Oscar Isaac", "Paul Rudd", "Quinn Fabray", "Rachel Zane"];
-const SECTIONS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
-const SPECIALIZATIONS = ["VLSI Design", "Embedded Systems", "Communication Systems", "Signal Processing", "Robotics"];
-const FACULTY = ["Dr. A. Smith", "Prof. R. Johnson", "Dr. P. Sharma", "Dr. K. Lee", "Prof. M. Gupta"];
+const COMPANIES = ["Texas Instruments", "Intel", "Qualcomm", "NVIDIA", "Qualcomm", "Analog Devices", "Samsung", "Google", "Microsoft", "TCS", "Infosys"];
 
-function generateRandomStudent(index: number): StudentApplication {
-    const name = NAMES[index % NAMES.length];
-    const section = SECTIONS[index % SECTIONS.length];
-    const spec = SPECIALIZATIONS[index % SPECIALIZATIONS.length];
-    const advisor = FACULTY[index % FACULTY.length];
-    const cgpa = 6 + Math.random() * 4; // 6.0 to 10.0
-    const regNo = `RA22110530100${(index + 4).toString().padStart(2, '0')}`;
+function generateRealisticStudent(index: number): StudentApplication {
+    const firstName = ["Arjun", "Neha", "Rohan", "Sanya", "Vikram", "Anjali", "Kabir", "Ishita", "Aditya", "Meera", "Siddharth", "Pooja", "Varun", "Kavya", "Akash", "Riya", "Karan", "Tanvi", "Nikhil", "Zoya"][index];
+    const lastName = ["Sharma", "Verma", "Iyer", "Nair", "Gupta", "Malhotra", "Reddy", "Patel", "Singh", "Das", "Joshi", "Kulkarni", "Chopra", "Bose", "Menon", "Kapoor", "Khan", "Deshmukh", "Pillai", "Aggarwal"][index];
+    const name = `${firstName} ${lastName}`;
+    const regNo = `RA2211053010${(100 + index).toString()}`;
+    const cgpa = 7.5 + (Math.random() * 2.4); // 7.5 to 9.9
 
-    return {
+    const student: StudentApplication = {
         personalDetails: {
             name,
             registerNumber: regNo,
-            department: "Electronics and Communication Engineering",
-            specialization: spec,
-            personalEmail: `${name.toLowerCase().replace(' ', '.')}@gmail.com`,
-            srmEmail: `${name[0].toLowerCase()}${name.split(' ')[1].toLowerCase()}123@srmist.edu.in`,
-            mobileNumber: `98765${index.toString().padStart(5, '0')}`,
-            facultyAdvisor: advisor,
-            section,
-            profilePhotoUrl: `https://ui-avatars.com/api/?name=${name.replace(' ', '+')}&background=random`
+            department: DEPARTMENTS[0],
+            specialization: SPECIALIZATIONS[index % SPECIALIZATIONS.length],
+            personalEmail: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+            srmEmail: `${firstName[0].toLowerCase()}${lastName.toLowerCase()}@srmist.edu.in`,
+            mobileNumber: `9840${Math.floor(100000 + Math.random() * 899999)}`,
+            facultyAdvisor: ADVISORS[index % ADVISORS.length],
+            section: SECTIONS[index % SECTIONS.length],
+            profilePhotoUrl: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=random&color=fff&size=128`
         },
         academicRecord: {
             cgpa: parseFloat(cgpa.toFixed(2)),
-            tenthPercentage: 80 + Math.floor(Math.random() * 20),
-            twelfthPercentage: 75 + Math.floor(Math.random() * 25),
-            historyOfArrears: Math.random() > 0.8,
-            numberOfArrears: Math.random() > 0.8 ? Math.floor(Math.random() * 3) + 1 : 0
+            tenthPercentage: 85 + Math.floor(Math.random() * 14),
+            twelfthPercentage: 82 + Math.floor(Math.random() * 16),
+            historyOfArrears: false,
         },
         postCollegeStatus: {
-            status: Math.random() > 0.5 ? 'placed' : (Math.random() > 0.5 ? 'higher_studies' : 'unplaced'),
-            placedCompany: Math.random() > 0.5 ? "TCS" : undefined,
-            universityName: Math.random() > 0.8 ? "ASU" : undefined
+            status: Math.random() > 0.4 ? "placed" : "higher_studies",
+            placedCompany: Math.random() > 0.4 ? COMPANIES[index % COMPANIES.length] : undefined,
+            universityName: Math.random() > 0.7 ? "SRM University" : undefined
         },
-        internships: [],
-        projects: [],
-        hackathons: [],
-        research: [],
+        internships: index % 2 === 0 ? [{
+            id: uuid(),
+            company: COMPANIES[index % COMPANIES.length],
+            role: "Engineering Intern",
+            startDate: "2024-05-01",
+            endDate: "2024-07-31",
+            certificateLink: "https://drive.google.com/cert-example",
+            description: "Developed hardware modules for signal processing."
+        }] : [],
+        projects: [{
+            id: uuid(),
+            title: `${["Smart City", "Grid Monitor", "Health AI", "Traffic Control", "AgriBot"][index % 5]}`,
+            techStack: "Arduino, IoT, Node.js",
+            description: "A comprehensive project leveraging IoT and embedded systems for automation.",
+            githubLink: "https://github.com/example/project"
+        }],
+        hackathons: index % 3 === 0 ? [{
+            id: uuid(),
+            name: "Smart India Hackathon",
+            projectBuilt: "Disaster Management App",
+            teamSize: 6,
+            position: "Finalist"
+        }] : [],
+        research: index % 4 === 0 ? [{
+            id: uuid(),
+            title: `Analysis of ${["ML", "VLSI", "5G", "Robotics"][index % 4]} Architectures`,
+            journalOrConference: "IEEE Xplore",
+            indexStatus: "scopus",
+            publicationStatus: "published"
+        }] : [],
         entrepreneurship: [],
-        certifications: [],
+        certifications: [{
+            id: uuid(),
+            provider: "Coursera",
+            certificateName: "Digital VLSI Design",
+            proofLink: "https://coursera.org/verify/123"
+        }],
         competitiveExams: [],
-        sportsOrCultural: [],
+        sportsOrCultural: index % 5 === 0 ? [{
+            id: uuid(),
+            eventName: "Inter-University Sports Meet",
+            level: "state",
+            positionWon: "Gold Medal"
+        }] : [],
         volunteering: [],
         scholarships: [],
-        clubActivities: [],
+        clubActivities: [{
+            id: uuid(),
+            clubName: "Technical Club",
+            position: "Member"
+        }],
         departmentContributions: [],
-        references: [],
-        socialMedia: { linkedin: `https://linkedin.com/in/${name.replace(' ', '')}` },
-        futureGoal: { description: "To become a successful engineer." },
-        videoPitchUrl: "https://youtube.com",
-        professionalMemberships: [],
+        professionalMemberships: [{
+            id: uuid(),
+            organization: PROFESSIONAL_ORGS[index % PROFESSIONAL_ORGS.length].name,
+            role: PROFESSIONAL_ORGS[index % PROFESSIONAL_ORGS.length].role,
+            membershipId: `MEM-${index}-2024`
+        }],
+        references: [{
+            id: uuid(),
+            facultyName: ADVISORS[(index + 1) % ADVISORS.length],
+            contact: "faculty@srmist.edu.in"
+        }],
+        socialMedia: {
+            linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}${lastName.toLowerCase()}`
+        },
+        futureGoal: { description: "To lead a research team in advanced communications." },
+        videoPitchUrl: "https://youtube.com/watch?v=example",
         consentGiven: true,
         submittedAt: new Date().toISOString()
     };
+
+    return student;
 }
 
-// Append 15 random students
-for (let i = 0; i < 15; i++) {
-    MOCK_STUDENTS.push(generateRandomStudent(i));
-}
+export async function GET(req: NextRequest) {
+    const { searchParams } = new URL(req.url);
+    const clear = searchParams.get('clear') === 'true';
 
-export async function GET() {
     try {
-        // 1. Fetch ALL existing students once (Efficient Read)
-        const existingStudents = await getAllStudents();
-        const existingRegNos = new Set(existingStudents.map(s => s.personalDetails.registerNumber));
-
-        const newStudents: StudentApplication[] = [];
-        const studentsToUpdate: StudentApplication[] = [];
-        let createdCount = 0;
-        let updatedCount = 0;
-
-        // 2. Classify: New vs Existing
-        for (const mockStudent of MOCK_STUDENTS) {
-            if (existingRegNos.has(mockStudent.personalDetails.registerNumber)) {
-                studentsToUpdate.push(mockStudent);
-            } else {
-                newStudents.push(mockStudent);
-            }
+        if (clear) {
+            console.log('Clearing existing students...');
+            await clearAllStudents();
         }
 
-        // 3. Batch Insert New Students (1 API Call)
-        if (newStudents.length > 0) {
-            await addStudentsBatch(newStudents);
-            createdCount = newStudents.length;
+        console.log('Generating 20 realistic students...');
+        const students: StudentApplication[] = [];
+        for (let i = 0; i < 20; i++) {
+            students.push(generateRealisticStudent(i));
         }
 
-        // 4. Update Existing (Must be individual updates unfortunately, but fewer than full scan)
-        for (const student of studentsToUpdate) {
-            await updateFullStudentApplication(student);
-            updatedCount++;
-        }
+        console.log('Batch inserting students...');
+        await addStudentsBatch(students);
 
         return NextResponse.json({
             success: true,
-            message: `Processed ${createdCount + updatedCount} students (${createdCount} created, ${updatedCount} updated). Batching active.`
+            message: `Successfully ${clear ? 'cleared and ' : ''}seeded 20 realistic students.`
         });
-    } catch (error) {
-        console.error('Seeding error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
-        return NextResponse.json({ success: false, error: 'Failed to seed data', details: String(error) }, { status: 500 });
+    } catch (error: any) {
+        console.error('Seeding error:', error);
+        return NextResponse.json({
+            success: false,
+            error: 'Failed to seed data',
+            details: error?.message || String(error)
+        }, { status: 500 });
     }
 }
