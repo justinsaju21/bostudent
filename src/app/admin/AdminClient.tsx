@@ -101,9 +101,40 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         );
     };
 
+    // Get full student data by register number
+    const getFullStudent = (regNo: string): StudentApplication | undefined => {
+        return fullStudents.find(s => s.personalDetails?.registerNumber === regNo);
+    };
+
+    const getDisplayScore = (student: RankedStudent) => {
+        // 1. If manual override exists, use it
+        if (scoreOverrides[student.registerNumber] !== undefined) {
+            return scoreOverrides[student.registerNumber];
+        }
+
+        // 2. Otherwise, recalculate based on discarded items
+        const fullData = getFullStudent(student.registerNumber);
+        if (!fullData) return student.totalScore;
+
+        const currentDiscarded = Array.from(discardedItems[student.registerNumber] || []);
+        if (currentDiscarded.length === 0) return student.totalScore;
+
+        // Recalculate
+        return calculateScore(fullData, undefined, currentDiscarded).totalScore;
+    };
+
+    // Dynamically sort students based on current display score
+    const sortedStudents = useMemo(() => {
+        return [...students].sort((a, b) => {
+            const scoreA = getDisplayScore(a);
+            const scoreB = getDisplayScore(b);
+            return scoreB - scoreA; // Descending order
+        });
+    }, [students, scoreOverrides, getDisplayScore]);
+
     const departments = [...new Set(students.map((s) => s.department))];
 
-    const filtered = students.filter((s) => {
+    const filtered = sortedStudents.filter((s) => {
         const matchesSearch =
             s.name.toLowerCase().includes(search.toLowerCase()) ||
             s.registerNumber.toLowerCase().includes(search.toLowerCase());
@@ -120,11 +151,6 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         });
         return Object.entries(stats).sort((a, b) => b[1] - a[1]);
     }, [students]);
-
-    // Get full student data by register number
-    const getFullStudent = (regNo: string): StudentApplication | undefined => {
-        return fullStudents.find(s => s.personalDetails?.registerNumber === regNo);
-    };
 
     // Persist changes
     const persistEvaluation = async (regNo: string, score: number | undefined, discarded: Set<string> | undefined) => {
@@ -190,22 +216,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         setTempScore('');
     };
 
-    const getDisplayScore = (student: RankedStudent) => {
-        // 1. If manual override exists, use it
-        if (scoreOverrides[student.registerNumber] !== undefined) {
-            return scoreOverrides[student.registerNumber];
-        }
 
-        // 2. Otherwise, recalculate based on discarded items
-        const fullData = getFullStudent(student.registerNumber);
-        if (!fullData) return student.totalScore;
-
-        const currentDiscarded = Array.from(discardedItems[student.registerNumber] || []);
-        if (currentDiscarded.length === 0) return student.totalScore;
-
-        // Recalculate
-        return calculateScore(fullData, undefined, currentDiscarded).totalScore;
-    };
 
     const downloadCSV = () => {
         const headers = ['Rank', 'Register Number', 'Name', 'Department', 'Auto Score', 'Faculty Score', 'CGPA', 'Research', 'Internships', 'Projects', 'Hackathons'];
@@ -414,9 +425,9 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                 ) : (
                                     filtered.map((student, index) => {
                                         const isExpanded = expandedRow === student.registerNumber;
-                                        const displayScore = getDisplayScore(student);
+                                        const displayScore = (scoreOverrides[student.registerNumber] ?? student.totalScore);
                                         const isSelected = selectedStudents.includes(student.registerNumber);
-                                        const fullStudent = getFullStudent(student.registerNumber);
+                                        const fullStudent = fullStudents.find(s => s.personalDetails?.registerNumber === student.registerNumber);
 
                                         return (
                                             <React.Fragment key={student.registerNumber}>
