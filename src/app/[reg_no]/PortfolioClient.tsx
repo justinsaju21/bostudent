@@ -9,7 +9,7 @@ import {
     Briefcase, Code, BookOpen, Trophy, Heart, Star, Award,
     GraduationCap, ExternalLink, Github, Linkedin, Instagram,
     Twitter, Globe, FolderOpen, Medal, Rocket, ShieldCheck,
-    Users, Building, BookMarked,
+    Users, Building, BookMarked, Shield,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -343,9 +343,25 @@ export default function PortfolioClient({ student }: Props) {
                         </PortfolioSection>
                     )}
 
+                    {/* Professional Memberships */}
+                    {student.professionalMemberships && student.professionalMemberships.length > 0 && (
+                        <PortfolioSection title="Professional Memberships" icon={<Shield size={18} />} index={15}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
+                                {student.professionalMemberships.map((item, i) => (
+                                    <div key={i} className="glass-card" style={{ padding: '20px' }}>
+                                        <h4 style={{ fontSize: '15px', fontWeight: 600 }}>{item.organization}</h4>
+                                        {item.role && <p style={{ fontSize: '13px', color: 'var(--accent-primary)', marginBottom: '8px' }}>{item.role}</p>}
+                                        {item.membershipId && <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>ID: {item.membershipId}</p>}
+                                        {item.proofLink && <ProofLink href={item.proofLink} label="View Certificate" />}
+                                    </div>
+                                ))}
+                            </div>
+                        </PortfolioSection>
+                    )}
+
                     {/* References */}
                     {student.references.length > 0 && (
-                        <PortfolioSection title="References" icon={<GraduationCap size={18} />} index={15}>
+                        <PortfolioSection title="References" icon={<GraduationCap size={18} />} index={16}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
                                 {student.references.map((ref, i) => (
                                     <div key={i} className="glass-card" style={{ padding: '20px' }}>

@@ -166,6 +166,15 @@ export const referenceSchema = z.object({
     lorLink: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
 
+// ===== Professional Membership Schema =====
+export const professionalMembershipSchema = z.object({
+    id: z.string(),
+    organization: z.string().min(1, 'Organization/Body name is required'),
+    membershipId: z.string().optional(),
+    role: z.string().optional(),
+    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+});
+
 // ===== Social Media Schema =====
 export const socialMediaSchema = z.object({
     linkedin: z.string().url('Invalid URL').optional().or(z.literal('')),
@@ -205,6 +214,7 @@ export const applicationSchema = z.object({
     scholarships: z.array(scholarshipSchema),
     clubActivities: z.array(clubActivitySchema),
     departmentContributions: z.array(departmentContributionSchema),
+    professionalMemberships: z.array(professionalMembershipSchema),
     references: z.array(referenceSchema),
     socialMedia: socialMediaSchema,
     futureGoal: futureGoalSchema,

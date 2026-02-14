@@ -71,6 +71,7 @@ export default function ApplicationForm() {
             scholarships: [],
             clubActivities: [],
             departmentContributions: [],
+            professionalMemberships: [],
             references: [],
             socialMedia: { linkedin: '', github: '', twitter: '', instagram: '', website: '', others: [] },
             futureGoal: { description: '' },
@@ -320,7 +321,7 @@ function getStepFields(step: number): string[] {
         case 0: return ['personalDetails'];
         case 1: return ['academicRecord', 'postCollegeStatus'];
         case 2: return ['internships', 'projects', 'hackathons'];
-        case 3: return ['research', 'entrepreneurship', 'certifications', 'competitiveExams', 'sportsOrCultural', 'volunteering', 'scholarships', 'clubActivities', 'departmentContributions', 'references'];
+        case 3: return ['research', 'entrepreneurship', 'certifications', 'competitiveExams', 'sportsOrCultural', 'volunteering', 'scholarships', 'clubActivities', 'departmentContributions', 'professionalMemberships', 'references'];
         case 4: return ['socialMedia', 'futureGoal', 'videoPitchUrl', 'consentGiven'];
         default: return [];
     }

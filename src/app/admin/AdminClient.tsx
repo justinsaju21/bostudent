@@ -235,7 +235,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
 
     const downloadCSV = () => {
-        const headers = ['Rank', 'Name', 'Register Number', 'Department', 'Section', 'Faculty Advisor', 'Auto Score', 'Faculty Score', 'CGPA', 'Research', 'Internships', 'Projects', 'Hackathons'];
+        const headers = ['Rank', 'Name', 'Register Number', 'Department', 'Section', 'Faculty Advisor', 'Auto Score', 'Faculty Score', 'CGPA', 'Research', 'Internships', 'Projects', 'Hackathons', 'Professional Memberships'];
         const rows = students.map((s, i) => {
             const fullStudent = fullStudents.find(fs => fs.personalDetails?.registerNumber === s.registerNumber);
             return [
@@ -253,6 +253,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                 s.breakdown.projects,
                 s.breakdown.projects,
                 s.breakdown.hackathons,
+                s.breakdown.professionalMemberships,
             ];
         });
 
@@ -979,6 +980,27 @@ function StudentDetailPanel({
                                     <DetailField label="Event" value={item.eventName} />
                                     <DetailField label="Role" value={item.role} />
                                     {item.contributionDescription && <DetailField label="Description" value={item.contributionDescription} />}
+                                    {item.proofLink && <DetailField label="Proof" value={item.proofLink} isLink />}
+                                </div>
+                            </DetailItem>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Professional Memberships */}
+            {student.professionalMemberships && student.professionalMemberships.length > 0 && (
+                <div style={sectionStyle}>
+                    <h4 style={headingStyle}>🪪 Professional Memberships ({student.professionalMemberships.length})</h4>
+                    {student.professionalMemberships.map((item, i) => {
+                        const itemId = item.id || `prof-${i}`;
+                        const discarded = isDiscarded(regNo, 'profMembership', itemId);
+                        return (
+                            <DetailItem key={i} discarded={discarded} onToggle={() => toggleDiscard(regNo, 'profMembership', itemId)}>
+                                <div style={gridStyle}>
+                                    <DetailField label="Organization" value={item.organization} />
+                                    {item.membershipId && <DetailField label="Membership ID" value={item.membershipId} />}
+                                    {item.role && <DetailField label="Role" value={item.role} />}
                                     {item.proofLink && <DetailField label="Proof" value={item.proofLink} isLink />}
                                 </div>
                             </DetailItem>

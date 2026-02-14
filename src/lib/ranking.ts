@@ -2,7 +2,7 @@ import { StudentApplication, RankedStudent, RankingWeights } from './types';
 
 // Default Ranking Weights (out of 100)
 export const DEFAULT_WEIGHTS: RankingWeights = {
-    cgpa: 20,
+    cgpa: 18,
     internships: 10,
     projects: 10,
     hackathons: 8,
@@ -15,6 +15,7 @@ export const DEFAULT_WEIGHTS: RankingWeights = {
     scholarships: 4,
     clubActivities: 4,
     departmentContributions: 2,
+    professionalMemberships: 2,
     references: 2,
 };
 
@@ -104,6 +105,7 @@ export function calculateScore(
     breakdown.scholarships = scoreListItems(filter(student.scholarships, 'scholarships'), 3) * weights.scholarships;
     breakdown.clubActivities = scoreListItems(filter(student.clubActivities, 'clubs')) * weights.clubActivities;
     breakdown.departmentContributions = scoreListItems(filter(student.departmentContributions, 'deptContrib')) * weights.departmentContributions;
+    breakdown.professionalMemberships = scoreListItems(filter(student.professionalMemberships, 'profMembership')) * weights.professionalMemberships;
     breakdown.references = scoreListItems(student.references, 3) * weights.references; // References usually not discarded, but can be if needed
 
     // Total

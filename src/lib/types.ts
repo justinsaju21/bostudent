@@ -157,6 +157,15 @@ export interface Reference {
     lorLink?: string;
 }
 
+// ---- Professional Membership ----
+export interface ProfessionalMembership {
+    id: string;
+    organization: string;
+    membershipId?: string;
+    role?: string;
+    proofLink?: string;
+}
+
 // ---- Social Media ----
 export interface SocialMedia {
     linkedin?: string;
@@ -189,6 +198,7 @@ export interface StudentApplication {
     scholarships: Scholarship[];
     clubActivities: ClubActivity[];
     departmentContributions: DepartmentContribution[];
+    professionalMemberships: ProfessionalMembership[];
     references: Reference[];
     socialMedia: SocialMedia;
     futureGoal: FutureGoal;
@@ -216,6 +226,7 @@ export interface RankingWeights {
     scholarships: number;
     clubActivities: number;
     departmentContributions: number;
+    professionalMemberships: number;
     references: number;
 }
 

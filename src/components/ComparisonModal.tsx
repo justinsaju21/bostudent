@@ -131,6 +131,19 @@ export default function ComparisonModal({ isOpen, onClose, students, rankedData,
                             </div>
                         ))}
 
+                        {/* Professional Memberships */}
+                        <div className="compare-cell label">Memberships</div>
+                        {students.map(s => (
+                            <div key={s.personalDetails.registerNumber} className="compare-cell value">
+                                <strong>{s.professionalMemberships?.length || 0}</strong>
+                                <div style={{ fontSize: '0.8rem', marginTop: '4px' }}>
+                                    {s.professionalMemberships?.map((m, idx) => (
+                                        <div key={idx}>{m.organization}</div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+
                         {/* Video Pitch */}
                         <div className="compare-cell label">Video Pitch</div>
                         {students.map(s => (

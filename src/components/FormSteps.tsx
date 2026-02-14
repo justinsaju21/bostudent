@@ -295,6 +295,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
     const scholarships = useFieldArray({ control, name: 'scholarships' });
     const clubs = useFieldArray({ control, name: 'clubActivities' });
     const deptContributions = useFieldArray({ control, name: 'departmentContributions' });
+    const professionalMemberships = useFieldArray({ control, name: 'professionalMemberships' });
     const references = useFieldArray({ control, name: 'references' });
 
     return (
@@ -511,6 +512,35 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <Field label="Role *"><input className="form-input" placeholder="Organizer / Volunteer" {...register(`departmentContributions.${index}.role`)} /></Field>
                             <Field label="Contribution Description"><input className="form-input" {...register(`departmentContributions.${index}.contributionDescription`)} /></Field>
                             <Field label="Proof Link"><input className="form-input" {...register(`departmentContributions.${index}.proofLink`)} /></Field>
+                        </div>
+                    </div>
+                ))}
+            </ArraySection>
+
+            {/* Professional Memberships */}
+            <ArraySection title="🪪 Professional Body Memberships" fields={professionalMemberships.fields}
+                onAdd={() => professionalMemberships.append({ id: generateId(), organization: '', membershipId: '', role: '', proofLink: '' })}
+                onRemove={professionalMemberships.remove}
+            >
+                {professionalMemberships.fields.map((field, index) => (
+                    <div key={field.id} className="glass-card" style={{ padding: '20px', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Membership #{index + 1}</span>
+                            <button type="button" className="btn-danger" onClick={() => professionalMemberships.remove(index)}><Trash2 size={14} /> Remove</button>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                            <Field label="Organization / Body * (e.g. IEEE, ACM)" error={errors.professionalMemberships?.[index]?.organization?.message}>
+                                <input className="form-input" {...register(`professionalMemberships.${index}.organization`)} />
+                            </Field>
+                            <Field label="Membership ID / Reg. No" error={errors.professionalMemberships?.[index]?.membershipId?.message}>
+                                <input className="form-input" {...register(`professionalMemberships.${index}.membershipId`)} />
+                            </Field>
+                            <Field label="Role / Grade (e.g. Student Member)" error={errors.professionalMemberships?.[index]?.role?.message}>
+                                <input className="form-input" {...register(`professionalMemberships.${index}.role`)} />
+                            </Field>
+                            <Field label="Proof Link" error={errors.professionalMemberships?.[index]?.proofLink?.message}>
+                                <input className="form-input" placeholder="ID Card / Certificate link" {...register(`professionalMemberships.${index}.proofLink`)} />
+                            </Field>
                         </div>
                     </div>
                 ))}

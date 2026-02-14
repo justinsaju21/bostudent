@@ -57,6 +57,7 @@ const HEADERS = [
     'Scholarships (Summary)',
     'Clubs/Leadership (Summary)',
     'Dept Contributions (Summary)',
+    'Professional Memberships (Summary)',
     'References (Summary)',
     'Social Media (Summary)',
     'Future Goal',
@@ -135,6 +136,11 @@ function summarizeReferences(items: StudentApplication['references']): string {
     return items.map((r, idx) => `${idx + 1}. ${r.facultyName} (${r.contact})`).join('\n');
 }
 
+function summarizeProfessionalMemberships(items: StudentApplication['professionalMemberships']): string {
+    if (!items || !items.length) return 'None';
+    return items.map((m, idx) => `${idx + 1}. ${m.organization}${m.role ? ` (${m.role})` : ''}`).join('\n');
+}
+
 function summarizeSocials(socials: StudentApplication['socialMedia']): string {
     const parts: string[] = [];
     if (socials.linkedin) parts.push(`LinkedIn: ${socials.linkedin}`);
@@ -186,6 +192,7 @@ function applicationToRow(app: StudentApplication): string[] {
         summarizeScholarships(app.scholarships),
         summarizeClubs(app.clubActivities),
         summarizeDeptContributions(app.departmentContributions),
+        summarizeProfessionalMemberships(app.professionalMemberships),
         summarizeReferences(app.references),
         summarizeSocials(app.socialMedia),
         app.futureGoal.description,

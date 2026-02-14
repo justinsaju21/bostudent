@@ -158,6 +158,7 @@ const MOCK_STUDENTS: StudentApplication[] = [
         futureGoal: { description: "Pursue a PhD in VLSI systems and contribute to next-generation low-power computing architectures for sustainable electronics." },
         videoPitchUrl: "https://youtube.com/watch?v=alice-pitch",
         masterProofFolderUrl: "https://drive.google.com/alice-proofs",
+        professionalMemberships: [],
         consentGiven: true,
         submittedAt: new Date().toISOString()
     },
@@ -290,6 +291,7 @@ const MOCK_STUDENTS: StudentApplication[] = [
         },
         futureGoal: { description: "Work on cutting-edge embedded systems at Qualcomm and eventually build a startup focused on affordable IoT solutions for Indian agriculture." },
         videoPitchUrl: "https://youtube.com/watch?v=bob-pitch",
+        professionalMemberships: [],
         consentGiven: true,
         submittedAt: new Date().toISOString()
     },
@@ -437,6 +439,7 @@ const MOCK_STUDENTS: StudentApplication[] = [
         futureGoal: { description: "Scale FitPro Analytics into India's leading sports-tech platform, combining my passion for athletics with technology to make professional coaching accessible to all." },
         videoPitchUrl: "https://youtube.com/watch?v=charlie-pitch",
         masterProofFolderUrl: "https://drive.google.com/charlie-proofs",
+        professionalMemberships: [],
         consentGiven: true,
         submittedAt: new Date().toISOString()
     }
@@ -497,6 +500,7 @@ function generateRandomStudent(index: number): StudentApplication {
         socialMedia: { linkedin: `https://linkedin.com/in/${name.replace(' ', '')}` },
         futureGoal: { description: "To become a successful engineer." },
         videoPitchUrl: "https://youtube.com",
+        professionalMemberships: [],
         consentGiven: true,
         submittedAt: new Date().toISOString()
     };
