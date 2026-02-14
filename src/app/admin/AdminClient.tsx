@@ -130,7 +130,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
             const scoreB = getDisplayScore(b);
             return scoreB - scoreA; // Descending order
         });
-    }, [students, scoreOverrides, getDisplayScore]);
+    }, [students, scoreOverrides, discardedItems, getDisplayScore]);
 
     const departments = [...new Set(students.map((s) => s.department))];
 
