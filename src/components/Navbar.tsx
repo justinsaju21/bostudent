@@ -71,7 +71,7 @@ export default function Navbar() {
                         alignItems: 'center',
                         gap: '8px',
                     }}
-                    className="hidden md:flex"
+                    className="hidden lg:flex"
                 >
                     <NavLink href="/">Home</NavLink>
                     <NavLink href="/apply">Apply Now</NavLink>
@@ -81,7 +81,7 @@ export default function Navbar() {
                 {/* Mobile Menu Button */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="md:hidden"
+                    className="lg:hidden"
                     style={{
                         background: 'transparent',
                         border: 'none',
@@ -108,7 +108,7 @@ export default function Navbar() {
                         gap: '8px',
                         background: 'white',
                     }}
-                    className="md:hidden"
+                    className="lg:hidden"
                 >
                     <MobileNavLink href="/" onClick={() => setIsOpen(false)}>Home</MobileNavLink>
                     <MobileNavLink href="/apply" onClick={() => setIsOpen(false)}>Apply Now</MobileNavLink>
