@@ -5,8 +5,12 @@ import { motion } from 'framer-motion';
 import { GraduationCap, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
+import { usePathname } from 'next/navigation';
+
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const pathname = usePathname();
+    const isApplyPage = pathname?.startsWith('/apply');
 
     return (
         <motion.nav
@@ -72,37 +76,43 @@ export default function Navbar() {
                     </div>
                 </Link>
 
-                {/* Desktop Links */}
-                <div
-                    style={{
-                        alignItems: 'center',
-                        gap: '8px',
-                    }}
-                    className="nav-desktop"
-                >
-                    <NavLink href="/">Home</NavLink>
-                    <NavLink href="/apply">Apply Now</NavLink>
-                    <NavLink href="/admin">Faculty Dashboard</NavLink>
-                </div>
+                {/* Hide links on Apply page (Student Focused View) */}
+                {!isApplyPage && (
+                    <>
+                        {/* Desktop Links */}
+                        <div
+                            style={{
+                                alignItems: 'center',
+                                gap: '8px',
+                            }}
+                            className="nav-desktop"
+                        >
+                            <NavLink href="/">Home</NavLink>
+                            <NavLink href="/apply">Apply Now</NavLink>
+                            {/* Hidden Admin Link for Security by Obscurity */}
+                            {/* <NavLink href="/admin">Faculty Dashboard</NavLink> */}
+                        </div>
 
-                {/* Mobile Menu Button */}
-                <button
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="nav-mobile-btn"
-                    style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'var(--text-primary)',
-                        cursor: 'pointer',
-                        padding: '8px',
-                    }}
-                >
-                    {isOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
+                        {/* Mobile Menu Button */}
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="nav-mobile-btn"
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--text-primary)',
+                                cursor: 'pointer',
+                                padding: '8px',
+                            }}
+                        >
+                            {isOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                    </>
+                )}
             </div>
 
             {/* Mobile Menu */}
-            {isOpen && (
+            {isOpen && !isApplyPage && (
                 <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
@@ -119,7 +129,8 @@ export default function Navbar() {
                 >
                     <MobileNavLink href="/" onClick={() => setIsOpen(false)}>Home</MobileNavLink>
                     <MobileNavLink href="/apply" onClick={() => setIsOpen(false)}>Apply Now</MobileNavLink>
-                    <MobileNavLink href="/admin" onClick={() => setIsOpen(false)}>Faculty Dashboard</MobileNavLink>
+                    {/* Hidden Admin Link */}
+                    {/* <MobileNavLink href="/admin" onClick={() => setIsOpen(false)}>Faculty Dashboard</MobileNavLink> */}
                 </motion.div>
             )}
         </motion.nav>
