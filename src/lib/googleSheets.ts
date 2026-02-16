@@ -393,10 +393,35 @@ export async function getStudentByRegNo(regNo: string): Promise<StudentApplicati
     ) || null;
 }
 
-export async function checkDuplicateRegNo(regNo: string): Promise<boolean> {
-    // This will also use the cache
+export async function checkExistingSubmission(data: {
+    registerNumber: string,
+    email: string,
+    mobile: string
+}): Promise<{ exists: boolean; field?: string }> {
     const students = await getAllStudents();
-    return students.some(s => s.personalDetails.registerNumber === regNo);
+    const regNo = data.registerNumber.toUpperCase();
+    const email = data.email.toLowerCase();
+    const mobile = data.mobile.trim();
+
+    for (const s of students) {
+        if (s.personalDetails.registerNumber.toUpperCase() === regNo) {
+            return { exists: true, field: 'Register Number' };
+        }
+        if (s.personalDetails.personalEmail.toLowerCase() === email ||
+            s.personalDetails.srmEmail.toLowerCase() === email) {
+            return { exists: true, field: 'Email Address' };
+        }
+        if (s.personalDetails.mobileNumber.trim() === mobile) {
+            return { exists: true, field: 'Mobile Number' };
+        }
+    }
+    return { exists: false };
+}
+
+// Keep this for backward compatibility if needed, but updated to use the new logic
+export async function checkDuplicateRegNo(regNo: string): Promise<boolean> {
+    const result = await checkExistingSubmission({ registerNumber: regNo, email: '', mobile: '' });
+    return result.exists;
 }
 
 export async function updateStudentEvaluation(

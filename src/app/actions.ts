@@ -1,6 +1,6 @@
 'use server';
 
-import { appendStudent, checkDuplicateRegNo, getDeadline } from '@/lib/googleSheets';
+import { appendStudent, checkExistingSubmission, getDeadline } from '@/lib/googleSheets';
 import { applicationSchema } from '@/lib/schemas';
 import { StudentApplication } from '@/lib/types';
 
@@ -50,12 +50,17 @@ export async function submitApplication(data: unknown): Promise<SubmitResult> {
             submittedAt: new Date().toISOString(),
         };
 
-        // Check for duplicate register number
-        const isDuplicate = await checkDuplicateRegNo(application.personalDetails.registerNumber);
-        if (isDuplicate) {
+        // Check for duplicate entry (Triple Check: Reg No, Email, Mobile)
+        const dupCheck = await checkExistingSubmission({
+            registerNumber: application.personalDetails.registerNumber,
+            email: application.personalDetails.personalEmail,
+            mobile: application.personalDetails.mobileNumber
+        });
+
+        if (dupCheck.exists) {
             return {
                 success: false,
-                message: `An application with register number ${application.personalDetails.registerNumber} already exists.`,
+                message: `An application with this ${dupCheck.field} already exists. Each student can only submit once.`,
             };
         }
 
