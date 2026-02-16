@@ -1,10 +1,17 @@
 import { google } from 'googleapis';
 import { StudentApplication } from './types';
 
+
+
 // These environment variables must be set:
 // GOOGLE_SERVICE_ACCOUNT_EMAIL - your service account email
 // GOOGLE_PRIVATE_KEY - your service account private key
 // GOOGLE_SHEET_ID - the spreadsheet ID
+
+// ===== CACHING STATE =====
+let _isInitialized = false;
+let _studentsCache: { data: StudentApplication[]; timestamp: number } | null = null;
+const CACHE_TTL_MS = 30 * 1000; // 30 seconds
 
 function getAuth() {
     const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -238,32 +245,42 @@ function rowToApplication(row: string[]): StudentApplication | null {
     }
 }
 
+// ===== Helper to Get Column Letter =====
+const getColLetter = (n: number) => {
+    let s = '';
+    while (n >= 0) {
+        s = String.fromCharCode(n % 26 + 65) + s;
+        n = Math.floor(n / 26) - 1;
+    }
+    return s;
+};
+
 // ===== PUBLIC API =====
 
 export async function initializeSheet(): Promise<void> {
+    // Optimization: Skip if we've already initialized in this functional instance
+    if (_isInitialized) return;
+
     const auth = getAuth();
     const sheets = google.sheets({ version: 'v4', auth });
     const sheetId = getSheetId();
 
-    // Always update headers to ensure new columns are added
-    await sheets.spreadsheets.values.update({
-        spreadsheetId: sheetId,
-        range: 'Sheet1!A1:AZ1',
-        valueInputOption: 'RAW',
-        requestBody: { values: [HEADERS] },
-    });
-
-    // Check if Settings sheet exists/init
     try {
-        await sheets.spreadsheets.values.get({
+        // Always update headers to ensure new columns are added
+        await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: 'Settings!A1',
+            range: 'Sheet1!A1:AZ1',
+            valueInputOption: 'RAW',
+            requestBody: { values: [HEADERS] },
         });
-    } catch {
-        // Likely sheet doesn't exist, create it (adding sheet is complex with values API, usually requires batchUpdate)
-        // For simplicity, we assume the user might need to create it, OR we try to add it.
-        // Actually, 'values' API cannot creating sheets. We need 'batchUpdate' with 'addSheet'.
+
+        // Check if Settings sheet exists/init
         try {
+            await sheets.spreadsheets.values.get({
+                spreadsheetId: sheetId,
+                range: 'Settings!A1',
+            });
+        } catch {
             await sheets.spreadsheets.batchUpdate({
                 spreadsheetId: sheetId,
                 requestBody: {
@@ -277,9 +294,10 @@ export async function initializeSheet(): Promise<void> {
                 valueInputOption: 'RAW',
                 requestBody: { values: [['Key', 'Value'], ['DEADLINE', '']] },
             });
-        } catch (e) {
-            console.log('Settings sheet might already exist or error creating:', e);
         }
+        _isInitialized = true;
+    } catch (e) {
+        console.error('Error initializing sheet:', e);
     }
 }
 
@@ -288,7 +306,11 @@ export async function appendStudent(app: StudentApplication): Promise<void> {
     const sheets = google.sheets({ version: 'v4', auth });
     const sheetId = getSheetId();
 
+    // Ensure initialized, but uses cached flag
     await initializeSheet();
+
+    // Invalidate cache on new write
+    _studentsCache = null;
 
     const row = applicationToRow(app);
     await sheets.spreadsheets.values.append({
@@ -307,6 +329,7 @@ export async function addStudentsBatch(apps: StudentApplication[]): Promise<void
     if (apps.length === 0) return;
 
     await initializeSheet();
+    _studentsCache = null;
 
     const rows = apps.map(applicationToRow);
 
@@ -319,6 +342,12 @@ export async function addStudentsBatch(apps: StudentApplication[]): Promise<void
 }
 
 export async function getAllStudents(): Promise<StudentApplication[]> {
+    // Optimization: Return cached data if available and fresh
+    const now = Date.now();
+    if (_studentsCache && (now - _studentsCache.timestamp < CACHE_TTL_MS)) {
+        return _studentsCache.data;
+    }
+
     const auth = getAuth();
     const sheets = google.sheets({ version: 'v4', auth });
     const sheetId = getSheetId();
@@ -328,17 +357,26 @@ export async function getAllStudents(): Promise<StudentApplication[]> {
         range: 'Sheet1!A2:AZ',
     });
 
-    if (!res.data.values) return [];
+    if (!res.data.values) {
+        // Cache empty result too
+        _studentsCache = { data: [], timestamp: now };
+        return [];
+    }
 
     const students: StudentApplication[] = [];
     for (const row of res.data.values) {
         const app = rowToApplication(row);
         if (app) students.push(app);
     }
+
+    // Update Cache
+    _studentsCache = { data: students, timestamp: now };
+
     return students;
 }
 
 export async function getStudentByRegNo(regNo: string): Promise<StudentApplication | null> {
+    // This will now use the cache automatically
     const students = await getAllStudents();
     return students.find(
         (s) => s.personalDetails.registerNumber.toUpperCase() === regNo.toUpperCase()
@@ -346,6 +384,7 @@ export async function getStudentByRegNo(regNo: string): Promise<StudentApplicati
 }
 
 export async function checkDuplicateRegNo(regNo: string): Promise<boolean> {
+    // This will also use the cache
     const students = await getAllStudents();
     return students.some(s => s.personalDetails.registerNumber === regNo);
 }
@@ -364,17 +403,14 @@ export async function updateStudentEvaluation(
         const regNoIndex = HEADERS.indexOf('Register Number');
         if (regNoIndex === -1) return false;
 
-        const getColLetter = (n: number) => {
-            let s = '';
-            while (n >= 0) {
-                s = String.fromCharCode(n % 26 + 65) + s;
-                n = Math.floor(n / 26) - 1;
-            }
-            return s;
-        };
         const regNoCol = getColLetter(regNoIndex);
-
         const range = `Sheet1!${regNoCol}:${regNoCol}`;
+
+        // Optimization: We could cache this lookup map if rows don't change order, but for safety we look it up.
+        // However, we can at least avoid re-reading the whole sheet if we just want indices?
+        // Actually, fetching just one column (Register Number) is much lighter than fetching all columns.
+        // The original code was already doing this (good), but let's ensure we invalidate cache after update.
+
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: sheetId,
             range,
@@ -394,21 +430,6 @@ export async function updateStudentEvaluation(
 
         if (scoreColIndex === -1 || discardedColIndex === -1) return false;
 
-        // Convert column index to letter (A, B, ... AA, AB...)
-        // (Helper function defined above currently)
-        // Reuse getColLetter if possible or just use it from scope if I structured it well. 
-        // Note: The previous chunk defined getColLetter inside the function scope, so it is available below in the specific function? 
-        // No, I need to be careful with scope. The previous replacement was inside updateStudentEvaluation.
-        // Let's just redefine getColLetter at top level or duplicate or use safely.
-
-        // Actually, to make it clean, I will NOT rely on previous definition being hoisted if I am not sure.
-        // The previous chunk inserted getColLetter *inside* updateStudentEvaluation before usage.
-        // So I can remove the *duplicate* definition further down if I want, or just leave it if I didn't touch it.
-        // But the Original Code had getColLetter *later* at line 367.
-        // My previous chunk inserted it at line 347 approx.
-        // So I should remove the old definition at 367 to avoid duplication/errors.
-
-        // Let's Delete the old definition block.
         const scoreCol = getColLetter(scoreColIndex);
         const discardedCol = getColLetter(discardedColIndex);
 
@@ -436,6 +457,8 @@ export async function updateStudentEvaluation(
                     data: updates,
                 },
             });
+            // Invalidate cache so the new score shows up immediately for everyone (or at least next fetch)
+            _studentsCache = null;
         }
 
         return true;
@@ -456,17 +479,7 @@ export async function updateFullStudentApplication(app: StudentApplication): Pro
         const regNoIndex = HEADERS.indexOf('Register Number');
         if (regNoIndex === -1) return false;
 
-        // Simple col letter helper
-        const getColLetter = (n: number) => {
-            let s = '';
-            while (n >= 0) {
-                s = String.fromCharCode(n % 26 + 65) + s;
-                n = Math.floor(n / 26) - 1;
-            }
-            return s;
-        };
         const regNoCol = getColLetter(regNoIndex);
-
         const range = `Sheet1!${regNoCol}:${regNoCol}`;
         const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range });
         const rows = response.data.values;
@@ -484,6 +497,9 @@ export async function updateFullStudentApplication(app: StudentApplication): Pro
             valueInputOption: 'RAW',
             requestBody: { values: [rowData] },
         });
+
+        // Invalidate cache
+        _studentsCache = null;
 
         return true;
     } catch (error) {
@@ -555,6 +571,86 @@ export async function setDeadline(dateStr: string): Promise<boolean> {
     }
 }
 
+export async function batchUpdateStudentEvaluations(
+    updates: { regNo: string; facultyScore?: number; discardedItems?: string[] }[]
+): Promise<boolean> {
+    if (updates.length === 0) return true;
+
+    const auth = getAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+    const sheetId = getSheetId();
+
+    try {
+        // 1. Fetch Register Numbers to map to Row Indices
+        // To be safe, we fetch the column.
+        const regNoIndex = HEADERS.indexOf('Register Number');
+        if (regNoIndex === -1) return false;
+
+        const regNoCol = getColLetter(regNoIndex);
+        const range = `Sheet1!${regNoCol}:${regNoCol}`;
+
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range,
+        });
+
+        const rows = response.data.values;
+        if (!rows) return false;
+
+        // Create Map: RegNo -> RowIndex (1-indexed for Sheets API)
+        const regNoMap = new Map<string, number>();
+        rows.forEach((row, index) => {
+            if (row[0]) regNoMap.set(row[0].toString().toUpperCase(), index + 1);
+        });
+
+        // 2. Prepare Updates
+        const scoreColIndex = HEADERS.indexOf('Faculty_Score');
+        const discardedColIndex = HEADERS.indexOf('Discarded_Items');
+        if (scoreColIndex === -1 || discardedColIndex === -1) return false;
+
+        const scoreCol = getColLetter(scoreColIndex);
+        const discardedCol = getColLetter(discardedColIndex);
+
+        const sheetUpdates: any[] = [];
+
+        for (const update of updates) {
+            const sheetRow = regNoMap.get(update.regNo.toUpperCase());
+            if (!sheetRow) continue; // Skip if student not found
+
+            if (update.facultyScore !== undefined) {
+                sheetUpdates.push({
+                    range: `Sheet1!${scoreCol}${sheetRow}`,
+                    values: [[update.facultyScore.toString()]],
+                });
+            }
+
+            if (update.discardedItems !== undefined) {
+                sheetUpdates.push({
+                    range: `Sheet1!${discardedCol}${sheetRow}`,
+                    values: [[JSON.stringify(update.discardedItems)]],
+                });
+            }
+        }
+
+        if (sheetUpdates.length > 0) {
+            await sheets.spreadsheets.values.batchUpdate({
+                spreadsheetId: sheetId,
+                requestBody: {
+                    valueInputOption: 'RAW',
+                    data: sheetUpdates,
+                },
+            });
+            _studentsCache = null; // Invalidate cache
+        }
+
+        return true;
+
+    } catch (error) {
+        console.error('Error batch updating evaluations:', error);
+        return false;
+    }
+}
+
 export async function clearAllStudents(): Promise<void> {
     const auth = getAuth();
     const sheets = google.sheets({ version: 'v4', auth });
@@ -565,4 +661,6 @@ export async function clearAllStudents(): Promise<void> {
         spreadsheetId: sheetId,
         range: 'Sheet1!A2:AZ1000',
     });
+
+    _studentsCache = null;
 }

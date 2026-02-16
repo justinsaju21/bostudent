@@ -12,26 +12,92 @@ function uuid() {
 
 const DEPARTMENTS = ["Electronics and Communication Engineering"];
 const SECTIONS = ["A", "B", "C", "D", "E", "F"];
-const ADVISORS = ["Dr. Ramesh Kumar", "Dr. Priya Sharma", "Prof. Lakshmi Narayanan", "Dr. A. Smith", "Prof. R. Johnson"];
-const SPECIALIZATIONS = ["VLSI Design", "Embedded Systems", "Communication Systems", "Signal Processing", "Robotics & Automation"];
+const ADVISORS = ["Dr. Ramesh Kumar", "Dr. Priya Sharma", "Prof. Lakshmi Narayanan", "Dr. A. Smith", "Prof. R. Johnson", "Dr. K. Lee", "Dr. S. Nair"];
+const SPECIALIZATIONS = ["VLSI Design", "Embedded Systems", "Communication Systems", "Signal Processing", "Robotics & Automation", "Internet of Things"];
 
-const PROFESSIONAL_ORGS = [
-    { name: "IEEE", role: "Student Member" },
-    { name: "ACM", role: "Ambassador" },
-    { name: "IETE", role: "Contributor" },
-    { name: "CSI", role: "Member" },
-    { name: "Optica", role: "Chapter Head" }
+const COMPANIES = ["Texas Instruments", "Intel", "Qualcomm", "NVIDIA", "Analog Devices", "Samsung", "Google", "Microsoft", "TCS", "Infosys", "Wipro", "Amazon", "Tesla", "Apple"];
+
+// --- REAL LOOKING DATA POOLS ---
+
+const INTERNSHIP_POOL = [
+    { company: "Texas Instruments", role: "Analog Design Intern", desc: "Simulation and verification of low-dropout (LDO) regulators using Cadence Virtuoso. Optimized power consumption by 15%." },
+    { company: "Intel", role: "Silicon Validation Intern", desc: "Automated post-silicon validation tests using Python and Perl for 13th Gen processors." },
+    { company: "Qualcomm", role: "Modem Software Intern", desc: "Implemented L1 layer features for 5G NR modem firmware. Debugged latency issues in high-speed data paths." },
+    { company: "NVIDIA", role: "Hardware Engineering Intern", desc: "Assisted in the design of high-speed memory interfaces for next-gen GPU architectures." },
+    { company: "Robert Bosch", role: "Automotive Electronics Intern", desc: "Developed firmware for body control modules and conducted HIL (Hardware-in-the-Loop) testing." },
+    { company: "Analog Devices", role: "System Applications Intern", desc: "Designed PCB layouts for high-precision sensor evaluation boards." },
+    { company: "Samsung Semiconductors", role: "Memory Design Intern", desc: "Contributed to the design of high-speed SRAM blocks for mobile SOCs." },
+    { company: "TCS Research", role: "Computer Vision Intern", desc: "Developed deep learning models for anomaly detection in industrial manufacturing lines." },
+    { company: "ISRO", role: "Payload Electronics Intern", desc: "Designed telemetry circuits for small satellite payloads under the guidance of senior scientists." },
+    { company: "DRDO", role: "Signal Processing Intern", desc: "Implemented RADAR signal processing algorithms on FPGA using Xilinx Vivado." }
 ];
 
-const COMPANIES = ["Texas Instruments", "Intel", "Qualcomm", "NVIDIA", "Qualcomm", "Analog Devices", "Samsung", "Google", "Microsoft", "TCS", "Infosys"];
+const PROJECT_POOL = [
+    { title: "Autonomous Indoor Navigation Bot", stack: "ROS, Raspberry Pi, LiDAR, Python", desc: "Built a robot capable of SLAM (Simultaneous Localization and Mapping) in unknown indoor environments." },
+    { title: "Smart Energy Meter using LoRaWAN", stack: "ESP32, LoRa, Node.js, Grafana", desc: "A long-range wireless energy monitoring system for rural areas with real-time billing dashboard." },
+    { title: "Wearable Health Monitor for Elderly", stack: "Arduino, BLE, Flutter, Firebase", desc: "Detects falls and monitors heart rate/oxygen levels, sending instant alerts to caregivers." },
+    { title: "FPGA based Image Processor", stack: "Verilog, Zybo Z7, MATLAB", desc: "Real-time edge detection and noise filtering of VGA video feed using custom hardware accelerators." },
+    { title: "LoRa based Wildlife Tracker", stack: "LoRa, GPS, Solar Harvesting", desc: "Low-power tracker designed to last 2 years on field for monitoring elephant movement patterns." },
+    { title: "ASIC Design of 16-bit RISC-V Core", stack: "Verilog, Synopsys Design Compiler", desc: "Completed the full RTL-to-GDSII flow for a custom RISC-V base integer instruction set." },
+    { title: "Smart Traffic Management via AI", stack: "Python, OpenCV, Jetson Nano", desc: "Identifies traffic density and dynamically controls signal timing to reduce congestion." },
+    { title: "Underwater Wireless Communication", stack: "Ultrasonic Sensors, OFDM, MATLAB", desc: "Research project implementing acoustic communication for underwater sensor networks." }
+];
+
+const RESEARCH_POOL = [
+    { title: "Novel Energy Harvesting for Body Area Networks", journal: "IEEE Sensors Letters", index: "sci", status: "published" },
+    { title: "Comparative Analysis of FinFET at 7nm node", journal: "Journal of Nanoelectronics", index: "scopus", status: "published" },
+    { title: "Deep Learning for SAR Image Denoising", journal: "IEEE Geoscience and Remote Sensing", index: "sci", status: "under_review" },
+    { title: "IoT Security: A Blockchain Based Approach", journal: "ICCC 2024 Conference", index: "scopus", status: "published" },
+    { title: "Low Power VLSI Architecture for FFT", journal: "IEEE Access", index: "sci", status: "published" },
+    { title: "Design of Reconfigurable Antenna for 5G", journal: "EuCAP 2025", index: "scopus", status: "granted" }
+];
+
+const HACKATHON_POOL = [
+    { name: "Smart India Hackathon (SIH)", project: "AI for Water Management", pos: "Winner (Grand Finale)" },
+    { name: "IEEE Xtreme 18.0", project: "Competitive Programming", pos: "Global Rank 42" },
+    { name: "HackMIT", project: "Accessibility Tech for Blind", pos: "Top 10 Finalist" },
+    { name: "Intel AI Global Impact Festival", project: "Edge AI for Healthcare", pos: "Regional Winner" },
+    { name: "Microsoft Imagine Cup", project: "Sustainable Agriculture Tech", pos: "National Finalist" },
+    { name: "NASA Apps Challenge", project: "Satellite Data Visualization", pos: "Global Nominee" }
+];
+
+const MEMBERSHIP_ORGS = [
+    { name: "IEEE", roles: ["Student Chair", "Secretary", "Technical Lead", "Student Member"] },
+    { name: "ACM", roles: ["Ambassador", "Vice Chair", "Core Member"] },
+    { name: "IETE", roles: ["Student Coordinator", "Member"] },
+    { name: "Optica", roles: ["Chapter President", "Outreach Head"] },
+    { name: "CSI", roles: ["Executive Member", "Web Master"] }
+];
+
+const NAMES = [
+    "Aarav", "Ananya", "Ishaan", "Diya", "Arjun", "Kavya", "Rohan", "Sanya", "Vikram", "Anjali",
+    "Kabir", "Ishita", "Aditya", "Meera", "Siddharth", "Pooja", "Varun", "Riya", "Akash", "Tara"
+];
+const SURNAMES = [
+    "Sharma", "Verma", "Iyer", "Nair", "Gupta", "Malhotra", "Reddy", "Patel", "Singh", "Das",
+    "Joshi", "Kulkarni", "Chopra", "Bose", "Menon", "Kapoor", "Khan", "Deshmukh", "Pillai", "Aggarwal"
+];
+
+// --- HELPER FUNCTIONS ---
+
+function getRandom<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getMultipleRandom<T>(arr: T[], max: number): T[] {
+    const count = Math.floor(Math.random() * max) + 1;
+    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
 
 function generateRealisticStudent(index: number): StudentApplication {
-    const firstName = ["Arjun", "Neha", "Rohan", "Sanya", "Vikram", "Anjali", "Kabir", "Ishita", "Aditya", "Meera", "Siddharth", "Pooja", "Varun", "Kavya", "Akash", "Riya", "Karan", "Tanvi", "Nikhil", "Zoya"][index];
-    const lastName = ["Sharma", "Verma", "Iyer", "Nair", "Gupta", "Malhotra", "Reddy", "Patel", "Singh", "Das", "Joshi", "Kulkarni", "Chopra", "Bose", "Menon", "Kapoor", "Khan", "Deshmukh", "Pillai", "Aggarwal"][index];
+    const firstName = NAMES[index % NAMES.length];
+    const lastName = SURNAMES[index % SURNAMES.length];
     const name = `${firstName} ${lastName}`;
-    const regNo = `RA2211053010${(100 + index).toString()}`;
-    const cgpa = 7.5 + (Math.random() * 2.4); // 7.5 to 9.9
+    const regNo = `RA2211053010${(index + 100).toString()}`;
+    const cgpa = 7.0 + (Math.random() * 2.9); // 7.0 to 9.9
 
+    // Complex student profile
     const student: StudentApplication = {
         personalDetails: {
             name,
@@ -39,7 +105,7 @@ function generateRealisticStudent(index: number): StudentApplication {
             department: DEPARTMENTS[0],
             specialization: SPECIALIZATIONS[index % SPECIALIZATIONS.length],
             personalEmail: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
-            srmEmail: `${firstName[0].toLowerCase()}${lastName.toLowerCase()}@srmist.edu.in`,
+            srmEmail: `${firstName[0].toLowerCase()}${lastName.toLowerCase()}${index}@srmist.edu.in`,
             mobileNumber: `9840${Math.floor(100000 + Math.random() * 899999)}`,
             facultyAdvisor: ADVISORS[index % ADVISORS.length],
             section: SECTIONS[index % SECTIONS.length],
@@ -48,82 +114,108 @@ function generateRealisticStudent(index: number): StudentApplication {
         academicRecord: {
             cgpa: parseFloat(cgpa.toFixed(2)),
             tenthPercentage: 85 + Math.floor(Math.random() * 14),
-            twelfthPercentage: 82 + Math.floor(Math.random() * 16),
-            historyOfArrears: false,
+            twelfthPercentage: 80 + Math.floor(Math.random() * 18),
+            historyOfArrears: Math.random() > 0.9,
+            numberOfArrears: Math.random() > 0.9 ? 1 : 0
         },
         postCollegeStatus: {
-            status: Math.random() > 0.4 ? "placed" : "higher_studies",
-            placedCompany: Math.random() > 0.4 ? COMPANIES[index % COMPANIES.length] : undefined,
-            universityName: Math.random() > 0.7 ? "SRM University" : undefined
+            status: Math.random() > 0.3 ? "placed" : "higher_studies",
+            placedCompany: Math.random() > 0.3 ? getRandom(COMPANIES) : undefined,
+            universityName: Math.random() > 0.7 ? "Carnegie Mellon" : (Math.random() > 0.5 ? "SRM University" : undefined)
         },
-        internships: index % 2 === 0 ? [{
+        internships: getMultipleRandom(INTERNSHIP_POOL, 3).map(i => ({
             id: uuid(),
-            company: COMPANIES[index % COMPANIES.length],
-            role: "Engineering Intern",
+            company: i.company,
+            role: i.role,
             startDate: "2024-05-01",
             endDate: "2024-07-31",
-            certificateLink: "https://drive.google.com/cert-example",
-            description: "Developed hardware modules for signal processing."
+            certificateLink: "https://drive.google.com/proof-internship",
+            description: i.desc
+        })),
+        projects: getMultipleRandom(PROJECT_POOL, 4).map(p => ({
+            id: uuid(),
+            title: p.title,
+            techStack: p.stack,
+            description: p.desc,
+            githubLink: "https://github.com/example/student-project"
+        })),
+        hackathons: Math.random() > 0.3 ? getMultipleRandom(HACKATHON_POOL, 2).map(h => ({
+            id: uuid(),
+            name: h.name,
+            projectBuilt: h.project,
+            teamSize: Math.floor(Math.random() * 4) + 2,
+            position: h.pos,
+            proofLink: "https://drive.google.com/proof-hackathon"
+        })) : [],
+        research: Math.random() > 0.5 ? getMultipleRandom(RESEARCH_POOL, 2).map(r => ({
+            id: uuid(),
+            title: r.title,
+            journalOrConference: r.journal,
+            indexStatus: r.index as any,
+            publicationStatus: r.status as any,
+            link: "https://doi.org/example-paper"
+        })) : [],
+        entrepreneurship: index === 5 ? [{
+            id: uuid(),
+            startupName: "TechNova Solutions",
+            description: "An AI consultancy startup helping small businesses adopt automation.",
+            revenueOrFundingStatus: "Seed funded - 2 Lakhs"
         }] : [],
-        projects: [{
+        certifications: getMultipleRandom(["AWS Solutions Architect", "TensorFlow Developer", "Certified VLSI Engineer", "NPTEL Embedded Systems"], 2).map(c => ({
             id: uuid(),
-            title: `${["Smart City", "Grid Monitor", "Health AI", "Traffic Control", "AgriBot"][index % 5]}`,
-            techStack: "Arduino, IoT, Node.js",
-            description: "A comprehensive project leveraging IoT and embedded systems for automation.",
-            githubLink: "https://github.com/example/project"
-        }],
-        hackathons: index % 3 === 0 ? [{
+            provider: "Industry Recognized",
+            certificateName: c,
+            proofLink: "https://verify.com/cert"
+        })),
+        competitiveExams: index % 7 === 0 ? [{ id: uuid(), examName: "GATE", scoreOrRank: "98.5 Percentile" }] : [],
+        sportsOrCultural: index % 6 === 0 ? [{
             id: uuid(),
-            name: "Smart India Hackathon",
-            projectBuilt: "Disaster Management App",
-            teamSize: 6,
-            position: "Finalist"
-        }] : [],
-        research: index % 4 === 0 ? [{
-            id: uuid(),
-            title: `Analysis of ${["ML", "VLSI", "5G", "Robotics"][index % 4]} Architectures`,
-            journalOrConference: "IEEE Xplore",
-            indexStatus: "scopus",
-            publicationStatus: "published"
-        }] : [],
-        entrepreneurship: [],
-        certifications: [{
-            id: uuid(),
-            provider: "Coursera",
-            certificateName: "Digital VLSI Design",
-            proofLink: "https://coursera.org/verify/123"
-        }],
-        competitiveExams: [],
-        sportsOrCultural: index % 5 === 0 ? [{
-            id: uuid(),
-            eventName: "Inter-University Sports Meet",
+            eventName: "Inter-College Cricket",
             level: "state",
-            positionWon: "Gold Medal"
+            positionWon: "Runners Up"
         }] : [],
-        volunteering: [],
-        scholarships: [],
+        volunteering: index % 4 === 0 ? [{
+            id: uuid(),
+            organization: "Nivedham NGO",
+            role: "Volunteer Teacher",
+            hoursServed: 50,
+            impact: "Taught basic science to underprivileged children."
+        }] : [],
+        scholarships: index === 0 ? [{
+            id: uuid(),
+            name: "Performance Excellence",
+            awardingBody: "SRMIST",
+            amountOrPrestige: "Full Tuition Waiver"
+        }] : [],
         clubActivities: [{
             id: uuid(),
-            clubName: "Technical Club",
-            position: "Member"
+            clubName: "SRM Tech Society",
+            position: "Core Member",
+            impactDescription: "Organized 3 workshops on IoT and Web Development."
         }],
-        departmentContributions: [],
-        professionalMemberships: [{
+        departmentContributions: index % 5 === 0 ? [{
             id: uuid(),
-            organization: PROFESSIONAL_ORGS[index % PROFESSIONAL_ORGS.length].name,
-            role: PROFESSIONAL_ORGS[index % PROFESSIONAL_ORGS.length].role,
-            membershipId: `MEM-${index}-2024`
-        }],
+            eventName: " Milan 2024",
+            role: "Technical Coordinator",
+            contributionDescription: "Managed audio-visual systems for the entire department."
+        }] : [],
+        professionalMemberships: getMultipleRandom(MEMBERSHIP_ORGS, 2).map(m => ({
+            id: uuid(),
+            organization: m.name,
+            role: getRandom(m.roles),
+            membershipId: `ID-${Math.floor(Math.random() * 10000)}`
+        })),
         references: [{
             id: uuid(),
-            facultyName: ADVISORS[(index + 1) % ADVISORS.length],
+            facultyName: getRandom(ADVISORS),
             contact: "faculty@srmist.edu.in"
         }],
         socialMedia: {
-            linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}${lastName.toLowerCase()}`
+            linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}${lastName.toLowerCase()}`,
+            github: `https://github.com/${firstName.toLowerCase()}${index}`
         },
-        futureGoal: { description: "To lead a research team in advanced communications." },
-        videoPitchUrl: "https://youtube.com/watch?v=example",
+        futureGoal: { description: "To work at the intersection of Hardware and AI to build smarter, sustainable robots." },
+        videoPitchUrl: "https://youtube.com/watch?v=pitch",
         consentGiven: true,
         submittedAt: new Date().toISOString()
     };
@@ -141,7 +233,7 @@ export async function GET(req: NextRequest) {
             await clearAllStudents();
         }
 
-        console.log('Generating 20 realistic students...');
+        console.log('Generating 20 highly realistic students...');
         const students: StudentApplication[] = [];
         for (let i = 0; i < 20; i++) {
             students.push(generateRealisticStudent(i));
@@ -152,7 +244,7 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: `Successfully ${clear ? 'cleared and ' : ''}seeded 20 realistic students.`
+            message: `Successfully ${clear ? 'cleared and ' : ''}seeded 20 highly realistic multi-achievement students.`
         });
     } catch (error: any) {
         console.error('Seeding error:', error);

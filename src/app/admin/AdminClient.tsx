@@ -42,6 +42,24 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
+    // Pagination State
+    const [visibleCount, setVisibleCount] = useState(50);
+
+    // Batch Saving State
+    const [changedRegNos, setChangedRegNos] = useState<Set<string>>(new Set());
+
+    // Warn on unsaved changes
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (changedRegNos.size > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [changedRegNos]);
+
     // Initialize state from fullStudents
     const [discardedItems, setDiscardedItems] = useState<Record<string, Set<string>>>(() => {
         const initial: Record<string, Set<string>> = {};
@@ -146,7 +164,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         return Array.from(a).sort();
     }, [fullStudents]);
 
-    const filtered = sortedStudents.filter((s) => {
+    const filtered = useMemo(() => sortedStudents.filter((s) => {
         const fullStudent = getFullStudent(s.registerNumber);
         const matchesSearch =
             s.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -156,7 +174,14 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         const matchesAdvisor = !advisorFilter || fullStudent?.personalDetails?.facultyAdvisor === advisorFilter;
 
         return matchesSearch && matchesDept && matchesSection && matchesAdvisor;
-    });
+    }), [sortedStudents, search, deptFilter, sectionFilter, advisorFilter, fullStudents]);
+
+    // PAGINATION SLICE
+    const visibleStudents = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+
+    const loadMore = () => {
+        setVisibleCount(prev => prev + 50);
+    };
 
     // Analytics
     const deptStats = useMemo(() => {
@@ -168,19 +193,24 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         return Object.entries(stats).sort((a, b) => b[1] - a[1]);
     }, [students]);
 
-    // Persist changes
-    const persistEvaluation = async (regNo: string, score: number | undefined, discarded: Set<string> | undefined) => {
+    // Batch Save
+    const saveAllChanges = async () => {
+        if (changedRegNos.size === 0) return;
         setIsSaving(true);
         try {
+            const updates = Array.from(changedRegNos).map(regNo => ({
+                regNo,
+                facultyScore: scoreOverrides[regNo],
+                discardedItems: Array.from(discardedItems[regNo] || [])
+            }));
+
             await fetch('/api/admin/evaluate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    regNo,
-                    facultyScore: score,
-                    discardedItems: discarded ? Array.from(discarded) : [],
-                }),
+                body: JSON.stringify({ updates }),
             });
+
+            setChangedRegNos(new Set());
         } catch (err) {
             console.error('Failed to save', err);
         } finally {
@@ -199,8 +229,8 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                 currentSet.add(key);
             }
 
-            // Persist immediately
-            persistEvaluation(regNo, scoreOverrides[regNo], currentSet);
+            // Mark as changed
+            setChangedRegNos(prevChanged => new Set(prevChanged).add(regNo));
 
             return { ...prev, [regNo]: currentSet };
         });
@@ -221,8 +251,8 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         const val = parseFloat(tempScore);
         if (!isNaN(val) && val >= 0 && val <= 100) {
             setScoreOverrides(prev => ({ ...prev, [regNo]: val }));
-            // Persist
-            persistEvaluation(regNo, val, discardedItems[regNo]);
+            // Mark as changed
+            setChangedRegNos(prevChanged => new Set(prevChanged).add(regNo));
         }
         setEditingScore(null);
     };
@@ -367,6 +397,20 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                 <button onClick={downloadCSV} className="btn-secondary" style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
                                     <Download size={18} /> Export
                                 </button>
+                                <button
+                                    onClick={async () => {
+                                        if (confirm('Push 700 mock records to Google Sheets?')) {
+                                            const res = await fetch('/api/admin/seed', { method: 'POST' });
+                                            const data = await res.json();
+                                            if (data.success) alert('Seeded! Refresh the page.');
+                                            else alert('Error: ' + data.error);
+                                        }
+                                    }}
+                                    className="btn-secondary"
+                                    style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px', color: '#B45309' }}
+                                >
+                                    <Award size={18} /> Seed 700
+                                </button>
                                 <button onClick={handleLogout} className="btn-secondary" style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
                                     <LogOut size={18} /> Logout
                                 </button>
@@ -509,14 +553,14 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.length === 0 ? (
+                                {visibleStudents.length === 0 ? (
                                     <tr>
-                                        <td colSpan={8} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                                        <td colSpan={9} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
                                             {students.length === 0 ? 'No applications yet.' : 'No results found.'}
                                         </td>
                                     </tr>
                                 ) : (
-                                    filtered.map((student, index) => {
+                                    visibleStudents.map((student, index) => {
                                         const isExpanded = expandedRow === student.registerNumber;
                                         const displayScore = getDisplayScore(student);
                                         const isSelected = selectedStudents.includes(student.registerNumber);
@@ -588,7 +632,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                                 </tr>
                                                 {isExpanded && fullStudent && (
                                                     <tr>
-                                                        <td colSpan={8} style={{ padding: 0 }}>
+                                                        <td colSpan={9} style={{ padding: 0 }}>
                                                             <StudentDetailPanel
                                                                 student={fullStudent}
                                                                 regNo={student.registerNumber}
@@ -605,7 +649,60 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Load More Button */}
+                    {visibleCount < filtered.length && (
+                        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px', borderTop: '1px solid var(--border-subtle)' }}>
+                            <button
+                                onClick={loadMore}
+                                className="btn-secondary"
+                                style={{ padding: '12px 32px' }}
+                            >
+                                Load More ({filtered.length - visibleCount} remaining)
+                            </button>
+                        </div>
+                    )}
                 </motion.div>
+
+                {/* Floating Save Button */}
+                <AnimatePresence>
+                    {(changedRegNos.size > 0 || isSaving) && (
+                        <motion.div
+                            initial={{ y: 50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 50, opacity: 0 }}
+                            style={{
+                                position: 'fixed', bottom: '24px', right: '24px',
+                                zIndex: 100
+                            }}
+                        >
+                            <button
+                                onClick={saveAllChanges}
+                                className="btn-primary"
+                                disabled={isSaving}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    background: isSaving ? 'var(--text-muted)' : 'var(--accent-primary)',
+                                    padding: '12px 24px', borderRadius: 'var(--radius-full)',
+                                    boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                                    color: 'white', border: 'none', cursor: isSaving ? 'wait' : 'pointer'
+                                }}
+                            >
+                                {isSaving ? (
+                                    <>
+                                        <div className="animate-spin" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={18} />
+                                        Save {changedRegNos.size} Updates
+                                    </>
+                                )}
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Compare Button */}
                 <AnimatePresence>

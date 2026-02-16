@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateStudentEvaluation } from '@/lib/googleSheets';
+import { updateStudentEvaluation, batchUpdateStudentEvaluations } from '@/lib/googleSheets';
 import { verifyAdminToken } from '@/lib/adminAuth';
 import { cookies } from 'next/headers';
 
@@ -14,6 +14,18 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
+
+        // Handle Batch Updates
+        if (body.updates && Array.isArray(body.updates)) {
+            const success = await batchUpdateStudentEvaluations(body.updates);
+            if (success) {
+                return NextResponse.json({ success: true });
+            } else {
+                return NextResponse.json({ error: 'Failed to update sheets' }, { status: 500 });
+            }
+        }
+
+        // Handle Single Update (Backward Compatibility)
         const { regNo, facultyScore, discardedItems } = body;
 
         if (!regNo) {
