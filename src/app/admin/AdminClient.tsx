@@ -397,20 +397,6 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                 <button onClick={downloadCSV} className="btn-secondary" style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
                                     <Download size={18} /> Export
                                 </button>
-                                <button
-                                    onClick={async () => {
-                                        if (confirm('Push 700 mock records to Google Sheets?')) {
-                                            const res = await fetch('/api/admin/seed', { method: 'POST' });
-                                            const data = await res.json();
-                                            if (data.success) alert('Seeded! Refresh the page.');
-                                            else alert('Error: ' + data.error);
-                                        }
-                                    }}
-                                    className="btn-secondary"
-                                    style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px', color: '#B45309' }}
-                                >
-                                    <Award size={18} /> Seed 700
-                                </button>
                                 <button onClick={handleLogout} className="btn-secondary" style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
                                     <LogOut size={18} /> Logout
                                 </button>

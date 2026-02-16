@@ -298,6 +298,7 @@ export async function initializeSheet(): Promise<void> {
         _isInitialized = true;
     } catch (e) {
         console.error('Error initializing sheet:', e);
+        throw e;
     }
 }
 
@@ -328,17 +329,26 @@ export async function addStudentsBatch(apps: StudentApplication[]): Promise<void
 
     if (apps.length === 0) return;
 
+    console.log('Initializing sheet before batch push...');
     await initializeSheet();
     _studentsCache = null;
 
     const rows = apps.map(applicationToRow);
 
-    await sheets.spreadsheets.values.append({
-        spreadsheetId: sheetId,
-        range: 'Sheet1!A:AZ',
-        valueInputOption: 'RAW',
-        requestBody: { values: rows },
-    });
+    // Chunking to avoid large payload/timeout issues (100 students per request)
+    const chunkSize = 100;
+    for (let i = 0; i < rows.length; i += chunkSize) {
+        const chunk = rows.slice(i, i + chunkSize);
+        console.log(`Pushing chunk ${Math.floor(i / chunkSize) + 1}... (${chunk.length} rows)`);
+
+        await sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: 'Sheet1!A:AZ',
+            valueInputOption: 'RAW',
+            requestBody: { values: chunk },
+        });
+    }
+    console.log('Batch push complete!');
 }
 
 export async function getAllStudents(): Promise<StudentApplication[]> {
