@@ -251,7 +251,18 @@ export default function ApplicationForm() {
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit(onSubmit as any)}>
+                <form
+                    onSubmit={handleSubmit(onSubmit as any)}
+                    onKeyDown={(e) => {
+                        // Prevent accidental form submission on Enter key in inputs
+                        if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') {
+                            e.preventDefault();
+                            if (currentStep < STEPS.length - 1) {
+                                nextStep();
+                            }
+                        }
+                    }}
+                >
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentStep}
@@ -296,11 +307,21 @@ export default function ApplicationForm() {
                         </button>
 
                         {currentStep < STEPS.length - 1 ? (
-                            <button type="button" className="btn-primary" onClick={nextStep}>
+                            <button
+                                key="next-step-btn"
+                                type="button"
+                                className="btn-primary"
+                                onClick={nextStep}
+                            >
                                 Next <ChevronRight size={18} />
                             </button>
                         ) : (
-                            <button type="submit" className="btn-primary" disabled={isSubmitting}>
+                            <button
+                                key="submit-application-btn"
+                                type="submit"
+                                className="btn-primary"
+                                disabled={isSubmitting}
+                            >
                                 {isSubmitting ? (
                                     <><Loader2 size={18} className="animate-spin" /> Submitting...</>
                                 ) : (
