@@ -212,9 +212,7 @@ export default function ApplicationForm() {
                             Your Best Outgoing Student application has been submitted successfully. Faculty can now view and evaluate your profile.
                         </p>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <Link href={`/${form.getValues('personalDetails.registerNumber')}`} style={{ textDecoration: 'none' }}>
-                                <button className="btn-primary">View My Portfolio</button>
-                            </Link>
+
                             <Link href="/" style={{ textDecoration: 'none' }}>
                                 <button className="btn-secondary">Back to Home</button>
                             </Link>
