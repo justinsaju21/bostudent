@@ -8,7 +8,8 @@ function randomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-const DEPARTMENTS = ['CSE', 'ECE', 'EEE', 'MECH', 'CIVIL', 'IT', 'BME', 'CHEM'];
+const DEPARTMENTS = ['Electronics and Communication Engineering'];
+const SPECIALIZATIONS = ['Wireless Communication', 'VLSI Design', 'Embedded Systems', 'Robotics'];
 const SECTIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const FULL_NAMES = [
     'Aarav Patel', 'Vihaan Rao', 'Aditya Kumar', 'Sai Krishna', 'Rahul Sharma',
