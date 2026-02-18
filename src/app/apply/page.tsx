@@ -106,7 +106,8 @@ export default function ApplicationForm() {
                 console.error('Failed to parse draft', e);
             }
         }
-    }, [form]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Save draft
     React.useEffect(() => {
@@ -114,7 +115,7 @@ export default function ApplicationForm() {
             localStorage.setItem('bo-student-draft', JSON.stringify(value));
         });
         return () => subscription.unsubscribe();
-    }, [form.watch]);
+    }, [form]);
 
     const { register, control, formState: { errors }, handleSubmit, trigger } = form;
 

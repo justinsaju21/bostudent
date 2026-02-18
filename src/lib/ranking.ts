@@ -27,7 +27,7 @@ function scoreCGPA(cgpa: number): number {
 function scoreListItems(items: unknown[], maxItems: number = 5): number {
     // Diminishing returns: first items worth more
     const count = Math.min(items.length, maxItems);
-    return count / maxItems;
+    return Math.min(count / maxItems, 1);
 }
 
 function scoreResearch(items: { indexStatus: string; publicationStatus: string }[]): number {
@@ -63,7 +63,7 @@ function scoreSportsOrCultural(items: { level: string }[]): number {
     for (let i = 0; i < Math.min(items.length, maxItems); i++) {
         totalScore += levelMultiplier[items[i].level] || 0.3;
     }
-    return totalScore / maxItems;
+    return Math.min(totalScore / maxItems, 1);
 }
 
 // Helper to check if an item is discarded

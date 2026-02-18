@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Award, ExternalLink, Search, LogOut, Download, ChevronDown, ChevronUp, X, Edit3, Save, XCircle, Calendar, CheckSquare, Square, BarChart2 } from 'lucide-react';
 import { calculateScore } from '@/lib/ranking';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import React from 'react';
 import ComparisonModal from '@/components/ComparisonModal';
 import { useRouter } from 'next/navigation';
@@ -88,6 +88,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
     // Deadline State
     const [deadline, setDeadline] = useState<string>('');
     const [isSettingDeadline, setIsSettingDeadline] = useState(false);
+    const deadlineTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Comparison State
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
@@ -102,17 +103,20 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         });
     }, []);
 
-    const saveDeadline = async (val: string) => {
+    const saveDeadline = (val: string) => {
         setDeadline(val);
-        try {
-            await fetch('/api/admin/settings', {
-                method: 'POST',
-                body: JSON.stringify({ deadline: val }),
-                headers: { 'Content-Type': 'application/json' }
-            });
-        } catch (e) {
-            console.error(e);
-        }
+        if (deadlineTimerRef.current) clearTimeout(deadlineTimerRef.current);
+        deadlineTimerRef.current = setTimeout(async () => {
+            try {
+                await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    body: JSON.stringify({ deadline: val }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }, 800);
     };
 
     const toggleSelection = (regNo: string) => {
@@ -126,14 +130,14 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         return fullStudents.find(s => s.personalDetails?.registerNumber === regNo);
     };
 
-    const getDisplayScore = (student: RankedStudent) => {
+    const getDisplayScore = useCallback((student: RankedStudent) => {
         // 1. If manual override exists, use it
         if (scoreOverrides[student.registerNumber] !== undefined) {
             return scoreOverrides[student.registerNumber];
         }
 
         // 2. Otherwise, recalculate based on discarded items
-        const fullData = getFullStudent(student.registerNumber);
+        const fullData = fullStudents.find(s => s.personalDetails?.registerNumber === student.registerNumber);
         if (!fullData) return student.totalScore;
 
         const currentDiscarded = Array.from(discardedItems[student.registerNumber] || []);
@@ -141,7 +145,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
         // Recalculate
         return calculateScore(fullData, undefined, currentDiscarded).totalScore;
-    };
+    }, [scoreOverrides, discardedItems, fullStudents]);
 
     // Dynamically sort students based on current display score
     const sortedStudents = useMemo(() => {
@@ -150,7 +154,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
             const scoreB = getDisplayScore(b);
             return scoreB - scoreA; // Descending order
         });
-    }, [students, scoreOverrides, discardedItems, getDisplayScore]);
+    }, [students, getDisplayScore]);
 
     const departments = [...new Set(students.map((s) => s.department))];
 
@@ -204,15 +208,21 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                 discardedItems: Array.from(discardedItems[regNo] || [])
             }));
 
-            await fetch('/api/admin/evaluate', {
+            const res = await fetch('/api/admin/evaluate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ updates }),
             });
 
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || 'Failed to save changes');
+            }
+
             setChangedRegNos(new Set());
         } catch (err) {
             console.error('Failed to save', err);
+            alert('Failed to save changes. Please try again.');
         } finally {
             setIsSaving(false);
         }
@@ -264,6 +274,14 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
 
 
+    const escapeCSV = (val: unknown): string => {
+        const str = String(val ?? '');
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+    };
+
     const downloadCSV = () => {
         const headers = ['Rank', 'Name', 'Register Number', 'Department', 'Section', 'Faculty Advisor', 'Auto Score', 'Faculty Score', 'CGPA', 'Research', 'Internships', 'Projects', 'Hackathons', 'Professional Memberships'];
         const rows = students.map((s, i) => {
@@ -281,14 +299,13 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                 s.breakdown.research,
                 s.breakdown.internships,
                 s.breakdown.projects,
-                s.breakdown.projects,
                 s.breakdown.hackathons,
                 s.breakdown.professionalMemberships,
             ];
         });
 
         const csvContent = "data:text/csv;charset=utf-8,"
-            + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+            + [headers.map(h => escapeCSV(h)).join(','), ...rows.map(e => e.map(v => escapeCSV(v)).join(','))].join('\n');
 
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -366,7 +383,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                             flexWrap: 'wrap',
                             width: '100%',
                             justifyContent: 'flex-start'
-                        }} className="lg:width-auto lg:justify-end">
+                        }} className="lg:w-auto lg:justify-end">
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -393,7 +410,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                     />
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '8px', width: '100%' }} className="sm:width-auto">
+                            <div style={{ display: 'flex', gap: '8px', width: '100%' }} className="sm:w-auto">
                                 <button onClick={downloadCSV} className="btn-secondary" style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
                                     <Download size={18} /> Export
                                 </button>

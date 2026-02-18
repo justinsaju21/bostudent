@@ -224,6 +224,14 @@ function generateRealisticStudent(index: number): StudentApplication {
 }
 
 export async function GET(req: NextRequest) {
+    // Block in production to prevent accidental data wipe
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+            { error: 'This endpoint is disabled in production' },
+            { status: 403 }
+        );
+    }
+
     const { searchParams } = new URL(req.url);
     const clear = searchParams.get('clear') === 'true';
 

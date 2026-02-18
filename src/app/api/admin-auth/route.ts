@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createAdminToken } from '@/lib/adminAuth';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '12345678';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export async function POST(request: NextRequest) {
     try {
+        if (!ADMIN_PASSWORD) {
+            return NextResponse.json(
+                { success: false, message: 'Admin password not configured on server' },
+                { status: 503 }
+            );
+        }
+
         const body = await request.json();
         const { password } = body;
 
