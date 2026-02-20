@@ -84,6 +84,7 @@ export interface SportsWinnerApplication {
 export interface NssNccApplication {
     personalDetails: BasePersonalDetails;
     organization: string; // NSS, NCC, or other
+    otherOrganization?: string;
     role: string;
     totalHoursServed: number;
     eventsOrganized: string;

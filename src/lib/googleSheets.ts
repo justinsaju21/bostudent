@@ -164,7 +164,7 @@ function summarizeSocials(socials: StudentApplication['socialMedia']): string {
 function postCollegeDetails(pc: StudentApplication['postCollegeStatus']): string {
     if (pc.status === 'placed') return `Placed: ${pc.placedCompany || 'N/A'}`;
     if (pc.status === 'higher_studies') return `Higher Studies: ${pc.universityName || 'N/A'}`;
-    if (pc.status === 'entrepreneur') return `Entrepreneur`;
+    if (pc.status === 'entrepreneur') return `Entrepreneur: ${pc.placedCompany || 'N/A'}`;
     return pc.otherDetails || 'Other';
 }
 

@@ -861,8 +861,11 @@ function StudentDetailPanel({
                 <h4 style={headingStyle}>🎯 Post-College Status</h4>
                 <div style={gridStyle}>
                     <DetailField label="Status" value={fmtStatus(pc.status)} />
-                    {pc.placedCompany && <DetailField label="Company/University" value={pc.placedCompany} />}
-                    {pc.offerLetterLink && <DetailField label="Offer Letter" value={pc.offerLetterLink} isLink />}
+                    {pc.status === 'placed' && <DetailField label="Company" value={pc.placedCompany || '—'} />}
+                    {pc.status === 'higher_studies' && <DetailField label="University" value={pc.universityName || '—'} />}
+                    {pc.status === 'entrepreneur' && <DetailField label="Startup" value={pc.placedCompany || '—'} />}
+                    {pc.status === 'placed' && pc.offerLetterLink && <DetailField label="Offer Letter" value={pc.offerLetterLink} isLink />}
+                    {pc.status === 'higher_studies' && pc.admitCardLink && <DetailField label="Admit Card" value={pc.admitCardLink} isLink />}
                     {pc.otherDetails && <DetailField label="Details" value={pc.otherDetails} />}
                 </div>
             </div>

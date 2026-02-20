@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
@@ -95,7 +95,7 @@ function AwardDetailsStep({ slug, register, errors, control }: { slug: AwardSlug
             {slug === 'researcher' && <ResearcherFields register={register} errors={errors} control={control} />}
             {slug === 'hackathon' && <HackathonFields register={register} errors={errors} control={control} />}
             {slug === 'sports' && <SportsFields register={register} errors={errors} control={control} />}
-            {slug === 'nss-ncc' && <NssNccFields register={register} errors={errors} />}
+            {slug === 'nss-ncc' && <NssNccFields register={register} errors={errors} control={control} />}
             {slug === 'dept-contribution' && <DeptContributionFields register={register} errors={errors} control={control} />}
             {slug === 'highest-salary' && <SalaryFields register={register} errors={errors} />}
             {slug === 'core-salary' && <CoreSalaryFields register={register} errors={errors} />}
@@ -307,7 +307,8 @@ function SportsFields({ register, errors, control }: { register: any; errors: an
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function NssNccFields({ register, errors }: { register: any; errors: any }) {
+function NssNccFields({ register, errors, control }: { register: any; errors: any; control: any }) {
+    const org = useWatch({ control, name: 'organization' });
     return (
         <>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -316,9 +317,14 @@ function NssNccFields({ register, errors }: { register: any; errors: any }) {
                         <option value="">Select...</option>
                         <option value="NSS">NSS (National Service Scheme)</option>
                         <option value="NCC">NCC (National Cadet Corps)</option>
-                        <option value="Other">Other</option>
+                        <option value="other">Other</option>
                     </select>
                 </Field>
+                {org === 'other' && (
+                    <Field label="Specify Organization" error={errors?.otherOrganization?.message}>
+                        <input className="form-input" {...register('otherOrganization')} placeholder="Enter organization name" />
+                    </Field>
+                )}
                 <Field label="Role" error={errors?.role?.message}>
                     <input className="form-input" {...register('role')} placeholder="e.g., Volunteer, Leader" />
                 </Field>

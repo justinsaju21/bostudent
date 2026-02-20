@@ -454,7 +454,13 @@ function NssNccDetails({ applicant }: { applicant: AwardApplicant }) {
 
     return (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
-            <div><div style={labelStyle}>Organization</div><div style={valueStyle}>{String(applicant.organization || '—')}</div></div>
+            <div>
+                <div style={labelStyle}>Organization</div>
+                <div style={valueStyle}>
+                    {String(applicant.organization || '—')}
+                    {applicant.organization === 'other' && Boolean(applicant.otherOrganization) && <span> ({String(applicant.otherOrganization)})</span>}
+                </div>
+            </div>
             <div><div style={labelStyle}>Role</div><div style={valueStyle}>{String(applicant.role || '—')}</div></div>
             <div><div style={labelStyle}>Total Hours</div><div style={valueStyle}>{String(applicant.totalHoursServed || '0')}</div></div>
             <div style={{ gridColumn: '1 / -1' }}><div style={labelStyle}>Events Organized</div><div style={{ ...valueStyle, lineHeight: 1.6 }}>{String(applicant.eventsOrganized || '—')}</div></div>

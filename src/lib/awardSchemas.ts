@@ -95,6 +95,7 @@ export const sportsWinnerSchema = z.object({
 export const nssNccSchema = z.object({
     personalDetails: basePersonalSchema,
     organization: z.string().min(1, 'Organization name is required'),
+    otherOrganization: z.string().optional().or(z.literal('')),
     role: z.string().min(1, 'Role is required'),
     totalHoursServed: z.coerce.number().min(0, 'Hours must be 0 or above'),
     eventsOrganized: z.string().optional().or(z.literal('')),

@@ -30,14 +30,14 @@ const TOP_HACKATHONS = [
     'IIIT Hackathon', 'CodeSangam', 'Hackfest',
 ];
 
-const TOP_VOLUNTEERING_ORGS = [
-    'NSS (National Service Scheme)', 'NCC (National Cadet Corps)',
-    'Rotaract Club', 'Leo Club', 'Red Cross Society',
-    'UNICEF', 'WWF', 'Teach India', 'CRY (Child Rights and You)',
-    'Habitat for Humanity', 'Bhumi', 'Make A Wish Foundation',
-    'Robin Hood Army', 'Goonj', 'Akshaya Patra Foundation',
-    'Youth For Seva', 'iVolunteer', 'Pratham',
-    'SRM Community Service', 'IEEE Humanitarian',
+export const VOLUNTEER_ORGS = [
+    'NSS (National Service Scheme)',
+    'NCC (National Cadet Corps)',
+    'IEEE (Institute of Electrical and Electronics Engineers)',
+    'IET (The Institution of Engineering and Technology)',
+    'Rotaract Club',
+    'Enactus',
+    'Other'
 ];
 
 interface StepProps {
@@ -448,7 +448,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                                         <SearchableSelect
                                             value={field.value}
                                             onChange={field.onChange}
-                                            options={TOP_VOLUNTEERING_ORGS}
+                                            options={VOLUNTEER_ORGS}
                                             placeholder="Type or select organization"
                                             error={errors.volunteering?.[index]?.organization?.message}
                                         />
@@ -686,11 +686,11 @@ function PostCollegeSection({ register, errors, control }: StepProps) {
             )}
             {statusValue === 'higher_studies' && (
                 <>
-                    <Field label="University Name *" error={errors.postCollegeStatus?.placedCompany?.message}>
-                        <input className="form-input" placeholder="e.g. MIT, Stanford" {...register('postCollegeStatus.placedCompany')} />
+                    <Field label="University Name *" error={errors.postCollegeStatus?.universityName?.message}>
+                        <input className="form-input" placeholder="e.g. MIT, Stanford" {...register('postCollegeStatus.universityName')} />
                     </Field>
-                    <Field label="Admit Card Link" error={errors.postCollegeStatus?.offerLetterLink?.message}>
-                        <input className="form-input" placeholder="Google Drive link" {...register('postCollegeStatus.offerLetterLink')} />
+                    <Field label="Admit Card Link" error={errors.postCollegeStatus?.admitCardLink?.message}>
+                        <input className="form-input" placeholder="Google Drive link" {...register('postCollegeStatus.admitCardLink')} />
                     </Field>
                 </>
             )}
@@ -765,7 +765,7 @@ export function FormDataLists() {
                 {TOP_HACKATHONS.map(h => <option key={h} value={h} />)}
             </datalist>
             <datalist id="volunteerOrgList">
-                {TOP_VOLUNTEERING_ORGS.map(o => <option key={o} value={o} />)}
+                {VOLUNTEER_ORGS.map(o => <option key={o} value={o} />)}
             </datalist>
         </>
     );

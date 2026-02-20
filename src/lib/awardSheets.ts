@@ -69,7 +69,7 @@ function getHeadersForAward(slug: AwardSlug): string[] {
         case 'sports':
             return [...personal, 'Wins (Summary)', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
         case 'nss-ncc':
-            return [...personal, 'Organization', 'Role', 'Total Hours', 'Events Organized', 'Impact Description', 'Proof Link', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
+            return [...personal, 'Organization', 'Other Organization', 'Role', 'Total Hours', 'Events Organized', 'Impact Description', 'Proof Link', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
         case 'dept-contribution':
             return [...personal, 'Contributions (Summary)', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
         case 'highest-salary':
@@ -108,7 +108,7 @@ function awardApplicationToRow(slug: AwardSlug, app: any): string[] {
             return [...personal, summary, app.masterProofFolderUrl || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
         }
         case 'nss-ncc':
-            return [...personal, app.organization || '', app.role || '', String(app.totalHoursServed || 0), app.eventsOrganized || '', app.impactDescription || '', app.proofLink || '', app.masterProofFolderUrl || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, app.organization || '', app.otherOrganization || '', app.role || '', String(app.totalHoursServed || 0), app.eventsOrganized || '', app.impactDescription || '', app.proofLink || '', app.masterProofFolderUrl || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
         case 'dept-contribution': {
             const summary = (app.contributions || []).map((c: { activityType: string; role: string; eventName: string }, i: number) =>
                 `${i + 1}. ${c.eventName} (${c.activityType}) - ${c.role}`).join('\n') || 'None';
