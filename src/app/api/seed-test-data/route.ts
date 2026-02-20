@@ -10,7 +10,7 @@ function uuid() {
     });
 }
 
-const DEPARTMENTS = ["Electronics and Communication Engineering"];
+const DEPARTMENTS = ["Electronics & Communication Engineering"];
 const SECTIONS = ["A", "B", "C", "D", "E", "F"];
 const ADVISORS = ["Dr. Ramesh Kumar", "Dr. Priya Sharma", "Prof. Lakshmi Narayanan", "Dr. A. Smith", "Prof. R. Johnson", "Dr. K. Lee", "Dr. S. Nair"];
 const SPECIALIZATIONS = ["VLSI Design", "Embedded Systems", "Communication Systems", "Signal Processing", "Robotics & Automation", "Internet of Things"];
