@@ -414,9 +414,6 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '8px', width: '100%' }} className="sm:w-auto">
-                                <button onClick={downloadCSV} className="btn-secondary" style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
-                                    <Download size={18} /> Export
-                                </button>
                                 <button onClick={handleLogout} className="btn-secondary" style={{ flex: 1, display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
                                     <LogOut size={18} /> Logout
                                 </button>
@@ -551,6 +548,9 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                     <option key={adv} value={adv}>{adv}</option>
                                 ))}
                             </select>
+                            <button onClick={downloadCSV} className="btn-secondary" style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '10px 16px' }}>
+                                <Download size={18} /> Export CSV
+                            </button>
                         </div>
 
                         {/* Rankings Table */}
