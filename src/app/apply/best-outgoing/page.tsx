@@ -50,7 +50,7 @@ export default function BestOutgoingForm() {
         resolver: zodResolver(applicationSchema) as any,
         defaultValues: {
             personalDetails: {
-                name: '', registerNumber: '', department: '', specialization: '',
+                name: '', registerNumber: '', department: '' as any, specialization: '',
                 personalEmail: '', srmEmail: '', mobileNumber: '', profilePhotoUrl: '',
                 facultyAdvisor: '', section: '',
             },

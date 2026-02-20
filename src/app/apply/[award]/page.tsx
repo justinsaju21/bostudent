@@ -452,7 +452,7 @@ export default function AwardApplyPage() {
 
     const getDefaults = useCallback(() => {
         const base = {
-            personalDetails: { name: '', registerNumber: '', department: '', personalEmail: '', srmEmail: '', mobileNumber: '', section: '', facultyAdvisor: '' },
+            personalDetails: { name: '', registerNumber: '', department: '' as any, personalEmail: '', srmEmail: '', mobileNumber: '', section: '', facultyAdvisor: '' },
             consentGiven: false as unknown as true,
         };
         switch (slug) {

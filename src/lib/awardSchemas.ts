@@ -7,7 +7,7 @@ export const basePersonalSchema = z.object({
         .string()
         .min(5, 'Register number is required')
         .regex(/^RA\d+$/i, 'Must be a valid SRM register number (e.g., RA2211053010097)'),
-    department: z.string().min(2, 'Department is required'),
+    department: z.enum(['Electronics & Communication Engineering', 'Electronics And Computer Engineering']).or(z.literal('')).refine(val => val !== '', 'Department is required'),
     personalEmail: z.string().email('Invalid email address'),
     srmEmail: z
         .string()
