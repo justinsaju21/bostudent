@@ -4,6 +4,7 @@ import React from 'react';
 import { UseFormRegister, FieldErrors, Control, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { ApplicationFormData } from '@/lib/schemas';
 import { Plus, Trash2 } from 'lucide-react';
+import { InfoTooltip } from './InfoTooltip';
 import { generateId } from '@/lib/utils';
 import { SearchableSelect } from './SearchableSelect';
 
@@ -106,6 +107,7 @@ export function AcademicStep({ register, errors, control }: StepProps) {
             <h2 className="section-title">
                 <span className="icon">📚</span>
                 Academic Record
+                <InfoTooltip text="📊 Weight: 18% of total score. CGPA is normalized to 10. Arrears history incurs a 15% penalty on your academic score." />
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                 <Field label="Current CGPA *" error={errors.academicRecord?.cgpa?.message}>
@@ -136,6 +138,7 @@ export function AcademicStep({ register, errors, control }: StepProps) {
             <h2 className="section-title" style={{ marginTop: '40px' }}>
                 <span className="icon">🎯</span>
                 Post-College Status
+                <InfoTooltip text="Having a placement, higher studies admit, or startup strengthens your overall profile." />
             </h2>
             <PostCollegeSection register={register} errors={errors} control={control} />
         </div>
@@ -153,6 +156,7 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
             {/* Internships */}
             <ArraySection
                 title="💼 Internships"
+                hint="📊 Weight: 10%. Up to 5 internships are scored with diminishing returns."
                 fields={internships.fields}
                 onAdd={() => internships.append({ id: generateId(), company: '', role: '', startDate: '', endDate: '', certificateLink: '', description: '' })}
                 onRemove={internships.remove}
@@ -202,6 +206,7 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
             {/* Projects */}
             <ArraySection
                 title="🚀 Projects"
+                hint="📊 Weight: 10%. Up to 5 projects are scored. Deployed projects with GitHub links strengthen your case."
                 fields={projects.fields}
                 onAdd={() => projects.append({ id: generateId(), title: '', description: '', techStack: '', githubLink: '', deployedLink: '', proofLink: '' })}
                 onRemove={projects.remove}
@@ -238,6 +243,7 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
             {/* Hackathons */}
             <ArraySection
                 title="⚡ Hackathons"
+                hint="📊 Weight: 8%. Up to 5 hackathon wins are scored. National-level wins are valued higher."
                 fields={hackathons.fields}
                 onAdd={() => hackathons.append({ id: generateId(), name: '', projectBuilt: '', teamSize: 1, position: '', proofLink: '' })}
                 onRemove={hackathons.remove}
@@ -301,7 +307,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
     return (
         <div>
             {/* Research */}
-            <ArraySection title="📄 Research / Papers / Patents" fields={research.fields}
+            <ArraySection title="📄 Research / Papers / Patents" hint="📊 Weight: 12%. SCI > Scopus > UGC indexed. Published papers score highest. Up to 5 counted." fields={research.fields}
                 onAdd={() => research.append({ id: generateId(), title: '', journalOrConference: '', indexStatus: 'none', publicationStatus: 'under_review', link: '' })}
                 onRemove={research.remove}
             >
@@ -331,7 +337,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* Entrepreneurship */}
-            <ArraySection title="🏢 Entrepreneurship" fields={entrepreneurship.fields}
+            <ArraySection title="🏢 Entrepreneurship" hint="📊 Weight: 8%. Registered startups with revenue/funding score higher. Up to 3 counted." fields={entrepreneurship.fields}
                 onAdd={() => entrepreneurship.append({ id: generateId(), startupName: '', registrationDetails: '', revenueOrFundingStatus: '', description: '', proofLink: '' })}
                 onRemove={entrepreneurship.remove}
             >
@@ -352,7 +358,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* Certifications */}
-            <ArraySection title="🏅 Global Certifications" fields={certifications.fields}
+            <ArraySection title="🏅 Global Certifications" hint="📊 Weight: 5%. Up to 5 certifications are scored. Industry-recognized certs (AWS, Google, Cisco) are valued." fields={certifications.fields}
                 onAdd={() => certifications.append({ id: generateId(), provider: '', certificateName: '', validationId: '', proofLink: '' })}
                 onRemove={certifications.remove}
             >
@@ -373,7 +379,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* Competitive Exams */}
-            <ArraySection title="📝 Competitive Exams" fields={exams.fields}
+            <ArraySection title="📝 Competitive Exams" hint="📊 Weight: 5%. GATE, GRE, CAT, etc. Up to 3 scored." fields={exams.fields}
                 onAdd={() => exams.append({ id: generateId(), examName: '', scoreOrRank: '', proofLink: '' })}
                 onRemove={exams.remove}
             >
@@ -393,7 +399,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* Sports */}
-            <ArraySection title="🏆 Sports / Cultural" fields={sports.fields}
+            <ArraySection title="🏆 Sports / Cultural" hint="📊 Weight: 5%. International > National > State > District > Zone level. Up to 5 counted." fields={sports.fields}
                 onAdd={() => sports.append({ id: generateId(), eventName: '', level: 'zone', positionWon: '', proofLink: '' })}
                 onRemove={sports.remove}
             >
@@ -418,7 +424,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* Volunteering */}
-            <ArraySection title="🤝 Volunteering / Social Service" fields={volunteering.fields}
+            <ArraySection title="🤝 Volunteering / Social Service" hint="📊 Weight: 5%. Up to 5 activities scored. Hours served and impact matter." fields={volunteering.fields}
                 onAdd={() => volunteering.append({ id: generateId(), organization: '', role: '', hoursServed: 0, impact: '', proofLink: '' })}
                 onRemove={volunteering.remove}
             >
@@ -454,7 +460,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* Scholarships */}
-            <ArraySection title="🎓 Scholarships / Grants" fields={scholarships.fields}
+            <ArraySection title="🎓 Scholarships / Grants" hint="📊 Weight: 4%. Up to 3 scholarships are scored." fields={scholarships.fields}
                 onAdd={() => scholarships.append({ id: generateId(), name: '', awardingBody: '', amountOrPrestige: '', proofLink: '' })}
                 onRemove={scholarships.remove}
             >
@@ -475,7 +481,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* Clubs */}
-            <ArraySection title="🏛️ Clubs / Leadership Roles" fields={clubs.fields}
+            <ArraySection title="🏛️ Clubs / Leadership Roles" hint="📊 Weight: 4%. Up to 3 club roles are scored. Leadership positions (President, Secretary) count more." fields={clubs.fields}
                 onAdd={() => clubs.append({ id: generateId(), clubName: '', position: '', keyEventsOrganized: '', impactDescription: '', proofLink: '' })}
                 onRemove={clubs.remove}
             >
@@ -497,7 +503,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* Department Contributions */}
-            <ArraySection title="🏫 Department Contributions" fields={deptContributions.fields}
+            <ArraySection title="🏫 Department Contributions" hint="📊 Weight: 2%. Up to 3 contributions are scored." fields={deptContributions.fields}
                 onAdd={() => deptContributions.append({ id: generateId(), eventName: '', role: '', contributionDescription: '', proofLink: '' })}
                 onRemove={deptContributions.remove}
             >
@@ -518,7 +524,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* Professional Memberships */}
-            <ArraySection title="🪪 Professional Body Memberships" fields={professionalMemberships.fields}
+            <ArraySection title="🪪 Professional Body Memberships" hint="📊 Weight: 2%. IEEE, ACM, etc. Up to 3 scored." fields={professionalMemberships.fields}
                 onAdd={() => professionalMemberships.append({ id: generateId(), organization: '', membershipId: '', role: '', proofLink: '' })}
                 onRemove={professionalMemberships.remove}
             >
@@ -547,7 +553,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
             </ArraySection>
 
             {/* References */}
-            <ArraySection title="👨‍🏫 References / Letter of Recommendation" fields={references.fields}
+            <ArraySection title="👨‍🏫 References / Letter of Recommendation" hint="📊 Weight: 2%. Faculty references strengthen your application." fields={references.fields}
                 onAdd={() => references.append({ id: generateId(), facultyName: '', contact: '', lorLink: '' })}
                 onRemove={references.remove}
             >
@@ -711,12 +717,14 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 
 function ArraySection({
     title,
+    hint,
     fields,
     onAdd,
     onRemove,
     children,
 }: {
     title: string;
+    hint?: string;
     fields: { id: string }[];
     onAdd: () => void;
     onRemove: (index: number) => void;
@@ -726,7 +734,7 @@ function ArraySection({
     return (
         <div style={{ marginBottom: '40px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <h2 className="section-title" style={{ marginBottom: 0 }}>{title}</h2>
+                <h2 className="section-title" style={{ marginBottom: 0 }}>{title}{hint && <InfoTooltip text={hint} />}</h2>
                 <button type="button" className="btn-ghost" onClick={onAdd}>
                     <Plus size={14} /> Add {fields.length > 0 ? 'Another' : 'Entry'}
                 </button>

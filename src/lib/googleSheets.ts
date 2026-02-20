@@ -266,10 +266,26 @@ export async function initializeSheet(): Promise<void> {
     const sheetId = getSheetId();
 
     try {
+        // Ensure BO_Main tab exists (handles fresh spreadsheets)
+        try {
+            await sheets.spreadsheets.values.get({
+                spreadsheetId: sheetId,
+                range: 'BO_Main!A1',
+            });
+        } catch {
+            // Tab doesn't exist — create it
+            await sheets.spreadsheets.batchUpdate({
+                spreadsheetId: sheetId,
+                requestBody: {
+                    requests: [{ addSheet: { properties: { title: 'BO_Main' } } }],
+                },
+            });
+        }
+
         // Always update headers to ensure new columns are added
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: 'Sheet1!A1:AZ1',
+            range: 'BO_Main!A1:AZ1',
             valueInputOption: 'RAW',
             requestBody: { values: [HEADERS] },
         });
@@ -316,7 +332,7 @@ export async function appendStudent(app: StudentApplication): Promise<void> {
     const row = applicationToRow(app);
     await sheets.spreadsheets.values.append({
         spreadsheetId: sheetId,
-        range: 'Sheet1!A:AZ',
+        range: 'BO_Main!A:AZ',
         valueInputOption: 'RAW',
         requestBody: { values: [row] },
     });
@@ -343,7 +359,7 @@ export async function addStudentsBatch(apps: StudentApplication[]): Promise<void
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: 'Sheet1!A:AZ',
+            range: 'BO_Main!A:AZ',
             valueInputOption: 'RAW',
             requestBody: { values: chunk },
         });
@@ -364,7 +380,7 @@ export async function getAllStudents(): Promise<StudentApplication[]> {
 
     const res = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: 'Sheet1!A2:AZ',
+        range: 'BO_Main!A2:AZ',
     });
 
     if (!res.data.values) {
@@ -439,7 +455,7 @@ export async function updateStudentEvaluation(
         if (regNoIndex === -1) return false;
 
         const regNoCol = getColLetter(regNoIndex);
-        const range = `Sheet1!${regNoCol}:${regNoCol}`;
+        const range = `BO_Main!${regNoCol}:${regNoCol}`;
 
         // Optimization: We could cache this lookup map if rows don't change order, but for safety we look it up.
         // However, we can at least avoid re-reading the whole sheet if we just want indices?
@@ -472,14 +488,14 @@ export async function updateStudentEvaluation(
 
         if (facultyScore !== undefined) {
             updates.push({
-                range: `Sheet1!${scoreCol}${sheetRow}`,
+                range: `BO_Main!${scoreCol}${sheetRow}`,
                 values: [[facultyScore.toString()]],
             });
         }
 
         if (discardedItems !== undefined) {
             updates.push({
-                range: `Sheet1!${discardedCol}${sheetRow}`,
+                range: `BO_Main!${discardedCol}${sheetRow}`,
                 values: [[JSON.stringify(discardedItems)]],
             });
         }
@@ -515,7 +531,7 @@ export async function updateFullStudentApplication(app: StudentApplication): Pro
         if (regNoIndex === -1) return false;
 
         const regNoCol = getColLetter(regNoIndex);
-        const range = `Sheet1!${regNoCol}:${regNoCol}`;
+        const range = `BO_Main!${regNoCol}:${regNoCol}`;
         const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range });
         const rows = response.data.values;
         if (!rows) return false;
@@ -528,7 +544,7 @@ export async function updateFullStudentApplication(app: StudentApplication): Pro
 
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `Sheet1!A${sheetRow}:AZ${sheetRow}`,
+            range: `BO_Main!A${sheetRow}:AZ${sheetRow}`,
             valueInputOption: 'RAW',
             requestBody: { values: [rowData] },
         });
@@ -622,7 +638,7 @@ export async function batchUpdateStudentEvaluations(
         if (regNoIndex === -1) return false;
 
         const regNoCol = getColLetter(regNoIndex);
-        const range = `Sheet1!${regNoCol}:${regNoCol}`;
+        const range = `BO_Main!${regNoCol}:${regNoCol}`;
 
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: sheetId,
@@ -654,14 +670,14 @@ export async function batchUpdateStudentEvaluations(
 
             if (update.facultyScore !== undefined) {
                 sheetUpdates.push({
-                    range: `Sheet1!${scoreCol}${sheetRow}`,
+                    range: `BO_Main!${scoreCol}${sheetRow}`,
                     values: [[update.facultyScore.toString()]],
                 });
             }
 
             if (update.discardedItems !== undefined) {
                 sheetUpdates.push({
-                    range: `Sheet1!${discardedCol}${sheetRow}`,
+                    range: `BO_Main!${discardedCol}${sheetRow}`,
                     values: [[JSON.stringify(update.discardedItems)]],
                 });
             }
@@ -694,7 +710,7 @@ export async function clearAllStudents(): Promise<void> {
     // Clear everything from row 2 onwards to preserve headers
     await sheets.spreadsheets.values.clear({
         spreadsheetId: sheetId,
-        range: 'Sheet1!A2:AZ1000',
+        range: 'BO_Main!A2:AZ1000',
     });
 
     _studentsCache = null;

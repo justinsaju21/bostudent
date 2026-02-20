@@ -10,6 +10,8 @@ import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import React from 'react';
 import ComparisonModal from '@/components/ComparisonModal';
 import { useRouter } from 'next/navigation';
+import { AWARD_CATEGORIES, AwardSlug } from '@/lib/awards';
+import AwardAdminPanel from '@/components/AwardAdminPanel';
 
 interface Props {
     students: RankedStudent[];
@@ -35,6 +37,7 @@ function fmtStatus(s: string) {
 }
 
 export default function AdminClient({ students, fullStudents, error }: Props) {
+    const [activeAward, setActiveAward] = useState<AwardSlug>('best-outgoing');
     const [search, setSearch] = useState('');
     const [deptFilter, setDeptFilter] = useState('');
     const [sectionFilter, setSectionFilter] = useState('');
@@ -435,315 +438,348 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                     )}
                 </motion.div>
 
-                {error && (
-                    <div style={{
-                        padding: '20px', borderRadius: 'var(--radius-md)',
-                        background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.25)',
-                        color: '#B45309', fontSize: '14px', marginBottom: '24px',
-                    }}>
-                        ⚠️ {error}
-                    </div>
-                )}
-
-                {/* Analytics */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}
-                >
-                    <div className="glass-card" style={{ padding: '24px' }}>
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px' }}>Total Applications</h3>
-                        <div style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--srm-blue)' }}>{students.length}</div>
-                    </div>
-                    <div className="glass-card" style={{ padding: '24px' }}>
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px' }}>Department Breakdown</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {deptStats.slice(0, 5).map(([dept, count]) => (
-                                <div key={dept} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                    <span style={{ color: 'var(--text-secondary)' }}>{dept}</span>
-                                    <span style={{ fontWeight: 600 }}>{count}</span>
-                                </div>
-                            ))}
-                            {deptStats.length === 0 && <span style={{ color: 'var(--text-muted)' }}>No data available</span>}
-                        </div>
-                    </div>
-                </motion.div>
-
-                {/* Filters */}
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-                    <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
-                        <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input
-                            className="form-input"
-                            style={{ paddingLeft: '40px' }}
-                            placeholder="Search by name or register number..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                    <select
-                        className="form-input"
-                        style={{ width: 'auto', minWidth: '150px' }}
-                        value={deptFilter}
-                        onChange={(e) => setDeptFilter(e.target.value)}
-                    >
-                        <option value="">All Departments</option>
-                        {departments.map((dept) => (
-                            <option key={dept} value={dept}>{dept}</option>
-                        ))}
-                    </select>
-
-                    <select
-                        className="form-input"
-                        style={{ width: 'auto', minWidth: '120px' }}
-                        value={sectionFilter}
-                        onChange={(e) => setSectionFilter(e.target.value)}
-                    >
-                        <option value="">All Sections</option>
-                        {sections.map((sec) => (
-                            <option key={sec} value={sec}>Section {sec}</option>
-                        ))}
-                    </select>
-
-                    <select
-                        className="form-input"
-                        style={{ width: 'auto', minWidth: '180px' }}
-                        value={advisorFilter}
-                        onChange={(e) => setAdvisorFilter(e.target.value)}
-                    >
-                        <option value="">All Advisors</option>
-                        {advisors.map((adv) => (
-                            <option key={adv} value={adv}>{adv}</option>
-                        ))}
-                    </select>
+                {/* Award Category Tabs */}
+                <div style={{
+                    display: 'flex', gap: '6px', marginBottom: '28px', overflowX: 'auto',
+                    padding: '4px', borderRadius: 'var(--radius-md)',
+                    background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
+                    WebkitOverflowScrolling: 'touch',
+                }}>
+                    {AWARD_CATEGORIES.map(award => (
+                        <button
+                            key={award.slug}
+                            onClick={() => { setActiveAward(award.slug); setSearch(''); setDeptFilter(''); setSectionFilter(''); setAdvisorFilter(''); }}
+                            style={{
+                                padding: '10px 16px', borderRadius: '8px', border: 'none',
+                                background: activeAward === award.slug ? award.color : 'transparent',
+                                color: activeAward === award.slug ? 'white' : 'var(--text-secondary)',
+                                fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                                whiteSpace: 'nowrap', transition: 'all 0.2s ease',
+                                opacity: activeAward === award.slug ? 1 : 0.7,
+                            }}
+                        >
+                            {award.shortTitle}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Rankings Table */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    style={{
-                        borderRadius: 'var(--radius-md)',
-                        overflow: 'hidden',
-                        border: '1px solid var(--border-subtle)',
-                        background: 'var(--bg-card)' // Ensure background for scrolling
-                    }}
-                >
-                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}> {/* Add touch scrolling */}
-                        {/* Force min-width to trigger scroll */}
-                        <table className="data-table" style={{ minWidth: '800px' }}>
+                {/* Show AwardAdminPanel for non-BO awards */}
+                {activeAward !== 'best-outgoing' ? (
+                    <AwardAdminPanel slug={activeAward} />
+                ) : (
+                    <>
 
-                            <thead>
-                                <tr>
-                                    <th style={{ width: '40px' }}>
-                                        <div
-                                            onClick={() => setSelectedStudents(selectedStudents.length === filtered.length && filtered.length > 0 ? [] : filtered.map(s => s.registerNumber))}
-                                            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                        >
-                                            {selectedStudents.length > 0 && selectedStudents.length === filtered.length ? <CheckSquare size={16} /> : <Square size={16} />}
-                                        </div>
-                                    </th>
-                                    <th style={{ width: '50px' }}>Rank</th>
-                                    <th>Name</th>
-                                    <th className="hide-on-mobile">Department</th>
-                                    <th style={{ width: '60px' }}>Sec</th>
-                                    <th style={{ width: '120px' }}>Score</th>
-                                    <th style={{ width: '150px' }}>Params</th>
-                                    <th style={{ width: '80px' }}>Profile</th>
-                                    <th style={{ width: '40px' }}></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {visibleStudents.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={9} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
-                                            {students.length === 0 ? 'No applications yet.' : 'No results found.'}
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    visibleStudents.map((student, index) => {
-                                        const isExpanded = expandedRow === student.registerNumber;
-                                        const displayScore = getDisplayScore(student);
-                                        const isSelected = selectedStudents.includes(student.registerNumber);
-                                        const fullStudent = fullStudents.find(s => s.personalDetails?.registerNumber === student.registerNumber);
-
-                                        return (
-                                            <React.Fragment key={student.registerNumber}>
-                                                <tr
-                                                    style={{ borderBottom: '1px solid var(--border-subtle)', background: isExpanded ? 'var(--bg-surface)' : 'transparent', transition: 'background 0.2s' }}
-                                                    onClick={() => setExpandedRow(isExpanded ? null : student.registerNumber)}
-                                                >
-                                                    <td style={{ textAlign: 'center' }} onClick={e => { e.stopPropagation(); toggleSelection(student.registerNumber); }}>
-                                                        {isSelected ? <CheckSquare size={16} color="var(--accent-primary)" /> : <Square size={16} color="var(--text-muted)" />}
-                                                    </td>
-                                                    <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>#{index + 1}</td>
-                                                    <td>
-                                                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>{student.name}</div>
-                                                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{student.registerNumber}</div>
-                                                    </td>
-                                                    <td style={{ fontSize: '13px' }} className="hide-on-mobile">{student.department}</td>
-                                                    <td style={{ fontSize: '13px', textAlign: 'center' }}>{fullStudent?.personalDetails.section}</td>
-                                                    <td style={{ fontFamily: 'monospace', fontWeight: 700, textAlign: 'right' }}>
-                                                        {editingScore === student.registerNumber ? (
-                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }} onClick={e => e.stopPropagation()}>
-                                                                <input
-                                                                    autoFocus
-                                                                    type="number"
-                                                                    value={tempScore}
-                                                                    onChange={e => setTempScore(e.target.value)}
-                                                                    onClick={e => e.stopPropagation()}
-                                                                    onKeyDown={e => {
-                                                                        if (e.key === 'Enter') saveScore(student.registerNumber);
-                                                                        if (e.key === 'Escape') setEditingScore(null);
-                                                                    }}
-                                                                    style={{ width: '60px', padding: '4px', fontSize: '13px', borderRadius: '4px', border: '1px solid var(--accent-primary)' }}
-                                                                />
-                                                                <button onClick={() => saveScore(student.registerNumber)} style={{ color: '#16A34A' }}><Save size={14} /></button>
-                                                                <button onClick={cancelEditScore} style={{ color: '#DC2626' }}><XCircle size={14} /></button>
-                                                            </div>
-                                                        ) : (
-                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
-                                                                {displayScore.toFixed(2)}
-                                                                <Edit3 size={12} style={{ opacity: 0.5, cursor: 'pointer' }} onClick={e => { e.stopPropagation(); startEditScore(student.registerNumber, displayScore); }} />
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                    <td>
-                                                        <div style={{ width: '100%', height: '6px', background: 'var(--bg-card)', borderRadius: '3px', overflow: 'hidden' }}>
-                                                            <div style={{ width: `${Math.min(displayScore, 100)}%`, height: '100%', background: 'var(--accent-gradient)' }} />
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <Link
-                                                            href={`/${student.registerNumber}`}
-                                                            target="_blank"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            style={{
-                                                                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                                                                padding: '4px 8px', borderRadius: '4px', background: 'rgba(3,77,161,0.05)',
-                                                                color: 'var(--accent-primary)', textDecoration: 'none', fontSize: '12px', fontWeight: 600
-                                                            }}
-                                                        >
-                                                            View <ExternalLink size={12} />
-                                                        </Link>
-                                                    </td>
-                                                    <td style={{ textAlign: 'center' }}>
-                                                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                                    </td>
-                                                </tr>
-                                                {isExpanded && fullStudent && (
-                                                    <tr>
-                                                        <td colSpan={9} style={{ padding: 0 }}>
-                                                            <StudentDetailPanel
-                                                                student={fullStudent}
-                                                                regNo={student.registerNumber}
-                                                                isDiscarded={isDiscarded}
-                                                                toggleDiscard={toggleDiscard}
-                                                            />
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </React.Fragment>
-                                        );
-                                    })
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Load More Button */}
-                    {visibleCount < filtered.length && (
-                        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px', borderTop: '1px solid var(--border-subtle)' }}>
-                            <button
-                                onClick={loadMore}
-                                className="btn-secondary"
-                                style={{ padding: '12px 32px' }}
-                            >
-                                Load More ({filtered.length - visibleCount} remaining)
-                            </button>
-                        </div>
-                    )}
-                </motion.div>
-
-                {/* Floating Save Button */}
-                <AnimatePresence>
-                    {(changedRegNos.size > 0 || isSaving) && (
-                        <motion.div
-                            initial={{ y: 50, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: 50, opacity: 0 }}
-                            style={{
-                                position: 'fixed', bottom: '24px', right: '24px',
-                                zIndex: 100
-                            }}
-                        >
-                            <button
-                                onClick={saveAllChanges}
-                                className="btn-primary"
-                                disabled={isSaving}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '8px',
-                                    background: isSaving ? 'var(--text-muted)' : 'var(--accent-primary)',
-                                    padding: '12px 24px', borderRadius: 'var(--radius-full)',
-                                    boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                                    color: 'white', border: 'none', cursor: isSaving ? 'wait' : 'pointer'
-                                }}
-                            >
-                                {isSaving ? (
-                                    <>
-                                        <div className="animate-spin" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }} />
-                                        Saving...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save size={18} />
-                                        Save {changedRegNos.size} Updates
-                                    </>
-                                )}
-                            </button>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Compare Button */}
-                <AnimatePresence>
-                    {selectedStudents.length > 0 && (
-                        <motion.div
-                            initial={{ y: 100, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: 100, opacity: 0 }}
-                            style={{
-                                position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
-                                background: 'var(--accent-primary)', color: 'white',
-                                padding: '12px 24px', borderRadius: 'var(--radius-full)',
-                                boxShadow: '0 8px 32px rgba(3, 77, 161, 0.4)',
-                                display: 'flex', alignItems: 'center', gap: '12px', zIndex: 50,
-                                cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)'
-                            }}
-                            onClick={() => setIsCompareModalOpen(true)}
-                        >
-                            <BarChart2 size={20} />
-                            <span style={{ fontWeight: 600 }}>Compare {selectedStudents.length} Candidates</span>
+                        {error && (
                             <div style={{
-                                background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px'
-                            }} onClick={(e) => { e.stopPropagation(); setSelectedStudents([]); }}>
-                                <X size={12} />
+                                padding: '20px', borderRadius: 'var(--radius-md)',
+                                background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.25)',
+                                color: '#B45309', fontSize: '14px', marginBottom: '24px',
+                            }}>
+                                ⚠️ {error}
+                            </div>
+                        )}
+
+                        {/* Analytics */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}
+                        >
+                            <div className="glass-card" style={{ padding: '24px' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px' }}>Total Applications</h3>
+                                <div style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--srm-blue)' }}>{students.length}</div>
+                            </div>
+                            <div className="glass-card" style={{ padding: '24px' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px' }}>Department Breakdown</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {deptStats.slice(0, 5).map(([dept, count]) => (
+                                        <div key={dept} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                            <span style={{ color: 'var(--text-secondary)' }}>{dept}</span>
+                                            <span style={{ fontWeight: 600 }}>{count}</span>
+                                        </div>
+                                    ))}
+                                    {deptStats.length === 0 && <span style={{ color: 'var(--text-muted)' }}>No data available</span>}
+                                </div>
                             </div>
                         </motion.div>
-                    )}
-                </AnimatePresence>
 
-                {/* Comparison Modal */}
-                <ComparisonModal
-                    isOpen={isCompareModalOpen}
-                    onClose={() => setIsCompareModalOpen(false)}
-                    students={fullStudents.filter(s => s.personalDetails?.registerNumber && selectedStudents.includes(s.personalDetails.registerNumber))}
-                    rankedData={students}
-                    scoreOverrides={scoreOverrides}
-                />
+                        {/* Filters */}
+                        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+                            <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+                                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                                <input
+                                    className="form-input"
+                                    style={{ paddingLeft: '40px' }}
+                                    placeholder="Search by name or register number..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </div>
+                            <select
+                                className="form-input"
+                                style={{ width: 'auto', minWidth: '150px' }}
+                                value={deptFilter}
+                                onChange={(e) => setDeptFilter(e.target.value)}
+                            >
+                                <option value="">All Departments</option>
+                                {departments.map((dept) => (
+                                    <option key={dept} value={dept}>{dept}</option>
+                                ))}
+                            </select>
+
+                            <select
+                                className="form-input"
+                                style={{ width: 'auto', minWidth: '120px' }}
+                                value={sectionFilter}
+                                onChange={(e) => setSectionFilter(e.target.value)}
+                            >
+                                <option value="">All Sections</option>
+                                {sections.map((sec) => (
+                                    <option key={sec} value={sec}>Section {sec}</option>
+                                ))}
+                            </select>
+
+                            <select
+                                className="form-input"
+                                style={{ width: 'auto', minWidth: '180px' }}
+                                value={advisorFilter}
+                                onChange={(e) => setAdvisorFilter(e.target.value)}
+                            >
+                                <option value="">All Advisors</option>
+                                {advisors.map((adv) => (
+                                    <option key={adv} value={adv}>{adv}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Rankings Table */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            style={{
+                                borderRadius: 'var(--radius-md)',
+                                overflow: 'hidden',
+                                border: '1px solid var(--border-subtle)',
+                                background: 'var(--bg-card)' // Ensure background for scrolling
+                            }}
+                        >
+                            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}> {/* Add touch scrolling */}
+                                {/* Force min-width to trigger scroll */}
+                                <table className="data-table" style={{ minWidth: '800px' }}>
+
+                                    <thead>
+                                        <tr>
+                                            <th style={{ width: '40px' }}>
+                                                <div
+                                                    onClick={() => setSelectedStudents(selectedStudents.length === filtered.length && filtered.length > 0 ? [] : filtered.map(s => s.registerNumber))}
+                                                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                >
+                                                    {selectedStudents.length > 0 && selectedStudents.length === filtered.length ? <CheckSquare size={16} /> : <Square size={16} />}
+                                                </div>
+                                            </th>
+                                            <th style={{ width: '50px' }}>Rank</th>
+                                            <th>Name</th>
+                                            <th className="hide-on-mobile">Department</th>
+                                            <th style={{ width: '60px' }}>Sec</th>
+                                            <th style={{ width: '120px' }}>Score</th>
+                                            <th style={{ width: '150px' }}>Params</th>
+                                            <th style={{ width: '80px' }}>Profile</th>
+                                            <th style={{ width: '40px' }}></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {visibleStudents.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={9} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                                                    {students.length === 0 ? 'No applications yet.' : 'No results found.'}
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            visibleStudents.map((student, index) => {
+                                                const isExpanded = expandedRow === student.registerNumber;
+                                                const displayScore = getDisplayScore(student);
+                                                const isSelected = selectedStudents.includes(student.registerNumber);
+                                                const fullStudent = fullStudents.find(s => s.personalDetails?.registerNumber === student.registerNumber);
+
+                                                return (
+                                                    <React.Fragment key={student.registerNumber}>
+                                                        <tr
+                                                            style={{ borderBottom: '1px solid var(--border-subtle)', background: isExpanded ? 'var(--bg-surface)' : 'transparent', transition: 'background 0.2s' }}
+                                                            onClick={() => setExpandedRow(isExpanded ? null : student.registerNumber)}
+                                                        >
+                                                            <td style={{ textAlign: 'center' }} onClick={e => { e.stopPropagation(); toggleSelection(student.registerNumber); }}>
+                                                                {isSelected ? <CheckSquare size={16} color="var(--accent-primary)" /> : <Square size={16} color="var(--text-muted)" />}
+                                                            </td>
+                                                            <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>#{index + 1}</td>
+                                                            <td>
+                                                                <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>{student.name}</div>
+                                                                <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{student.registerNumber}</div>
+                                                            </td>
+                                                            <td style={{ fontSize: '13px' }} className="hide-on-mobile">{student.department}</td>
+                                                            <td style={{ fontSize: '13px', textAlign: 'center' }}>{fullStudent?.personalDetails.section}</td>
+                                                            <td style={{ fontFamily: 'monospace', fontWeight: 700, textAlign: 'right' }}>
+                                                                {editingScore === student.registerNumber ? (
+                                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }} onClick={e => e.stopPropagation()}>
+                                                                        <input
+                                                                            autoFocus
+                                                                            type="number"
+                                                                            value={tempScore}
+                                                                            onChange={e => setTempScore(e.target.value)}
+                                                                            onClick={e => e.stopPropagation()}
+                                                                            onKeyDown={e => {
+                                                                                if (e.key === 'Enter') saveScore(student.registerNumber);
+                                                                                if (e.key === 'Escape') setEditingScore(null);
+                                                                            }}
+                                                                            style={{ width: '60px', padding: '4px', fontSize: '13px', borderRadius: '4px', border: '1px solid var(--accent-primary)' }}
+                                                                        />
+                                                                        <button onClick={() => saveScore(student.registerNumber)} style={{ color: '#16A34A' }}><Save size={14} /></button>
+                                                                        <button onClick={cancelEditScore} style={{ color: '#DC2626' }}><XCircle size={14} /></button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                                                                        {displayScore.toFixed(2)}
+                                                                        <Edit3 size={12} style={{ opacity: 0.5, cursor: 'pointer' }} onClick={e => { e.stopPropagation(); startEditScore(student.registerNumber, displayScore); }} />
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                            <td>
+                                                                <div style={{ width: '100%', height: '6px', background: 'var(--bg-card)', borderRadius: '3px', overflow: 'hidden' }}>
+                                                                    <div style={{ width: `${Math.min(displayScore, 100)}%`, height: '100%', background: 'var(--accent-gradient)' }} />
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <Link
+                                                                    href={`/${student.registerNumber}`}
+                                                                    target="_blank"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    style={{
+                                                                        display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                                        padding: '4px 8px', borderRadius: '4px', background: 'rgba(3,77,161,0.05)',
+                                                                        color: 'var(--accent-primary)', textDecoration: 'none', fontSize: '12px', fontWeight: 600
+                                                                    }}
+                                                                >
+                                                                    View <ExternalLink size={12} />
+                                                                </Link>
+                                                            </td>
+                                                            <td style={{ textAlign: 'center' }}>
+                                                                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                            </td>
+                                                        </tr>
+                                                        {isExpanded && fullStudent && (
+                                                            <tr>
+                                                                <td colSpan={9} style={{ padding: 0 }}>
+                                                                    <StudentDetailPanel
+                                                                        student={fullStudent}
+                                                                        regNo={student.registerNumber}
+                                                                        isDiscarded={isDiscarded}
+                                                                        toggleDiscard={toggleDiscard}
+                                                                    />
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </React.Fragment>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Load More Button */}
+                            {visibleCount < filtered.length && (
+                                <div style={{ display: 'flex', justifyContent: 'center', padding: '24px', borderTop: '1px solid var(--border-subtle)' }}>
+                                    <button
+                                        onClick={loadMore}
+                                        className="btn-secondary"
+                                        style={{ padding: '12px 32px' }}
+                                    >
+                                        Load More ({filtered.length - visibleCount} remaining)
+                                    </button>
+                                </div>
+                            )}
+                        </motion.div>
+
+                        {/* Floating Save Button */}
+                        <AnimatePresence>
+                            {(changedRegNos.size > 0 || isSaving) && (
+                                <motion.div
+                                    initial={{ y: 50, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: 50, opacity: 0 }}
+                                    style={{
+                                        position: 'fixed', bottom: '24px', right: '24px',
+                                        zIndex: 100
+                                    }}
+                                >
+                                    <button
+                                        onClick={saveAllChanges}
+                                        className="btn-primary"
+                                        disabled={isSaving}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '8px',
+                                            background: isSaving ? 'var(--text-muted)' : 'var(--accent-primary)',
+                                            padding: '12px 24px', borderRadius: 'var(--radius-full)',
+                                            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                                            color: 'white', border: 'none', cursor: isSaving ? 'wait' : 'pointer'
+                                        }}
+                                    >
+                                        {isSaving ? (
+                                            <>
+                                                <div className="animate-spin" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save size={18} />
+                                                Save {changedRegNos.size} Updates
+                                            </>
+                                        )}
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Compare Button */}
+                        <AnimatePresence>
+                            {selectedStudents.length > 0 && (
+                                <motion.div
+                                    initial={{ y: 100, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: 100, opacity: 0 }}
+                                    style={{
+                                        position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+                                        background: 'var(--accent-primary)', color: 'white',
+                                        padding: '12px 24px', borderRadius: 'var(--radius-full)',
+                                        boxShadow: '0 8px 32px rgba(3, 77, 161, 0.4)',
+                                        display: 'flex', alignItems: 'center', gap: '12px', zIndex: 50,
+                                        cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)'
+                                    }}
+                                    onClick={() => setIsCompareModalOpen(true)}
+                                >
+                                    <BarChart2 size={20} />
+                                    <span style={{ fontWeight: 600 }}>Compare {selectedStudents.length} Candidates</span>
+                                    <div style={{
+                                        background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px'
+                                    }} onClick={(e) => { e.stopPropagation(); setSelectedStudents([]); }}>
+                                        <X size={12} />
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Comparison Modal */}
+                        <ComparisonModal
+                            isOpen={isCompareModalOpen}
+                            onClose={() => setIsCompareModalOpen(false)}
+                            students={fullStudents.filter(s => s.personalDetails?.registerNumber && selectedStudents.includes(s.personalDetails.registerNumber))}
+                            rankedData={students}
+                            scoreOverrides={scoreOverrides}
+                        />
+                    </>
+                )}
             </main>
         </>
     );

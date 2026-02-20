@@ -36,7 +36,7 @@ export const academicRecordSchema = z.object({
 export const postCollegeStatusSchema = z.object({
     status: z.enum(['placed', 'higher_studies', 'entrepreneur', 'unplaced', 'other']),
     placedCompany: z.string().optional(),
-    offerLetterLink: z.string().url().optional().or(z.literal('')),
+    offerLetterLink: z.string().url('Please provide your offer letter link').optional().or(z.literal('')),
     universityName: z.string().optional(),
     admitCardLink: z.string().url().optional().or(z.literal('')),
     otherDetails: z.string().optional(),
@@ -49,7 +49,7 @@ export const internshipSchema = z.object({
     role: z.string().min(1, 'Role is required'),
     startDate: z.string().min(1, 'Start date is required'),
     endDate: z.string().min(1, 'End date is required'),
-    certificateLink: z.string().url('Invalid URL').or(z.literal('')),
+    certificateLink: z.string().url('Please provide the internship certificate link'),
     description: z.string().optional(),
 });
 
@@ -61,7 +61,7 @@ export const projectSchema = z.object({
     techStack: z.string().min(1, 'Tech stack is required'),
     githubLink: z.string().url('Invalid URL').optional().or(z.literal('')),
     deployedLink: z.string().url('Invalid URL').optional().or(z.literal('')),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide a valid proof link'),
 });
 
 // ===== Hackathon Schema =====
@@ -71,7 +71,7 @@ export const hackathonSchema = z.object({
     projectBuilt: z.string().min(1, 'Project built is required'),
     teamSize: z.coerce.number().min(1, 'Team size must be at least 1'),
     position: z.string().min(1, 'Position is required'),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide a valid proof link'),
 });
 
 // ===== Research Schema =====
@@ -81,7 +81,7 @@ export const researchSchema = z.object({
     journalOrConference: z.string().min(1, 'Journal/Conference is required'),
     indexStatus: z.enum(['scopus', 'sci', 'ugc', 'other', 'none']),
     publicationStatus: z.enum(['filed', 'published', 'granted', 'under_review']),
-    link: z.string().url('Invalid URL').optional().or(z.literal('')),
+    link: z.string().url('Please provide the paper/publication link'),
 });
 
 // ===== Entrepreneurship Schema =====
@@ -91,7 +91,7 @@ export const entrepreneurshipSchema = z.object({
     registrationDetails: z.string().optional(),
     revenueOrFundingStatus: z.string().optional(),
     description: z.string().optional(),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide a valid proof link'),
 });
 
 // ===== Certification Schema =====
@@ -100,7 +100,7 @@ export const certificationSchema = z.object({
     provider: z.string().min(1, 'Provider is required'),
     certificateName: z.string().min(1, 'Certificate name is required'),
     validationId: z.string().optional(),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide the certificate proof link'),
 });
 
 // ===== Competitive Exam Schema =====
@@ -108,7 +108,7 @@ export const competitiveExamSchema = z.object({
     id: z.string(),
     examName: z.string().min(1, 'Exam name is required'),
     scoreOrRank: z.string().min(1, 'Score/Rank is required'),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide a valid proof link'),
 });
 
 // ===== Sports/Cultural Schema =====
@@ -117,7 +117,7 @@ export const sportsOrCulturalSchema = z.object({
     eventName: z.string().min(1, 'Event name is required'),
     level: z.enum(['zone', 'district', 'state', 'national', 'international']),
     positionWon: z.string().min(1, 'Position is required'),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide a valid proof link'),
 });
 
 // ===== Volunteering Schema =====
@@ -127,7 +127,7 @@ export const volunteeringSchema = z.object({
     role: z.string().min(1, 'Role is required'),
     hoursServed: z.coerce.number().min(0).optional(),
     impact: z.string().optional(),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide a valid proof link'),
 });
 
 // ===== Scholarship Schema =====
@@ -136,7 +136,7 @@ export const scholarshipSchema = z.object({
     name: z.string().min(1, 'Scholarship name is required'),
     awardingBody: z.string().min(1, 'Awarding body is required'),
     amountOrPrestige: z.string().optional(),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide the scholarship proof link'),
 });
 
 // ===== Club Activity Schema =====
@@ -146,7 +146,7 @@ export const clubActivitySchema = z.object({
     position: z.string().min(1, 'Position is required'),
     keyEventsOrganized: z.string().optional(),
     impactDescription: z.string().optional(),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide a valid proof link'),
 });
 
 // ===== Department Contribution Schema =====
@@ -155,7 +155,7 @@ export const departmentContributionSchema = z.object({
     eventName: z.string().min(1, 'Event name is required'),
     role: z.string().min(1, 'Role is required'),
     contributionDescription: z.string().optional(),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide a valid proof link'),
 });
 
 // ===== Reference Schema =====
@@ -172,7 +172,7 @@ export const professionalMembershipSchema = z.object({
     organization: z.string().min(1, 'Organization/Body name is required'),
     membershipId: z.string().optional(),
     role: z.string().optional(),
-    proofLink: z.string().url('Invalid URL').optional().or(z.literal('')),
+    proofLink: z.string().url('Please provide a valid proof link'),
 });
 
 // ===== Social Media Schema =====
@@ -219,7 +219,7 @@ export const applicationSchema = z.object({
     socialMedia: socialMediaSchema,
     futureGoal: futureGoalSchema,
     videoPitchUrl: z.string().url('Please provide a valid video URL'),
-    masterProofFolderUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+    masterProofFolderUrl: z.string().url('Please provide a Google Drive folder link with all proofs'),
     consentGiven: z.literal(true, {
         message: 'You must consent to data accuracy',
     }),
