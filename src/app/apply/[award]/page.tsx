@@ -694,6 +694,9 @@ export default function AwardApplyPage() {
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
                             e.preventDefault();
+                            if (currentStep === 0) {
+                                nextStep();
+                            }
                         }
                     }}>
                     <AnimatePresence mode="wait">

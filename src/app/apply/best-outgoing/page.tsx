@@ -264,9 +264,13 @@ export default function BestOutgoingForm() {
                 <form
                     onSubmit={handleSubmit(onSubmit as any)}
                     onKeyDown={(e) => {
-                        // Prevent Enter key from ever submitting the form (except inside textareas)
+                        // Prevent Enter key from auto-submitting.
+                        // Instead, move to the next step if not on the last step.
                         if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
                             e.preventDefault();
+                            if (currentStep < STEPS.length - 1) {
+                                nextStep();
+                            }
                         }
                     }}
                 >
