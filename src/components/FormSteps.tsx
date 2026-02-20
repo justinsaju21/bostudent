@@ -192,8 +192,8 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                             <Field label="End Date *" error={errors.internships?.[index]?.endDate?.message}>
                                 <input className="form-input" type="month" {...register(`internships.${index}.endDate`)} />
                             </Field>
-                            <Field label="Certificate Link" error={errors.internships?.[index]?.certificateLink?.message}>
-                                <input className="form-input" placeholder="Drive/URL link" {...register(`internships.${index}.certificateLink`)} />
+                            <Field label="Certificate Link *" error={errors.internships?.[index]?.certificateLink?.message}>
+                                <input className="form-input" placeholder="https://drive.google.com/..." {...register(`internships.${index}.certificateLink`)} />
                             </Field>
                             <Field label="Description" error={errors.internships?.[index]?.description?.message}>
                                 <input className="form-input" placeholder="Brief description of work" {...register(`internships.${index}.description`)} />
@@ -226,6 +226,9 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                             </Field>
                             <Field label="GitHub Link" error={errors.projects?.[index]?.githubLink?.message}>
                                 <input className="form-input" placeholder="https://github.com/..." {...register(`projects.${index}.githubLink`)} />
+                            </Field>
+                            <Field label="Proof Link *" error={errors.projects?.[index]?.proofLink?.message}>
+                                <input className="form-input" placeholder="https://drive.google.com/..." {...register(`projects.${index}.proofLink`)} />
                             </Field>
                             <Field label="Deployed Link" error={errors.projects?.[index]?.deployedLink?.message}>
                                 <input className="form-input" placeholder="https://myproject.vercel.app" {...register(`projects.${index}.deployedLink`)} />
@@ -279,8 +282,8 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                             <Field label="Position *" error={errors.hackathons?.[index]?.position?.message}>
                                 <input className="form-input" placeholder="Winner / Runner-up / Finalist" {...register(`hackathons.${index}.position`)} />
                             </Field>
-                            <Field label="Proof Link" error={errors.hackathons?.[index]?.proofLink?.message}>
-                                <input className="form-input" placeholder="Certificate / Link" {...register(`hackathons.${index}.proofLink`)} />
+                            <Field label="Proof Link *" error={errors.hackathons?.[index]?.proofLink?.message}>
+                                <input className="form-input" placeholder="https://drive.google.com/..." {...register(`hackathons.${index}.proofLink`)} />
                             </Field>
                         </div>
                     </div>
@@ -330,7 +333,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                                     <option value="under_review">Under Review</option><option value="filed">Filed</option><option value="published">Published</option><option value="granted">Granted</option>
                                 </select>
                             </Field>
-                            <Field label="Link"><input className="form-input" placeholder="DOI / URL" {...register(`research.${index}.link`)} /></Field>
+                            <Field label="Paper Link *" error={errors.research?.[index]?.link?.message}><input className="form-input" placeholder="https://doi.org/... or URL" {...register(`research.${index}.link`)} /></Field>
                         </div>
                     </div>
                 ))}
@@ -351,7 +354,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <Field label="Startup Name *"><input className="form-input" {...register(`entrepreneurship.${index}.startupName`)} /></Field>
                             <Field label="Registration Details"><input className="form-input" {...register(`entrepreneurship.${index}.registrationDetails`)} /></Field>
                             <Field label="Revenue / Funding Status"><input className="form-input" {...register(`entrepreneurship.${index}.revenueOrFundingStatus`)} /></Field>
-                            <Field label="Proof Link"><input className="form-input" {...register(`entrepreneurship.${index}.proofLink`)} /></Field>
+                            <Field label="Proof Link *" error={errors.entrepreneurship?.[index]?.proofLink?.message}><input className="form-input" placeholder="https://drive.google.com/..." {...register(`entrepreneurship.${index}.proofLink`)} /></Field>
                         </div>
                     </div>
                 ))}
@@ -372,7 +375,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <Field label="Provider *"><input className="form-input" placeholder="AWS / Google / Cisco" {...register(`certifications.${index}.provider`)} /></Field>
                             <Field label="Certificate Name *"><input className="form-input" {...register(`certifications.${index}.certificateName`)} /></Field>
                             <Field label="Validation ID"><input className="form-input" {...register(`certifications.${index}.validationId`)} /></Field>
-                            <Field label="Proof Link"><input className="form-input" {...register(`certifications.${index}.proofLink`)} /></Field>
+                            <Field label="Proof Link *" error={errors.certifications?.[index]?.proofLink?.message}><input className="form-input" placeholder="https://drive.google.com/..." {...register(`certifications.${index}.proofLink`)} /></Field>
                         </div>
                     </div>
                 ))}
@@ -392,7 +395,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
                             <Field label="Exam Name *"><input className="form-input" placeholder="GATE / GRE / CAT" {...register(`competitiveExams.${index}.examName`)} /></Field>
                             <Field label="Score / Rank *"><input className="form-input" placeholder="Score or AIR" {...register(`competitiveExams.${index}.scoreOrRank`)} /></Field>
-                            <Field label="Proof Link"><input className="form-input" {...register(`competitiveExams.${index}.proofLink`)} /></Field>
+                            <Field label="Proof Link *" error={errors.competitiveExams?.[index]?.proofLink?.message}><input className="form-input" placeholder="https://drive.google.com/..." {...register(`competitiveExams.${index}.proofLink`)} /></Field>
                         </div>
                     </div>
                 ))}
@@ -417,7 +420,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                                 </select>
                             </Field>
                             <Field label="Position Won *"><input className="form-input" placeholder="1st / 2nd / Finalist" {...register(`sportsOrCultural.${index}.positionWon`)} /></Field>
-                            <Field label="Proof Link"><input className="form-input" {...register(`sportsOrCultural.${index}.proofLink`)} /></Field>
+                            <Field label="Proof Link *" error={errors.sportsOrCultural?.[index]?.proofLink?.message}><input className="form-input" placeholder="https://drive.google.com/..." {...register(`sportsOrCultural.${index}.proofLink`)} /></Field>
                         </div>
                     </div>
                 ))}
@@ -453,7 +456,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <Field label="Role *"><input className="form-input" {...register(`volunteering.${index}.role`)} /></Field>
                             <Field label="Hours Served"><input className="form-input" type="number" {...register(`volunteering.${index}.hoursServed`)} /></Field>
                             <Field label="Impact"><input className="form-input" placeholder="Describe impact" {...register(`volunteering.${index}.impact`)} /></Field>
-                            <Field label="Proof Link"><input className="form-input" {...register(`volunteering.${index}.proofLink`)} /></Field>
+                            <Field label="Proof Link *" error={errors.volunteering?.[index]?.proofLink?.message}><input className="form-input" placeholder="https://drive.google.com/..." {...register(`volunteering.${index}.proofLink`)} /></Field>
                         </div>
                     </div>
                 ))}
@@ -474,7 +477,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <Field label="Scholarship Name *"><input className="form-input" {...register(`scholarships.${index}.name`)} /></Field>
                             <Field label="Awarding Body *"><input className="form-input" {...register(`scholarships.${index}.awardingBody`)} /></Field>
                             <Field label="Amount / Prestige"><input className="form-input" {...register(`scholarships.${index}.amountOrPrestige`)} /></Field>
-                            <Field label="Proof Link"><input className="form-input" {...register(`scholarships.${index}.proofLink`)} /></Field>
+                            <Field label="Proof Link *" error={errors.scholarships?.[index]?.proofLink?.message}><input className="form-input" placeholder="https://drive.google.com/..." {...register(`scholarships.${index}.proofLink`)} /></Field>
                         </div>
                     </div>
                 ))}
@@ -496,7 +499,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <Field label="Position *"><input className="form-input" placeholder="President / Secretary / Member" {...register(`clubActivities.${index}.position`)} /></Field>
                             <Field label="Key Events Organized"><input className="form-input" {...register(`clubActivities.${index}.keyEventsOrganized`)} /></Field>
                             <Field label="Impact Description"><input className="form-input" {...register(`clubActivities.${index}.impactDescription`)} /></Field>
-                            <Field label="Proof Link"><input className="form-input" {...register(`clubActivities.${index}.proofLink`)} /></Field>
+                            <Field label="Proof Link *" error={errors.clubActivities?.[index]?.proofLink?.message}><input className="form-input" placeholder="https://drive.google.com/..." {...register(`clubActivities.${index}.proofLink`)} /></Field>
                         </div>
                     </div>
                 ))}
@@ -517,7 +520,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <Field label="Event Name *"><input className="form-input" {...register(`departmentContributions.${index}.eventName`)} /></Field>
                             <Field label="Role *"><input className="form-input" placeholder="Organizer / Volunteer" {...register(`departmentContributions.${index}.role`)} /></Field>
                             <Field label="Contribution Description"><input className="form-input" {...register(`departmentContributions.${index}.contributionDescription`)} /></Field>
-                            <Field label="Proof Link"><input className="form-input" {...register(`departmentContributions.${index}.proofLink`)} /></Field>
+                            <Field label="Proof Link *" error={errors.departmentContributions?.[index]?.proofLink?.message}><input className="form-input" placeholder="https://drive.google.com/..." {...register(`departmentContributions.${index}.proofLink`)} /></Field>
                         </div>
                     </div>
                 ))}
@@ -635,7 +638,7 @@ export function FinalStep({ register, errors, control }: StepProps) {
 
             {/* Master Proof Folder */}
             <h2 className="section-title" style={{ marginTop: '40px' }}><span className="icon">📁</span>Master Proof Folder</h2>
-            <Field label="Google Drive Folder Link (All proofs in one place)" error={errors.masterProofFolderUrl?.message}>
+            <Field label="Google Drive Folder Link (All proofs in one place) *" error={errors.masterProofFolderUrl?.message}>
                 <input className="form-input" placeholder="https://drive.google.com/drive/folders/..." {...register('masterProofFolderUrl')} />
             </Field>
 
