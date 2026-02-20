@@ -175,7 +175,8 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         const fullStudent = getFullStudent(s.registerNumber);
         const matchesSearch =
             s.name.toLowerCase().includes(search.toLowerCase()) ||
-            s.registerNumber.toLowerCase().includes(search.toLowerCase());
+            s.registerNumber.toLowerCase().includes(search.toLowerCase()) ||
+            fullStudent?.personalDetails?.specialization?.toLowerCase().includes(search.toLowerCase());
         const matchesDept = !deptFilter || s.department === deptFilter;
         const matchesSection = !sectionFilter || fullStudent?.personalDetails?.section === sectionFilter;
         const matchesAdvisor = !advisorFilter || fullStudent?.personalDetails?.facultyAdvisor === advisorFilter;

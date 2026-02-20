@@ -19,7 +19,7 @@ function getSheetId(): string {
 
 // Headers for each award (matches awardSheets.ts getHeadersForAward)
 function getHeadersForAward(slug: AwardSlug): string[] {
-    const personal = ['Name', 'Register Number', 'Department', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor'];
+    const personal = ['Name', 'Register Number', 'Department', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
     switch (slug) {
         case 'best-outgoing':
             return []; // BO uses the existing BO_Main tab — skip
@@ -48,8 +48,9 @@ function sampleResearcher(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${200 + i}`,
-            department: 'Electronics and Communication Engineering', personalEmail: `researcher${i}@example.com`,
+            department: 'Electronics & Communication Engineering', specialization: 'Embedded Systems', personalEmail: `researcher${i}@example.com`,
             srmEmail: `res${i}@srmist.edu.in`, mobileNumber: `98401${100000 + i}`, section: 'A', facultyAdvisor: 'Dr. Ramesh Kumar',
+            profilePhotoUrl: '',
         },
         papers: [
             { title: `Novel Approach to ${i % 2 === 0 ? 'VLSI Optimization' : 'IoT Security'}`, journalOrConference: 'IEEE Access', indexStatus: 'sci', publicationStatus: 'published', link: 'https://doi.org/example' },
@@ -67,8 +68,9 @@ function sampleHackathon(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${300 + i}`,
-            department: 'Electronics and Communication Engineering', personalEmail: `hack${i}@example.com`,
+            department: 'Electronics & Communication Engineering', specialization: 'VLSI Design', personalEmail: `hack${i}@example.com`,
             srmEmail: `hack${i}@srmist.edu.in`, mobileNumber: `98402${100000 + i}`, section: 'B', facultyAdvisor: 'Dr. Priya Sharma',
+            profilePhotoUrl: '',
         },
         wins: [
             { eventName: 'Smart India Hackathon', level: 'national', position: 'Winner', teamSize: 6, projectBuilt: 'AI Water Management', proofLink: 'https://drive.google.com/proof' },
@@ -84,8 +86,9 @@ function sampleSports(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${400 + i}`,
-            department: 'Electronics and Communication Engineering', personalEmail: `sports${i}@example.com`,
+            department: 'Electronics & Communication Engineering', specialization: 'Communication', personalEmail: `sports${i}@example.com`,
             srmEmail: `sp${i}@srmist.edu.in`, mobileNumber: `98403${100000 + i}`, section: 'C', facultyAdvisor: 'Prof. Lakshmi Narayanan',
+            profilePhotoUrl: '',
         },
         wins: [
             { sportOrEvent: 'Table Tennis', level: 'state', position: 'Gold', proofLink: 'https://drive.google.com/proof-sports' },
@@ -100,8 +103,9 @@ function sampleNssNcc(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${500 + i}`,
-            department: 'Electronics and Communication Engineering', personalEmail: `nss${i}@example.com`,
+            department: 'Electronics & Communication Engineering', specialization: 'VLSI', personalEmail: `nss${i}@example.com`,
             srmEmail: `nss${i}@srmist.edu.in`, mobileNumber: `98404${100000 + i}`, section: 'D', facultyAdvisor: 'Dr. A. Smith',
+            profilePhotoUrl: '',
         },
         organization: i % 2 === 0 ? 'NSS' : 'NCC',
         role: i % 2 === 0 ? 'Volunteer Lead' : 'Cadet Sergeant',
@@ -119,8 +123,9 @@ function sampleDeptContribution(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${600 + i}`,
-            department: 'Electronics and Communication Engineering', personalEmail: `dept${i}@example.com`,
+            department: 'Electronics And Computer Engineering', specialization: 'N/A', personalEmail: `dept${i}@example.com`,
             srmEmail: `dept${i}@srmist.edu.in`, mobileNumber: `98405${100000 + i}`, section: 'E', facultyAdvisor: 'Prof. R. Johnson',
+            profilePhotoUrl: '',
         },
         contributions: [
             { activityType: 'magazine', role: 'Editor', eventName: 'ECE Annual Magazine', contributionDescription: 'Compiled and edited 40+ articles from students and faculty.', proofLink: 'https://drive.google.com/magazine' },
@@ -141,8 +146,9 @@ function sampleHighestSalary(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: d.name, registerNumber: `RA2211053010${700 + i}`,
-            department: 'Electronics and Communication Engineering', personalEmail: `salary${i}@example.com`,
+            department: 'Electronics And Computer Engineering', specialization: 'AI & ML', personalEmail: `salary${i}@example.com`,
             srmEmail: `sal${i}@srmist.edu.in`, mobileNumber: `98406${100000 + i}`, section: 'F', facultyAdvisor: 'Dr. K. Lee',
+            profilePhotoUrl: '',
         },
         companyName: d.company, jobRole: d.role, ctcLpa: d.ctc,
         offerLetterLink: 'https://drive.google.com/offer-letter',
@@ -159,8 +165,9 @@ function sampleCoreSalary(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: d.name, registerNumber: `RA2211053010${800 + i}`,
-            department: 'Electronics and Communication Engineering', personalEmail: `core${i}@example.com`,
+            department: 'Electronics & Communication Engineering', specialization: 'Core ECE', personalEmail: `core${i}@example.com`,
             srmEmail: `core${i}@srmist.edu.in`, mobileNumber: `98407${100000 + i}`, section: 'A', facultyAdvisor: 'Dr. S. Nair',
+            profilePhotoUrl: '',
         },
         companyName: d.company, jobRole: d.role, ctcLpa: d.ctc,
         coreDomain: d.domain,

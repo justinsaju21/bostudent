@@ -7,12 +7,13 @@ export interface BasePersonalDetails {
     name: string;
     registerNumber: string;
     department: string;
+    specialization: string;
     personalEmail: string;
     srmEmail: string;
     mobileNumber: string;
     section: string;
     facultyAdvisor: string;
-    specialization?: string;
+    profilePhotoUrl?: string;
 }
 
 // ---- Award #2: Best Undergraduate Researcher ----

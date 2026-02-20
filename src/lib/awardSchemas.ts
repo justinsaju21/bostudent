@@ -8,6 +8,7 @@ export const basePersonalSchema = z.object({
         .min(5, 'Register number is required')
         .regex(/^RA\d+$/i, 'Must be a valid SRM register number (e.g., RA2211053010097)'),
     department: z.enum(['Electronics & Communication Engineering', 'Electronics And Computer Engineering']).or(z.literal('')).refine(val => val !== '', 'Department is required'),
+    specialization: z.string().min(2, 'Specialization is required'),
     personalEmail: z.string().email('Invalid email address'),
     srmEmail: z
         .string()
@@ -19,6 +20,7 @@ export const basePersonalSchema = z.object({
         .regex(/^[+]?\d{10,15}$/, 'Invalid mobile number'),
     section: z.string().min(1, 'Section is required').max(3, 'Section too long'),
     facultyAdvisor: z.string().min(2, 'Faculty Advisor name is required'),
+    profilePhotoUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
 
 // ===== Award #2: Best Undergraduate Researcher =====

@@ -57,7 +57,7 @@ async function ensureSheet(sheetName: string, headers: string[]): Promise<void> 
 
 // ===== HEADERS for each award sheet =====
 function getHeadersForAward(slug: AwardSlug): string[] {
-    const personal = ['Name', 'Register Number', 'Department', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor'];
+    const personal = ['Name', 'Register Number', 'Department', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
 
     switch (slug) {
         case 'researcher':
@@ -83,7 +83,7 @@ function getHeadersForAward(slug: AwardSlug): string[] {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function awardApplicationToRow(slug: AwardSlug, app: any): string[] {
     const pd: BasePersonalDetails = app.personalDetails;
-    const personal = [pd.name, pd.registerNumber, pd.department, pd.personalEmail, pd.srmEmail, pd.mobileNumber, pd.section, pd.facultyAdvisor];
+    const personal = [pd.name, pd.registerNumber, pd.department, pd.specialization, pd.personalEmail, pd.srmEmail, pd.mobileNumber, pd.section, pd.facultyAdvisor, pd.profilePhotoUrl || ''];
 
     switch (slug) {
         case 'researcher': {
