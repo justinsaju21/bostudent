@@ -64,7 +64,7 @@ export default function PortfolioClient({ student }: Props) {
                                 {pd.name}
                             </h1>
                             <p style={{ fontSize: '18px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                                {pd.department} — {pd.specialization}
+                                {pd.department}{pd.specialization ? ` — ${pd.specialization}` : ''}
                             </p>
                             <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>
                                 Class {pd.section} • Advisor: {pd.facultyAdvisor}

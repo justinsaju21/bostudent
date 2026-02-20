@@ -51,7 +51,9 @@ export default function AwardAdminPanel({ slug }: Props) {
                 const pd = a.personalDetails;
                 return pd?.name?.toLowerCase().includes(q) ||
                     pd?.registerNumber?.toLowerCase().includes(q) ||
-                    pd?.department?.toLowerCase().includes(q);
+                    pd?.department?.toLowerCase().includes(q) ||
+                    pd?.specialization?.toLowerCase().includes(q) ||
+                    pd?.section?.toLowerCase().includes(q);
             });
         }
         // Auto-sort salary awards by CTC descending

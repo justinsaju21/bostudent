@@ -12,6 +12,7 @@ export interface BasePersonalDetails {
     mobileNumber: string;
     section: string;
     facultyAdvisor: string;
+    specialization?: string;
 }
 
 // ---- Award #2: Best Undergraduate Researcher ----

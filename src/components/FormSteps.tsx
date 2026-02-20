@@ -62,7 +62,7 @@ export function PersonalDetailsStep({ register, errors }: StepProps) {
                     <Field label="Section *" error={errors.personalDetails?.section?.message}>
                         <select className="form-input" {...register('personalDetails.section')}>
                             <option value="">Select</option>
-                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'].map(s => (
+                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'].map(s => (
                                 <option key={s} value={s}>{s}</option>
                             ))}
                         </select>
