@@ -659,9 +659,8 @@ export default function AwardApplyPage() {
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)}
                     onKeyDown={(e) => {
-                        if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') {
+                        if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
                             e.preventDefault();
-                            if (currentStep === 0) nextStep();
                         }
                     }}>
                     <AnimatePresence mode="wait">
