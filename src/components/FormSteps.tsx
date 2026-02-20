@@ -77,7 +77,8 @@ export function PersonalDetailsStep({ register, errors }: StepProps) {
                 <Field label="Department *" error={errors.personalDetails?.department?.message}>
                     <select className="form-input" {...register('personalDetails.department')}>
                         <option value="">Select Department</option>
-                        <option value="Electronics and Communication Engineering">Electronics and Communication Engineering (ECE)</option>
+                        <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
+                        <option value="Electronics And Computer Engineering">Electronics And Computer Engineering</option>
                     </select>
                 </Field>
                 <Field label="Specialization *" error={errors.personalDetails?.specialization?.message}>

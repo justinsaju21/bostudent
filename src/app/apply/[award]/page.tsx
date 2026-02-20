@@ -48,7 +48,11 @@ function PersonalStep({ register, errors }: { register: any; errors: any }) {
                     <input className="form-input" {...register('personalDetails.registerNumber')} placeholder="RA2211053010097" />
                 </Field>
                 <Field label="Department" error={errors?.personalDetails?.department?.message}>
-                    <input className="form-input" {...register('personalDetails.department')} placeholder="ECE" />
+                    <select className="form-input" {...register('personalDetails.department')}>
+                        <option value="">Select Department</option>
+                        <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
+                        <option value="Electronics And Computer Engineering">Electronics And Computer Engineering</option>
+                    </select>
                 </Field>
                 <Field label="Personal Email" error={errors?.personalDetails?.personalEmail?.message}>
                     <input className="form-input" type="email" {...register('personalDetails.personalEmail')} placeholder="you@gmail.com" />
