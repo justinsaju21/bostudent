@@ -12,13 +12,7 @@ interface SearchableSelectProps {
 
 export function SearchableSelect({ value, onChange, options, placeholder, error, onBlur }: SearchableSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const [search, setSearch] = useState('');
     const wrapperRef = useRef<HTMLDivElement>(null);
-
-    // Sync internal search state with external value
-    useEffect(() => {
-        setSearch(value || '');
-    }, [value]);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -32,18 +26,16 @@ export function SearchableSelect({ value, onChange, options, placeholder, error,
     }, [onBlur]);
 
     const filteredOptions = options.filter(opt =>
-        opt.toLowerCase().includes(search.toLowerCase())
+        opt.toLowerCase().includes((value || '').toLowerCase())
     );
 
     const handleSelect = (option: string) => {
         onChange(option);
-        setSearch(option);
         setIsOpen(false);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
-        setSearch(newValue);
         onChange(newValue);
         setIsOpen(true);
     };
@@ -55,7 +47,7 @@ export function SearchableSelect({ value, onChange, options, placeholder, error,
                     type="text"
                     className={`form-input w-full pr-10 ${error ? 'border-red-500' : ''}`}
                     placeholder={placeholder}
-                    value={search}
+                    value={value || ''}
                     onChange={handleInputChange}
                     onFocus={() => setIsOpen(true)}
                 />
