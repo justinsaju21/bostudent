@@ -169,6 +169,7 @@ export default function ComparisonModal({ isOpen, onClose, students, rankedData,
                     background: var(--bg-surface);
                     position: sticky;
                     left: 0;
+                    z-index: 15;
                 }
                 .header {
                     background: var(--bg-surface);
@@ -176,6 +177,11 @@ export default function ComparisonModal({ isOpen, onClose, students, rankedData,
                     top: 0;
                     z-index: 10;
                     border-bottom: 2px solid var(--border-subtle);
+                }
+                /* Intersection cell (Metric) should stay on top of everything */
+                .header.label {
+                    z-index: 30;
+                    background: var(--bg-surface);
                 }
                 .value {
                     text-align: center;

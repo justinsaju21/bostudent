@@ -250,7 +250,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                 <div style={{ overflowX: 'auto' }}>
                     <table className="data-table" style={{ minWidth: '700px' }}>
                         <thead>
-                            <tr>
+                            <tr style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                                 <th style={{ width: '50px' }}>#</th>
                                 <th>Name</th>
                                 <th>Department</th>

@@ -14,6 +14,7 @@
   --bg-secondary: #F5F7FA;
   --bg-card: #FFFFFF;
   --bg-card-hover: #F0F4FF;
+  --bg-surface: #F8FAFC;
   --bg-glass: rgba(255, 255, 255, 0.85);
 
   --text-primary: #1a1a2e;
@@ -380,7 +381,10 @@ body {
 }
 
 .data-table thead th {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
+  position: sticky;
+  top: 0;
+  z-index: 20;
   padding: 14px 16px;
   text-align: left;
   font-size: 12px;
