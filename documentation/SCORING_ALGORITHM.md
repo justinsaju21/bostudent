@@ -1,6 +1,9 @@
-# Scoring Algorithm: The 100-Point Formula
+# The Scoring Algorithm
 
-This is the exhaustive documentation of how the "Best Outgoing" rank is calculated in `src/lib/ranking.ts`.
+> [!NOTE]
+> All scoring weights and criteria are now transparently displayed to students via **ℹ️ Info Tooltips** next to each section header in the application form.
+
+This guide provides a transparent breakdown of the 100-point math...austive documentation of how the "Best Outgoing" rank is calculated in `src/lib/ranking.ts`.
 
 ## Total Points: 100
 
