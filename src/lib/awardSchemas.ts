@@ -1,5 +1,12 @@
 import { z } from 'zod';
 
+// ===== Programme options (used globally) =====
+export const PROGRAMME_OPTIONS = [
+    'B.Tech Electronics and Communication Engineering',
+    'B.Tech Electronics and Computer Engineering',
+    'M.Tech Electronics and Communication Engineering',
+] as const;
+
 // ===== SHARED: Personal Details Schema (reused by all awards) =====
 export const basePersonalSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -7,7 +14,7 @@ export const basePersonalSchema = z.object({
         .string()
         .min(5, 'Register number is required')
         .regex(/^RA\d+$/i, 'Must be a valid SRM register number (e.g., RA2211053010097)'),
-    department: z.enum(['Electronics & Communication Engineering', 'Electronics And Computer Engineering']).or(z.literal('')).refine(val => val !== '', 'Department is required'),
+    department: z.enum(PROGRAMME_OPTIONS).or(z.literal('')).refine(val => val !== '', 'Programme is required'),
     specialization: z.string().min(2, 'Specialization is required'),
     personalEmail: z.string().email('Invalid email address'),
     srmEmail: z
@@ -136,6 +143,14 @@ export const coreSalarySchema = z.object({
     consentGiven: z.literal(true, { message: 'You must consent to data accuracy' }),
 });
 
+// ===== Award #9: Best Student for Academic Excellence =====
+export const academicExcellenceSchema = z.object({
+    personalDetails: basePersonalSchema,
+    cgpa: z.coerce.number().min(0, 'CGPA must be 0 or above').max(10, 'CGPA cannot exceed 10'),
+    gradeSheetLink: z.string().url('Please provide a valid grade sheet link'),
+    consentGiven: z.literal(true, { message: 'You must consent to data accuracy' }),
+});
+
 // ===== Inferred Form Data Types =====
 export type ResearcherFormData = z.infer<typeof researcherSchema>;
 export type HackathonWinnerFormData = z.infer<typeof hackathonWinnerSchema>;
@@ -144,12 +159,14 @@ export type NssNccFormData = z.infer<typeof nssNccSchema>;
 export type DeptContributorFormData = z.infer<typeof deptContributorSchema>;
 export type HighestSalaryFormData = z.infer<typeof highestSalarySchema>;
 export type CoreSalaryFormData = z.infer<typeof coreSalarySchema>;
+export type AcademicExcellenceFormData = z.infer<typeof academicExcellenceSchema>;
 
 // ===== Schema lookup by award slug =====
 import { AwardSlug } from './awards';
 
 export function getSchemaForAward(slug: AwardSlug) {
     switch (slug) {
+        case 'academic-excellence': return academicExcellenceSchema;
         case 'researcher': return researcherSchema;
         case 'hackathon': return hackathonWinnerSchema;
         case 'sports': return sportsWinnerSchema;

@@ -136,6 +136,15 @@ export interface CoreSalaryApplication {
     submittedAt?: string;
 }
 
+// ---- Award #9: Best Student for Academic Excellence ----
+export interface AcademicExcellenceApplication {
+    personalDetails: BasePersonalDetails;
+    cgpa: number;
+    gradeSheetLink: string;
+    consentGiven: boolean;
+    submittedAt?: string;
+}
+
 // ---- Union type for all award applications ----
 export type AwardApplication =
     | ResearcherApplication
@@ -144,4 +153,5 @@ export type AwardApplication =
     | NssNccApplication
     | DeptContributorApplication
     | HighestSalaryApplication
-    | CoreSalaryApplication;
+    | CoreSalaryApplication
+    | AcademicExcellenceApplication;

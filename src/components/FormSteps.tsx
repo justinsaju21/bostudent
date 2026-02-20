@@ -74,11 +74,12 @@ export function PersonalDetailsStep({ register, errors }: StepProps) {
                 <Field label="Faculty Advisor Name *" error={errors.personalDetails?.facultyAdvisor?.message}>
                     <input className="form-input" placeholder="e.g. Dr. A. Smith" {...register('personalDetails.facultyAdvisor')} />
                 </Field>
-                <Field label="Department *" error={errors.personalDetails?.department?.message}>
+                <Field label="Programme / Course *" error={errors.personalDetails?.department?.message}>
                     <select className="form-input" {...register('personalDetails.department')}>
-                        <option value="">Select Department</option>
-                        <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
-                        <option value="Electronics And Computer Engineering">Electronics And Computer Engineering</option>
+                        <option value="">Select Programme</option>
+                        <option value="B.Tech Electronics and Communication Engineering">B.Tech Electronics and Communication Engineering</option>
+                        <option value="B.Tech Electronics and Computer Engineering">B.Tech Electronics and Computer Engineering</option>
+                        <option value="M.Tech Electronics and Communication Engineering">M.Tech Electronics and Communication Engineering</option>
                     </select>
                 </Field>
                 <Field label="Specialization *" error={errors.personalDetails?.specialization?.message}>

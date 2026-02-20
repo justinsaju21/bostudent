@@ -88,9 +88,12 @@ export default function AwardAdminPanel({ slug }: Props) {
             list = list.filter(a => a.personalDetails?.facultyAdvisor === advisorFilter);
         }
 
-        // Auto-sort salary awards by CTC descending
+        // Auto-sort salary awards by CTC descending, academic excellence by CGPA descending
         if (slug === 'highest-salary' || slug === 'core-salary') {
             list = [...list].sort((a, b) => (Number(b.ctcLpa) || 0) - (Number(a.ctcLpa) || 0));
+        }
+        if (slug === 'academic-excellence') {
+            list = [...list].sort((a, b) => (Number(b.cgpa) || 0) - (Number(a.cgpa) || 0));
         }
         return list;
     }, [applicants, search, deptFilter, sectionFilter, advisorFilter, slug]);
@@ -338,7 +341,7 @@ function AwardDetailPanel({ applicant, slug }: { applicant: AwardApplicant; slug
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
                     <div><div style={labelStyle}>Name</div><div style={valueStyle}>{pd?.name}</div></div>
                     <div><div style={labelStyle}>Register No</div><div style={valueStyle}>{pd?.registerNumber}</div></div>
-                    <div><div style={labelStyle}>Department</div><div style={valueStyle}>{pd?.department}</div></div>
+                    <div><div style={labelStyle}>Programme</div><div style={valueStyle}>{pd?.department}</div></div>
                     <div><div style={labelStyle}>Email</div><div style={valueStyle}>{pd?.personalEmail}</div></div>
                     <div><div style={labelStyle}>SRM Email</div><div style={valueStyle}>{pd?.srmEmail}</div></div>
                     <div><div style={labelStyle}>Mobile</div><div style={valueStyle}>{pd?.mobileNumber}</div></div>
@@ -352,6 +355,7 @@ function AwardDetailPanel({ applicant, slug }: { applicant: AwardApplicant; slug
                 <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '10px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
                     📋 Award Details
                 </h4>
+                {slug === 'academic-excellence' && <AcademicExcellenceDetails applicant={applicant} />}
                 {slug === 'researcher' && <ResearcherDetails applicant={applicant} />}
                 {slug === 'hackathon' && <ListDetails items={applicant.wins as any[]} label="Win" fields={['eventName', 'level', 'position', 'teamSize', 'projectBuilt', 'proofLink']} />}
                 {slug === 'sports' && <ListDetails items={applicant.wins as any[]} label="Win" fields={['sportOrEvent', 'level', 'position', 'proofLink']} />}
@@ -477,6 +481,20 @@ function SalaryDetails({ applicant, slug }: { applicant: AwardApplicant; slug: A
             )}
             {slug === 'core-salary' && Boolean(applicant.coreDomainProofLink) && (
                 <div><div style={labelStyle}>Core Proof</div><a href={String(applicant.coreDomainProofLink)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', fontSize: '13px' }}>View</a></div>
+            )}
+        </div>
+    );
+}
+
+function AcademicExcellenceDetails({ applicant }: { applicant: AwardApplicant }) {
+    const labelStyle: React.CSSProperties = { fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 };
+    const valueStyle: React.CSSProperties = { fontSize: '13px', color: 'var(--text-primary)' };
+
+    return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+            <div><div style={labelStyle}>CGPA</div><div style={{ ...valueStyle, fontWeight: 700, color: '#D97706', fontSize: '1.2rem' }}>{Number(applicant.cgpa || 0).toFixed(2)}</div></div>
+            {Boolean(applicant.gradeSheetLink) && (
+                <div><div style={labelStyle}>Grade Sheet</div><a href={String(applicant.gradeSheetLink)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', fontSize: '13px' }}>View Grade Sheet</a></div>
             )}
         </div>
     );

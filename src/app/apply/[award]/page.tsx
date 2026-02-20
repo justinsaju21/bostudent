@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { AwardSlug, getAwardBySlug } from '@/lib/awards';
-import { getSchemaForAward } from '@/lib/awardSchemas';
+import { getSchemaForAward, PROGRAMME_OPTIONS } from '@/lib/awardSchemas';
 import { submitAwardApplication, AwardSubmitResult } from '@/app/awardActions';
 import {
     ChevronLeft,
@@ -47,11 +47,12 @@ function PersonalStep({ register, errors }: { register: any; errors: any }) {
                 <Field label="Register Number" error={errors?.personalDetails?.registerNumber?.message}>
                     <input className="form-input" {...register('personalDetails.registerNumber')} placeholder="RA2211053010097" />
                 </Field>
-                <Field label="Department" error={errors?.personalDetails?.department?.message}>
+                <Field label="Programme / Course" error={errors?.personalDetails?.department?.message}>
                     <select className="form-input" {...register('personalDetails.department')}>
-                        <option value="">Select Department</option>
-                        <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
-                        <option value="Electronics And Computer Engineering">Electronics And Computer Engineering</option>
+                        <option value="">Select Programme</option>
+                        {PROGRAMME_OPTIONS.map(p => (
+                            <option key={p} value={p}>{p}</option>
+                        ))}
                     </select>
                 </Field>
                 <Field label="Personal Email" error={errors?.personalDetails?.personalEmail?.message}>
@@ -69,6 +70,12 @@ function PersonalStep({ register, errors }: { register: any; errors: any }) {
                 <Field label="Faculty Advisor" error={errors?.personalDetails?.facultyAdvisor?.message}>
                     <input className="form-input" {...register('personalDetails.facultyAdvisor')} placeholder="Dr. Name" />
                 </Field>
+                <Field label="Specialization" error={errors?.personalDetails?.specialization?.message}>
+                    <input className="form-input" {...register('personalDetails.specialization')} placeholder="e.g., VLSI Design, Embedded Systems" />
+                </Field>
+                <Field label="Profile Photo URL (Optional)" error={errors?.personalDetails?.profilePhotoUrl?.message}>
+                    <input className="form-input" {...register('personalDetails.profilePhotoUrl')} placeholder="https://drive.google.com/..." />
+                </Field>
             </div>
         </div>
     );
@@ -84,6 +91,7 @@ function AwardDetailsStep({ slug, register, errors, control }: { slug: AwardSlug
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.4rem', fontWeight: 600, marginBottom: '24px' }}>
                 {award.title} — Details
             </h2>
+            {slug === 'academic-excellence' && <AcademicExcellenceFields register={register} errors={errors} />}
             {slug === 'researcher' && <ResearcherFields register={register} errors={errors} control={control} />}
             {slug === 'hackathon' && <HackathonFields register={register} errors={errors} control={control} />}
             {slug === 'sports' && <SportsFields register={register} errors={errors} control={control} />}
@@ -436,6 +444,20 @@ function CoreSalaryFields({ register, errors }: { register: any; errors: any }) 
     );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function AcademicExcellenceFields({ register, errors }: { register: any; errors: any }) {
+    return (
+        <>
+            <Field label="Overall CGPA (out of 10)" error={errors?.cgpa?.message}>
+                <input className="form-input" type="number" step="0.01" min="0" max="10" {...register('cgpa', { valueAsNumber: true })} placeholder="e.g., 9.25" />
+            </Field>
+            <Field label="Grade Sheet / Transcript Link" error={errors?.gradeSheetLink?.message}>
+                <input className="form-input" {...register('gradeSheetLink')} placeholder="https://drive.google.com/..." />
+            </Field>
+        </>
+    );
+}
+
 // ===== MAIN DYNAMIC PAGE =====
 export default function AwardApplyPage() {
     const params = useParams();
@@ -452,10 +474,11 @@ export default function AwardApplyPage() {
 
     const getDefaults = useCallback(() => {
         const base = {
-            personalDetails: { name: '', registerNumber: '', department: '' as any, personalEmail: '', srmEmail: '', mobileNumber: '', section: '', facultyAdvisor: '' },
+            personalDetails: { name: '', registerNumber: '', department: '' as any, specialization: '', personalEmail: '', srmEmail: '', mobileNumber: '', section: '', facultyAdvisor: '', profilePhotoUrl: '' },
             consentGiven: false as unknown as true,
         };
         switch (slug) {
+            case 'academic-excellence': return { ...base, cgpa: 0, gradeSheetLink: '' };
             case 'researcher': return { ...base, papers: [], patents: [], researchStatement: '', masterProofFolderUrl: '' };
             case 'hackathon': return { ...base, wins: [], masterProofFolderUrl: '' };
             case 'sports': return { ...base, wins: [], masterProofFolderUrl: '' };

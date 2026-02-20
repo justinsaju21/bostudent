@@ -19,10 +19,12 @@ function getSheetId(): string {
 
 // Headers for each award (matches awardSheets.ts getHeadersForAward)
 function getHeadersForAward(slug: AwardSlug): string[] {
-    const personal = ['Name', 'Register Number', 'Department', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
+    const personal = ['Name', 'Register Number', 'Programme', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
     switch (slug) {
         case 'best-outgoing':
             return []; // BO uses the existing BO_Main tab — skip
+        case 'academic-excellence':
+            return [...personal, 'CGPA', 'Grade Sheet Link', 'Submitted At', 'JSON_Full_Data'];
         case 'researcher':
             return [...personal, 'Papers (Summary)', 'Patents (Summary)', 'Research Statement', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
         case 'hackathon':
@@ -48,7 +50,7 @@ function sampleResearcher(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${200 + i}`,
-            department: 'Electronics & Communication Engineering', specialization: 'Embedded Systems', personalEmail: `researcher${i}@example.com`,
+            department: 'B.Tech Electronics and Communication Engineering', specialization: 'Embedded Systems', personalEmail: `researcher${i}@example.com`,
             srmEmail: `res${i}@srmist.edu.in`, mobileNumber: `98401${100000 + i}`, section: 'A', facultyAdvisor: 'Dr. Ramesh Kumar',
             profilePhotoUrl: '',
         },
@@ -68,7 +70,7 @@ function sampleHackathon(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${300 + i}`,
-            department: 'Electronics & Communication Engineering', specialization: 'VLSI Design', personalEmail: `hack${i}@example.com`,
+            department: 'B.Tech Electronics and Communication Engineering', specialization: 'VLSI Design', personalEmail: `hack${i}@example.com`,
             srmEmail: `hack${i}@srmist.edu.in`, mobileNumber: `98402${100000 + i}`, section: 'B', facultyAdvisor: 'Dr. Priya Sharma',
             profilePhotoUrl: '',
         },
@@ -86,7 +88,7 @@ function sampleSports(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${400 + i}`,
-            department: 'Electronics & Communication Engineering', specialization: 'Communication', personalEmail: `sports${i}@example.com`,
+            department: 'B.Tech Electronics and Communication Engineering', specialization: 'Communication', personalEmail: `sports${i}@example.com`,
             srmEmail: `sp${i}@srmist.edu.in`, mobileNumber: `98403${100000 + i}`, section: 'C', facultyAdvisor: 'Prof. Lakshmi Narayanan',
             profilePhotoUrl: '',
         },
@@ -103,7 +105,7 @@ function sampleNssNcc(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${500 + i}`,
-            department: 'Electronics & Communication Engineering', specialization: 'VLSI', personalEmail: `nss${i}@example.com`,
+            department: 'B.Tech Electronics and Communication Engineering', specialization: 'VLSI', personalEmail: `nss${i}@example.com`,
             srmEmail: `nss${i}@srmist.edu.in`, mobileNumber: `98404${100000 + i}`, section: 'D', facultyAdvisor: 'Dr. A. Smith',
             profilePhotoUrl: '',
         },
@@ -123,7 +125,7 @@ function sampleDeptContribution(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: names[i % names.length], registerNumber: `RA2211053010${600 + i}`,
-            department: 'Electronics And Computer Engineering', specialization: 'N/A', personalEmail: `dept${i}@example.com`,
+            department: 'B.Tech Electronics and Computer Engineering', specialization: 'N/A', personalEmail: `dept${i}@example.com`,
             srmEmail: `dept${i}@srmist.edu.in`, mobileNumber: `98405${100000 + i}`, section: 'E', facultyAdvisor: 'Prof. R. Johnson',
             profilePhotoUrl: '',
         },
@@ -146,7 +148,7 @@ function sampleHighestSalary(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: d.name, registerNumber: `RA2211053010${700 + i}`,
-            department: 'Electronics And Computer Engineering', specialization: 'AI & ML', personalEmail: `salary${i}@example.com`,
+            department: 'B.Tech Electronics and Computer Engineering', specialization: 'AI & ML', personalEmail: `salary${i}@example.com`,
             srmEmail: `sal${i}@srmist.edu.in`, mobileNumber: `98406${100000 + i}`, section: 'F', facultyAdvisor: 'Dr. K. Lee',
             profilePhotoUrl: '',
         },
@@ -165,7 +167,7 @@ function sampleCoreSalary(i: number): Record<string, unknown> {
     return {
         personalDetails: {
             name: d.name, registerNumber: `RA2211053010${800 + i}`,
-            department: 'Electronics & Communication Engineering', specialization: 'Core ECE', personalEmail: `core${i}@example.com`,
+            department: 'B.Tech Electronics and Communication Engineering', specialization: 'Core ECE', personalEmail: `core${i}@example.com`,
             srmEmail: `core${i}@srmist.edu.in`, mobileNumber: `98407${100000 + i}`, section: 'A', facultyAdvisor: 'Dr. S. Nair',
             profilePhotoUrl: '',
         },
@@ -173,6 +175,26 @@ function sampleCoreSalary(i: number): Record<string, unknown> {
         coreDomain: d.domain,
         offerLetterLink: 'https://drive.google.com/offer-core',
         coreDomainProofLink: 'https://drive.google.com/core-proof',
+        consentGiven: true, submittedAt: new Date().toISOString(),
+    };
+}
+
+function sampleAcademicExcellence(i: number): Record<string, unknown> {
+    const data = [
+        { name: 'Priya Sharma', cgpa: 9.72, programme: 'B.Tech Electronics and Communication Engineering' },
+        { name: 'Rahul Iyer', cgpa: 9.58, programme: 'B.Tech Electronics and Computer Engineering' },
+        { name: 'Sneha Nair', cgpa: 9.45, programme: 'M.Tech Electronics and Communication Engineering' },
+    ];
+    const d = data[i % data.length];
+    return {
+        personalDetails: {
+            name: d.name, registerNumber: `RA2211053010${900 + i}`,
+            department: d.programme, specialization: 'Academic Excellence', personalEmail: `acad${i}@example.com`,
+            srmEmail: `acad${i}@srmist.edu.in`, mobileNumber: `98408${100000 + i}`, section: 'A', facultyAdvisor: 'Dr. Ramesh Kumar',
+            profilePhotoUrl: '',
+        },
+        cgpa: d.cgpa,
+        gradeSheetLink: 'https://drive.google.com/grade-sheet',
         consentGiven: true, submittedAt: new Date().toISOString(),
     };
 }
@@ -243,6 +265,7 @@ export async function GET(req: NextRequest) {
         // Seed sample data if requested
         if (withSample) {
             const sampleGenerators: Record<string, (i: number) => Record<string, unknown>> = {
+                'academic-excellence': sampleAcademicExcellence,
                 'researcher': sampleResearcher,
                 'hackathon': sampleHackathon,
                 'sports': sampleSports,

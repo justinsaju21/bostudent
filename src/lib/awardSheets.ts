@@ -57,9 +57,11 @@ async function ensureSheet(sheetName: string, headers: string[]): Promise<void> 
 
 // ===== HEADERS for each award sheet =====
 function getHeadersForAward(slug: AwardSlug): string[] {
-    const personal = ['Name', 'Register Number', 'Department', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
+    const personal = ['Name', 'Register Number', 'Programme', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
 
     switch (slug) {
+        case 'academic-excellence':
+            return [...personal, 'CGPA', 'Grade Sheet Link', 'Submitted At', 'JSON_Full_Data'];
         case 'researcher':
             return [...personal, 'Papers (Summary)', 'Patents (Summary)', 'Research Statement', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
         case 'hackathon':
@@ -86,6 +88,8 @@ function awardApplicationToRow(slug: AwardSlug, app: any): string[] {
     const personal = [pd.name, pd.registerNumber, pd.department, pd.specialization, pd.personalEmail, pd.srmEmail, pd.mobileNumber, pd.section, pd.facultyAdvisor, pd.profilePhotoUrl || ''];
 
     switch (slug) {
+        case 'academic-excellence':
+            return [...personal, String(app.cgpa || 0), app.gradeSheetLink || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
         case 'researcher': {
             const papersSummary = (app.papers || []).map((p: { title: string; indexStatus: string }, i: number) =>
                 `${i + 1}. ${p.title} [${p.indexStatus?.toUpperCase()}]`).join('\n') || 'None';

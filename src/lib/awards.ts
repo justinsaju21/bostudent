@@ -2,6 +2,7 @@
 
 export type AwardSlug =
     | 'best-outgoing'
+    | 'academic-excellence'
     | 'researcher'
     | 'hackathon'
     | 'sports'
@@ -29,6 +30,15 @@ export const AWARD_CATEGORIES: AwardCategory[] = [
         sheetName: 'BO_Main',
         icon: 'GraduationCap',
         color: '#034DA1',
+    },
+    {
+        slug: 'academic-excellence',
+        title: 'Best Student for Academic Excellence',
+        shortTitle: 'Academic Excellence',
+        description: 'Programme-wise award for the student with the highest overall CGPA.',
+        sheetName: 'Academic_Excellence',
+        icon: 'Star',
+        color: '#D97706',
     },
     {
         slug: 'researcher',
