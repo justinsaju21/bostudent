@@ -20,6 +20,9 @@ export default function AwardAdminPanel({ slug }: Props) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [search, setSearch] = useState('');
+    const [deptFilter, setDeptFilter] = useState('');
+    const [sectionFilter, setSectionFilter] = useState('');
+    const [advisorFilter, setAdvisorFilter] = useState('');
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
     const award = AWARD_CATEGORIES.find(a => a.slug === slug);
@@ -28,6 +31,9 @@ export default function AwardAdminPanel({ slug }: Props) {
         setIsLoading(true);
         setError('');
         setApplicants([]);
+        setDeptFilter('');
+        setSectionFilter('');
+        setAdvisorFilter('');
         setExpandedRow(null);
 
         fetch(`/api/admin/awards?slug=${slug}`)
@@ -43,6 +49,21 @@ export default function AwardAdminPanel({ slug }: Props) {
             .finally(() => setIsLoading(false));
     }, [slug]);
 
+    const departments = useMemo(() => {
+        const d = new Set(applicants.map(a => a.personalDetails?.department).filter(Boolean));
+        return Array.from(d).sort();
+    }, [applicants]);
+
+    const sections = useMemo(() => {
+        const s = new Set(applicants.map(a => a.personalDetails?.section).filter(Boolean));
+        return Array.from(s).sort();
+    }, [applicants]);
+
+    const advisors = useMemo(() => {
+        const ad = new Set(applicants.map(a => a.personalDetails?.facultyAdvisor).filter(Boolean));
+        return Array.from(ad).sort();
+    }, [applicants]);
+
     const filtered = useMemo(() => {
         let list = applicants;
         if (search) {
@@ -56,12 +77,23 @@ export default function AwardAdminPanel({ slug }: Props) {
                     pd?.section?.toLowerCase().includes(q);
             });
         }
+
+        if (deptFilter) {
+            list = list.filter(a => a.personalDetails?.department === deptFilter);
+        }
+        if (sectionFilter) {
+            list = list.filter(a => a.personalDetails?.section === sectionFilter);
+        }
+        if (advisorFilter) {
+            list = list.filter(a => a.personalDetails?.facultyAdvisor === advisorFilter);
+        }
+
         // Auto-sort salary awards by CTC descending
         if (slug === 'highest-salary' || slug === 'core-salary') {
             list = [...list].sort((a, b) => (Number(b.ctcLpa) || 0) - (Number(a.ctcLpa) || 0));
         }
         return list;
-    }, [applicants, search, slug]);
+    }, [applicants, search, deptFilter, sectionFilter, advisorFilter, slug]);
 
     const downloadCSV = () => {
         if (!award || applicants.length === 0) return;
@@ -165,6 +197,43 @@ export default function AwardAdminPanel({ slug }: Props) {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
+
+                <select
+                    className="form-input"
+                    style={{ width: 'auto', minWidth: '180px' }}
+                    value={deptFilter}
+                    onChange={(e) => setDeptFilter(e.target.value)}
+                >
+                    <option value="">All Departments</option>
+                    {departments.map((dept) => (
+                        <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                </select>
+
+                <select
+                    className="form-input"
+                    style={{ width: 'auto', minWidth: '120px' }}
+                    value={sectionFilter}
+                    onChange={(e) => setSectionFilter(e.target.value)}
+                >
+                    <option value="">All Sections</option>
+                    {sections.map((sec) => (
+                        <option key={sec} value={sec}>Section {sec}</option>
+                    ))}
+                </select>
+
+                <select
+                    className="form-input"
+                    style={{ width: 'auto', minWidth: '180px' }}
+                    value={advisorFilter}
+                    onChange={(e) => setAdvisorFilter(e.target.value)}
+                >
+                    <option value="">All Advisors</option>
+                    {advisors.map((adv) => (
+                        <option key={adv} value={adv}>{adv}</option>
+                    ))}
+                </select>
+
                 <button onClick={downloadCSV} className="btn-secondary" style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '10px 16px' }}>
                     <Download size={18} /> Export CSV
                 </button>
