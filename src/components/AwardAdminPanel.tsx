@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AWARD_CATEGORIES, AwardSlug } from '@/lib/awards';
 import { BasePersonalDetails } from '@/lib/awardTypes';
-import { Search, Download, Loader2, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Download, Loader2, ChevronDown, ChevronUp, ExternalLink, Users, Award as AwardIcon } from 'lucide-react';
 
 interface AwardApplicant {
     personalDetails: BasePersonalDetails;
@@ -62,6 +63,15 @@ export default function AwardAdminPanel({ slug }: Props) {
     const advisors = useMemo(() => {
         const ad = new Set(applicants.map(a => a.personalDetails?.facultyAdvisor).filter(Boolean));
         return Array.from(ad).sort();
+    }, [applicants]);
+
+    const deptStats = useMemo(() => {
+        const stats: Record<string, number> = {};
+        applicants.forEach(a => {
+            const dept = a.personalDetails?.department || 'Unknown';
+            stats[dept] = (stats[dept] || 0) + 1;
+        });
+        return Object.entries(stats).sort((a, b) => b[1] - a[1]);
     }, [applicants]);
 
     const filtered = useMemo(() => {
@@ -165,27 +175,60 @@ export default function AwardAdminPanel({ slug }: Props) {
     }
 
     return (
-        <div>
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+        >
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                <div className="glass-card" style={{ padding: '20px' }}>
-                    <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '4px' }}>
-                        Total Applicants
-                    </div>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: award?.color || 'var(--text-primary)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+                <div className="glass-card" style={{ padding: '24px' }}>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Users size={20} /> Total Applicants
+                    </h3>
+                    <div style={{ fontSize: '3rem', fontWeight: 700, color: award?.color || 'var(--srm-blue)' }}>
                         {applicants.length}
                     </div>
                 </div>
-                {(slug === 'highest-salary' || slug === 'core-salary') && applicants.length > 0 && (
-                    <div className="glass-card" style={{ padding: '20px' }}>
-                        <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '4px' }}>
-                            Highest CTC
+
+                {(slug === 'highest-salary' || slug === 'core-salary') && applicants.length > 0 ? (
+                    <div className="glass-card" style={{ padding: '24px' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <AwardIcon size={20} /> Highest CTC
+                        </h3>
+                        <div style={{ fontSize: '3rem', fontWeight: 700, color: '#10B981' }}>
+                            ₹{Math.max(...applicants.map(a => Number(a.ctcLpa) || 0)).toFixed(2)} <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>LPA</span>
                         </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: '#10B981' }}>
-                            ₹{Math.max(...applicants.map(a => Number(a.ctcLpa) || 0)).toFixed(2)} LPA
+                    </div>
+                ) : (
+                    <div className="glass-card" style={{ padding: '24px' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-secondary)' }}>Department Breakdown</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {deptStats.slice(0, 5).map(([dept, count]) => (
+                                <div key={dept} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                    <span style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '8px' }}>{dept}</span>
+                                    <span style={{ fontWeight: 600 }}>{count}</span>
+                                </div>
+                            ))}
+                            {deptStats.length === 0 && <span style={{ color: 'var(--text-muted)' }}>No data available</span>}
                         </div>
                     </div>
                 )}
+            </div>
+
+            {/* Results Count Label */}
+            <div style={{
+                marginBottom: '12px',
+                fontSize: '13px',
+                color: 'var(--text-muted)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+            }}>
+                <span>
+                    Showing <strong>{filtered.length}</strong> {filtered.length === 1 ? 'applicant' : 'applicants'}
+                    {deptFilter || search || sectionFilter || advisorFilter ? ' (filtered)' : ' total'}
+                </span>
             </div>
 
             {/* Filters */}
@@ -195,7 +238,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                     <input
                         className="form-input"
                         style={{ paddingLeft: '40px' }}
-                        placeholder="Search by name, register no, or department..."
+                        placeholder="Search by name, register no, or specialization..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -221,7 +264,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                 >
                     <option value="">All Sections</option>
                     {sections.map((sec) => (
-                        <option key={sec} value={sec}>Section {sec}</option>
+                        <option key={sec} value={sec}>Sec {sec}</option>
                     ))}
                 </select>
 
@@ -243,12 +286,19 @@ export default function AwardAdminPanel({ slug }: Props) {
             </div>
 
             {/* Table */}
-            <div style={{
-                borderRadius: 'var(--radius-md)', overflow: 'hidden',
-                border: '1px solid var(--border-subtle)', background: 'var(--bg-card)',
-            }}>
-                <div style={{ overflowX: 'auto' }}>
-                    <table className="data-table" style={{ minWidth: '700px' }}>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                style={{
+                    borderRadius: 'var(--radius-md)',
+                    overflow: 'hidden',
+                    border: '1px solid var(--border-subtle)',
+                    background: 'var(--bg-card)',
+                }}
+            >
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <table className="data-table" style={{ minWidth: '800px' }}>
                         <thead>
                             <tr style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                                 <th style={{ width: '50px' }}>#</th>
@@ -263,7 +313,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                         <tbody>
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 7 : 5} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
                                         {applicants.length === 0 ? 'No applications yet for this award.' : 'No results found.'}
                                     </td>
                                 </tr>
@@ -308,7 +358,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                                             </tr>
                                             {isExpanded && (
                                                 <tr>
-                                                    <td colSpan={7} style={{ padding: 0 }}>
+                                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 7 : 5} style={{ padding: 0 }}>
                                                         <AwardDetailPanel applicant={applicant} slug={slug} />
                                                     </td>
                                                 </tr>
@@ -320,8 +370,8 @@ export default function AwardAdminPanel({ slug }: Props) {
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }
 
