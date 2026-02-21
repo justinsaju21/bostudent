@@ -79,67 +79,67 @@ const HEADERS = [
 
 // ===== Generate Summary Strings =====
 function summarizeInternships(items: StudentApplication['internships']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((i, idx) => `${idx + 1}. ${i.company} (${i.role}) - ${i.startDate} to ${i.endDate}`).join('\n');
 }
 
 function summarizeProjects(items: StudentApplication['projects']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((p, idx) => `${idx + 1}. ${p.title} [${p.techStack}]`).join('\n');
 }
 
 function summarizeHackathons(items: StudentApplication['hackathons']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((h, idx) => `${idx + 1}. ${h.name} - ${h.position} (Team: ${h.teamSize})`).join('\n');
 }
 
 function summarizeResearch(items: StudentApplication['research']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((r, idx) => `${idx + 1}. ${r.title} [${r.indexStatus.toUpperCase()}] - ${r.publicationStatus}`).join('\n');
 }
 
 function summarizeEntrepreneurship(items: StudentApplication['entrepreneurship']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((e, idx) => `${idx + 1}. ${e.startupName} - ${e.revenueOrFundingStatus || 'N/A'}`).join('\n');
 }
 
 function summarizeCertifications(items: StudentApplication['certifications']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((c, idx) => `${idx + 1}. ${c.certificateName} (${c.provider})`).join('\n');
 }
 
 function summarizeExams(items: StudentApplication['competitiveExams']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((e, idx) => `${idx + 1}. ${e.examName} - ${e.scoreOrRank}`).join('\n');
 }
 
 function summarizeSports(items: StudentApplication['sportsOrCultural']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((s, idx) => `${idx + 1}. ${s.eventName} (${s.level}) - ${s.positionWon}`).join('\n');
 }
 
 function summarizeVolunteering(items: StudentApplication['volunteering']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((v, idx) => `${idx + 1}. ${v.organization} (${v.role}) - ${v.hoursServed || '?'}h`).join('\n');
 }
 
 function summarizeScholarships(items: StudentApplication['scholarships']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((s, idx) => `${idx + 1}. ${s.name} by ${s.awardingBody}`).join('\n');
 }
 
 function summarizeClubs(items: StudentApplication['clubActivities']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((c, idx) => `${idx + 1}. ${c.clubName} - ${c.position}`).join('\n');
 }
 
 function summarizeDeptContributions(items: StudentApplication['departmentContributions']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((d, idx) => `${idx + 1}. ${d.eventName} (${d.role})`).join('\n');
 }
 
 function summarizeReferences(items: StudentApplication['references']): string {
-    if (!items.length) return 'None';
+    if (!items || !items.length) return 'None';
     return items.map((r, idx) => `${idx + 1}. ${r.facultyName} (${r.contact})`).join('\n');
 }
 

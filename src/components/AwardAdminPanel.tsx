@@ -181,7 +181,7 @@ export default function AwardAdminPanel({ slug }: Props) {
             transition={{ duration: 0.4 }}
         >
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: '20px', marginBottom: '40px' }}>
                 <div className="glass-card" style={{ padding: '24px' }}>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Users size={20} /> Total Applicants
@@ -388,7 +388,7 @@ function AwardDetailPanel({ applicant, slug }: { applicant: AwardApplicant; slug
                 <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '10px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
                     👤 Personal Details
                 </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '8px' }}>
                     <div><div style={labelStyle}>Name</div><div style={valueStyle}>{pd?.name}</div></div>
                     <div><div style={labelStyle}>Register No</div><div style={valueStyle}>{pd?.registerNumber}</div></div>
                     <div><div style={labelStyle}>Programme</div><div style={valueStyle}>{pd?.department}</div></div>
@@ -478,7 +478,7 @@ function ListDetails({ items, label, fields }: { items: any[]; label: string; fi
             {items.map((item: any, i: number) => (
                 <div key={i} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
                     <strong style={{ fontSize: '13px', marginBottom: '6px', display: 'block' }}>{label} {i + 1}</strong>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '6px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(160px, 100%), 1fr))', gap: '6px' }}>
                         {fields.map(field => (
                             <div key={field}>
                                 <div style={labelStyle}>{field.replace(/([A-Z])/g, ' $1').trim()}</div>
@@ -503,7 +503,7 @@ function NssNccDetails({ applicant }: { applicant: AwardApplicant }) {
     const valueStyle: React.CSSProperties = { fontSize: '13px', color: 'var(--text-primary)' };
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '8px' }}>
             <div>
                 <div style={labelStyle}>Organization</div>
                 <div style={valueStyle}>
@@ -527,7 +527,7 @@ function SalaryDetails({ applicant, slug }: { applicant: AwardApplicant; slug: A
     const valueStyle: React.CSSProperties = { fontSize: '13px', color: 'var(--text-primary)' };
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '8px' }}>
             <div><div style={labelStyle}>Company</div><div style={valueStyle}>{String(applicant.companyName || '—')}</div></div>
             <div><div style={labelStyle}>Job Role</div><div style={valueStyle}>{String(applicant.jobRole || '—')}</div></div>
             <div><div style={labelStyle}>CTC (LPA)</div><div style={{ ...valueStyle, fontWeight: 700, color: '#10B981' }}>₹{Number(applicant.ctcLpa || 0).toFixed(2)}</div></div>
@@ -547,7 +547,7 @@ function AcademicExcellenceDetails({ applicant }: { applicant: AwardApplicant })
     const valueStyle: React.CSSProperties = { fontSize: '13px', color: 'var(--text-primary)' };
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '8px' }}>
             <div><div style={labelStyle}>CGPA</div><div style={{ ...valueStyle, fontWeight: 700, color: '#D97706', fontSize: '1.2rem' }}>{Number(applicant.cgpa || 0).toFixed(2)}</div></div>
             {Boolean(applicant.gradeSheetLink) && (
                 <div><div style={labelStyle}>Grade Sheet</div><a href={String(applicant.gradeSheetLink)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', fontSize: '13px' }}>View Grade Sheet</a></div>

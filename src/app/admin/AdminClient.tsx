@@ -482,7 +482,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.2 }}
-                            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}
+                            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: '20px', marginBottom: '40px' }}
                         >
                             <div className="glass-card" style={{ padding: '24px' }}>
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px' }}>Total Applications</h3>
@@ -807,7 +807,7 @@ function StudentDetailPanel({
 
     const sectionStyle = { marginBottom: '24px' };
     const headingStyle: React.CSSProperties = { fontSize: '14px', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '10px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' };
-    const gridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' };
+    const gridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '8px' };
     const labelStyle: React.CSSProperties = { fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' as const, fontWeight: 600 };
     const valueStyle: React.CSSProperties = { fontSize: '13px', color: 'var(--text-primary)' };
 

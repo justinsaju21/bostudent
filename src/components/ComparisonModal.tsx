@@ -53,7 +53,7 @@ export default function ComparisonModal({ isOpen, onClose, students, rankedData,
                 </div>
 
                 <div style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: `200px repeat(${students.length}, minmax(300px, 1fr))`, gap: '0' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: `200px repeat(${students.length}, minmax(min(300px, 100%), 1fr))`, gap: '0' }}>
                         {/* Header Row */}
                         <div className="compare-cell header">Metric</div>
                         {students.map(s => (
