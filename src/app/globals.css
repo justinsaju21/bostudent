@@ -146,6 +146,28 @@ body {
   margin-top: 4px;
 }
 
+/* ===== Form Grids for Mobile Responsive Scaling ===== */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+
+  .form-grid-2,
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+    /* Collapse to 1 column on phones */
+  }
+}
+
 /* ===== Buttons ===== */
 .btn-primary {
   background: var(--accent-gradient);

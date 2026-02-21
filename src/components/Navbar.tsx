@@ -41,7 +41,7 @@ export default function Navbar() {
                 }}
             >
                 {/* Logo */}
-                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', minWidth: 0, overflow: 'hidden' }}>
                     <div
                         style={{
                             width: 'clamp(32px, 8vw, 48px)',
@@ -49,6 +49,7 @@ export default function Navbar() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
+                            flexShrink: 0,
                         }}
                     >
                         {/* SRM Logo */}

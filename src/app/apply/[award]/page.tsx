@@ -134,7 +134,7 @@ function ResearcherFields({ register, errors, control }: { register: any; errors
                         <Field label="Journal / Conference" error={errors?.papers?.[i]?.journalOrConference?.message}>
                             <input className="form-input" {...register(`papers.${i}.journalOrConference`)} />
                         </Field>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div className="form-grid-2">
                             <Field label="Index Status" error={errors?.papers?.[i]?.indexStatus?.message}>
                                 <select className="form-input" {...register(`papers.${i}.indexStatus`)}>
                                     <option value="sci">SCI</option>
@@ -230,7 +230,7 @@ function HackathonFields({ register, errors, control }: { register: any; errors:
                     <Field label="Event Name" error={errors?.wins?.[i]?.eventName?.message}>
                         <input className="form-input" {...register(`wins.${i}.eventName`)} />
                     </Field>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                    <div className="form-grid-3">
                         <Field label="Level" error={errors?.wins?.[i]?.level?.message}>
                             <select className="form-input" {...register(`wins.${i}.level`)}>
                                 <option value="state">State</option>
@@ -282,7 +282,7 @@ function SportsFields({ register, errors, control }: { register: any; errors: an
                     <Field label="Sport / Event" error={errors?.wins?.[i]?.sportOrEvent?.message}>
                         <input className="form-input" {...register(`wins.${i}.sportOrEvent`)} />
                     </Field>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="form-grid-2">
                         <Field label="Level" error={errors?.wins?.[i]?.level?.message}>
                             <select className="form-input" {...register(`wins.${i}.level`)}>
                                 <option value="state">State</option>
@@ -311,7 +311,7 @@ function NssNccFields({ register, errors, control }: { register: any; errors: an
     const org = useWatch({ control, name: 'organization' });
     return (
         <>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="form-grid-2">
                 <Field label="Organization" error={errors?.organization?.message}>
                     <select className="form-input" {...register('organization')}>
                         <option value="">Select...</option>
@@ -376,7 +376,7 @@ function DeptContributionFields({ register, errors, control }: { register: any; 
                             <option value="Other">Other</option>
                         </select>
                     </Field>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="form-grid-2">
                         <Field label="Role" error={errors?.contributions?.[i]?.role?.message}>
                             <input className="form-input" {...register(`contributions.${i}.role`)} />
                         </Field>
@@ -404,7 +404,7 @@ function DeptContributionFields({ register, errors, control }: { register: any; 
 function SalaryFields({ register, errors }: { register: any; errors: any }) {
     return (
         <>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="form-grid-2">
                 <Field label="Company Name" error={errors?.companyName?.message}>
                     <input className="form-input" {...register('companyName')} />
                 </Field>
@@ -426,7 +426,7 @@ function SalaryFields({ register, errors }: { register: any; errors: any }) {
 function CoreSalaryFields({ register, errors }: { register: any; errors: any }) {
     return (
         <>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="form-grid-2">
                 <Field label="Company Name" error={errors?.companyName?.message}>
                     <input className="form-input" {...register('companyName')} />
                 </Field>
@@ -475,6 +475,7 @@ export default function AwardApplyPage() {
     const [result, setResult] = useState<AwardSubmitResult | null>(null);
     const [deadlinePassed, setDeadlinePassed] = useState(false);
     const [isLoadingDeadline, setIsLoadingDeadline] = useState(true);
+    const [isNavigating, setIsNavigating] = useState(false);
 
     const schema = getSchemaForAward(slug);
 
@@ -595,13 +596,14 @@ export default function AwardApplyPage() {
     }
 
     const nextStep = async () => {
-        if (currentStep === 0) {
-            const valid = await trigger('personalDetails');
-            if (valid) {
-                setCurrentStep(1);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+        if (isNavigating || currentStep !== 0) return;
+        setIsNavigating(true);
+        const valid = await trigger('personalDetails');
+        if (valid) {
+            setCurrentStep(1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+        setIsNavigating(false);
     };
 
     const prevStep = () => {
@@ -692,9 +694,9 @@ export default function AwardApplyPage() {
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)}
                     onKeyDown={(e) => {
-                        if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
-                            e.preventDefault();
+                        if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA' && (e.target as HTMLElement).tagName !== 'BUTTON') {
                             if (currentStep === 0) {
+                                e.preventDefault();
                                 nextStep();
                             }
                         }
@@ -737,7 +739,7 @@ export default function AwardApplyPage() {
                             <ChevronLeft size={18} /> Previous
                         </button>
                         {currentStep === 0 ? (
-                            <button type="button" className="btn-primary" onClick={nextStep}>
+                            <button type="button" className="btn-primary" onClick={nextStep} disabled={isNavigating}>
                                 Next <ChevronRight size={18} />
                             </button>
                         ) : (

@@ -54,7 +54,7 @@ export default function AwardSelectionPage() {
 
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
                     gap: '24px',
                 }}>
                     {AWARD_CATEGORIES.map((award, index) => {

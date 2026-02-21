@@ -53,6 +53,7 @@ export function InfoTooltip({ text }: InfoTooltipProps) {
             {isOpen && (
                 <div
                     ref={tooltipRef}
+                    className="info-tooltip-content"
                     style={{
                         position: 'absolute',
                         bottom: 'calc(100% + 8px)',
@@ -93,6 +94,22 @@ export function InfoTooltip({ text }: InfoTooltipProps) {
                 @keyframes tooltipFadeIn {
                     from { opacity: 0; transform: translateX(-50%) translateY(4px); }
                     to { opacity: 1; transform: translateX(-50%) translateY(0); }
+                }
+                @media (max-width: 640px) {
+                    .info-tooltip-content {
+                        position: fixed !important;
+                        left: 16px !important;
+                        right: 16px !important;
+                        top: auto !important;
+                        bottom: 24px !important;
+                        width: auto !important;
+                        max-width: none !important;
+                        transform: none !important;
+                        z-index: 100 !important;
+                    }
+                    .info-tooltip-content > div:first-child {
+                        display: none !important; /* Hide arrow on mobile */
+                    }
                 }
             `}</style>
         </span>

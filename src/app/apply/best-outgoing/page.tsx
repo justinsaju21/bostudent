@@ -45,6 +45,7 @@ export default function BestOutgoingForm() {
     const [result, setResult] = useState<SubmitResult | null>(null);
     const [deadlinePassed, setDeadlinePassed] = useState(false);
     const [isLoadingDeadline, setIsLoadingDeadline] = useState(true);
+    const [isNavigating, setIsNavigating] = useState(false);
 
     const form = useForm<ApplicationFormData>({
         resolver: zodResolver(applicationSchema) as any,
@@ -118,19 +119,21 @@ export default function BestOutgoingForm() {
     }, [form]);
 
     const { register, control, formState: { errors }, handleSubmit, trigger } = form;
-
     const nextStep = async () => {
+        if (isNavigating || currentStep >= STEPS.length - 1) return;
+        setIsNavigating(true);
         const stepFields = getStepFields(currentStep);
         const isValid = await trigger(stepFields as (keyof ApplicationFormData)[]);
-        if (isValid && currentStep < STEPS.length - 1) {
-            setCurrentStep((prev) => prev + 1);
+        if (isValid) {
+            setCurrentStep(currentStep + 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+        setIsNavigating(false);
     };
 
     const prevStep = () => {
         if (currentStep > 0) {
-            setCurrentStep((prev) => prev - 1);
+            setCurrentStep(currentStep - 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
@@ -266,9 +269,9 @@ export default function BestOutgoingForm() {
                     onKeyDown={(e) => {
                         // Prevent Enter key from auto-submitting.
                         // Instead, move to the next step if not on the last step.
-                        if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
-                            e.preventDefault();
+                        if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA' && (e.target as HTMLElement).tagName !== 'BUTTON') {
                             if (currentStep < STEPS.length - 1) {
+                                e.preventDefault();
                                 nextStep();
                             }
                         }
@@ -323,6 +326,7 @@ export default function BestOutgoingForm() {
                                 type="button"
                                 className="btn-primary"
                                 onClick={nextStep}
+                                disabled={isNavigating}
                             >
                                 Next <ChevronRight size={18} />
                             </button>

@@ -54,8 +54,8 @@ export function PersonalDetailsStep({ register, errors }: StepProps) {
                 <span className="icon">👤</span>
                 Personal Details
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '20px' }}>
+                <div className="form-grid-2">
                     <Field label="Full Name *" error={errors.personalDetails?.name?.message}>
                         <input className="form-input" placeholder="e.g. John Doe" {...register('personalDetails.name')} />
                     </Field>
@@ -111,7 +111,7 @@ export function AcademicStep({ register, errors, control }: StepProps) {
                 Academic Record
                 <InfoTooltip text="📊 Weight: 18% of total score. CGPA is normalized to 10. Arrears history incurs a 15% penalty on your academic score." />
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '20px' }}>
                 <Field label="Current CGPA *" error={errors.academicRecord?.cgpa?.message}>
                     <input className="form-input" type="number" step="0.01" min="0" max="10" placeholder="8.5" {...register('academicRecord.cgpa')} />
                 </Field>
@@ -169,7 +169,7 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Internship #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => internships.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Company *" error={errors.internships?.[index]?.company?.message}>
                                 <Controller
                                     control={control}
@@ -219,7 +219,7 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Project #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => projects.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Title *" error={errors.projects?.[index]?.title?.message}>
                                 <input className="form-input" placeholder="Project Title" {...register(`projects.${index}.title`)} />
                             </Field>
@@ -259,7 +259,7 @@ export function TechnicalStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Hackathon #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => hackathons.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Hackathon Name *" error={errors.hackathons?.[index]?.name?.message}>
                                 <Controller
                                     control={control}
@@ -322,7 +322,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Paper #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => research.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Title *"><input className="form-input" {...register(`research.${index}.title`)} /></Field>
                             <Field label="Journal / Conference *"><input className="form-input" {...register(`research.${index}.journalOrConference`)} /></Field>
                             <Field label="Index Status *">
@@ -352,7 +352,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Startup #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => entrepreneurship.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Startup Name *"><input className="form-input" {...register(`entrepreneurship.${index}.startupName`)} /></Field>
                             <Field label="Registration Details"><input className="form-input" {...register(`entrepreneurship.${index}.registrationDetails`)} /></Field>
                             <Field label="Revenue / Funding Status"><input className="form-input" {...register(`entrepreneurship.${index}.revenueOrFundingStatus`)} /></Field>
@@ -373,7 +373,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Certificate #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => certifications.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Provider *"><input className="form-input" placeholder="AWS / Google / Cisco" {...register(`certifications.${index}.provider`)} /></Field>
                             <Field label="Certificate Name *"><input className="form-input" {...register(`certifications.${index}.certificateName`)} /></Field>
                             <Field label="Validation ID"><input className="form-input" {...register(`certifications.${index}.validationId`)} /></Field>
@@ -394,7 +394,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Exam #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => exams.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Exam Name *"><input className="form-input" placeholder="GATE / GRE / CAT" {...register(`competitiveExams.${index}.examName`)} /></Field>
                             <Field label="Score / Rank *"><input className="form-input" placeholder="Score or AIR" {...register(`competitiveExams.${index}.scoreOrRank`)} /></Field>
                             <Field label="Proof Link *" error={errors.competitiveExams?.[index]?.proofLink?.message}><input className="form-input" placeholder="https://drive.google.com/..." {...register(`competitiveExams.${index}.proofLink`)} /></Field>
@@ -414,7 +414,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Event #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => sports.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Event Name *"><input className="form-input" {...register(`sportsOrCultural.${index}.eventName`)} /></Field>
                             <Field label="Level *">
                                 <select className="form-input" {...register(`sportsOrCultural.${index}.level`)}>
@@ -439,7 +439,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Activity #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => volunteering.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Organization *" error={errors.volunteering?.[index]?.organization?.message}>
                                 <Controller
                                     control={control}
@@ -475,7 +475,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Scholarship #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => scholarships.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Scholarship Name *"><input className="form-input" {...register(`scholarships.${index}.name`)} /></Field>
                             <Field label="Awarding Body *"><input className="form-input" {...register(`scholarships.${index}.awardingBody`)} /></Field>
                             <Field label="Amount / Prestige"><input className="form-input" {...register(`scholarships.${index}.amountOrPrestige`)} /></Field>
@@ -496,7 +496,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Club #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => clubs.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Club Name *"><input className="form-input" {...register(`clubActivities.${index}.clubName`)} /></Field>
                             <Field label="Position *"><input className="form-input" placeholder="President / Secretary / Member" {...register(`clubActivities.${index}.position`)} /></Field>
                             <Field label="Key Events Organized"><input className="form-input" {...register(`clubActivities.${index}.keyEventsOrganized`)} /></Field>
@@ -518,7 +518,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Contribution #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => deptContributions.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Event Name *"><input className="form-input" {...register(`departmentContributions.${index}.eventName`)} /></Field>
                             <Field label="Role *"><input className="form-input" placeholder="Organizer / Volunteer" {...register(`departmentContributions.${index}.role`)} /></Field>
                             <Field label="Contribution Description"><input className="form-input" {...register(`departmentContributions.${index}.contributionDescription`)} /></Field>
@@ -539,7 +539,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Membership #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => professionalMemberships.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Organization / Body * (e.g. IEEE, ACM)" error={errors.professionalMemberships?.[index]?.organization?.message}>
                                 <input className="form-input" {...register(`professionalMemberships.${index}.organization`)} />
                             </Field>
@@ -568,7 +568,7 @@ export function AchievementsStep({ register, errors, control }: StepProps) {
                             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>Reference #{index + 1}</span>
                             <button type="button" className="btn-danger" onClick={() => references.remove(index)}><Trash2 size={14} /> Remove</button>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '16px' }}>
                             <Field label="Faculty Name *"><input className="form-input" {...register(`references.${index}.facultyName`)} /></Field>
                             <Field label="Contact *"><input className="form-input" placeholder="Email or Phone" {...register(`references.${index}.contact`)} /></Field>
                             <Field label="LoR Link"><input className="form-input" placeholder="Google Drive link" {...register(`references.${index}.lorLink`)} /></Field>
@@ -588,7 +588,7 @@ export function FinalStep({ register, errors, control }: StepProps) {
         <div>
             {/* Social Media */}
             <h2 className="section-title"><span className="icon">🌐</span>Social Media</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '20px', marginBottom: '32px' }}>
                 <Field label="LinkedIn" error={errors.socialMedia?.linkedin?.message}>
                     <input className="form-input" placeholder="https://linkedin.com/in/..." {...register('socialMedia.linkedin')} />
                 </Field>
@@ -663,7 +663,7 @@ function PostCollegeSection({ register, errors, control }: StepProps) {
     const statusValue = useWatch({ control, name: 'postCollegeStatus.status' });
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '20px' }}>
             <Field label="Current Status *" error={errors.postCollegeStatus?.status?.message}>
                 <select className="form-input" {...register('postCollegeStatus.status')}>
                     <option value="">Select...</option>
