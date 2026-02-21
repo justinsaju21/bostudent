@@ -205,9 +205,11 @@ export interface StudentApplication {
     videoPitchUrl: string;
     masterProofFolderUrl?: string;
     consentGiven: boolean;
+    termsAccepted: boolean;
     submittedAt?: string;
-    // Admin fields
+    // Admin Overrides
     facultyScore?: number;
+    verified?: boolean;
     discardedItems?: string[]; // Array of item IDs
 }
 

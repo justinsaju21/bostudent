@@ -5,10 +5,14 @@ import { AWARD_CATEGORIES, AwardSlug } from '@/lib/awards';
 import { BasePersonalDetails } from '@/lib/awardTypes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Download, Loader2, ChevronDown, ChevronUp, ExternalLink, Users, Award as AwardIcon } from 'lucide-react';
+import ComparisonModal from './ComparisonModal';
 
 interface AwardApplicant {
     personalDetails: BasePersonalDetails;
     submittedAt?: string;
+    facultyScore?: number;
+    verified?: boolean;
+    discardedItems?: string[];
     [key: string]: unknown;
 }
 
@@ -25,6 +29,17 @@ export default function AwardAdminPanel({ slug }: Props) {
     const [sectionFilter, setSectionFilter] = useState('');
     const [advisorFilter, setAdvisorFilter] = useState('');
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+    // Feature States
+    const [selectedRegNos, setSelectedRegNos] = useState<Set<string>>(new Set());
+    const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+
+    // Evaluation States
+    const [scoreOverrides, setScoreOverrides] = useState<Record<string, number>>({});
+    const [discardedItems, setDiscardedItems] = useState<Record<string, Set<string>>>({});
+    const [verifiedStatus, setVerifiedStatus] = useState<Record<string, boolean>>({});
+    const [changedRegNos, setChangedRegNos] = useState<Set<string>>(new Set());
+    const [isSaving, setIsSaving] = useState(false);
 
     const award = AWARD_CATEGORIES.find(a => a.slug === slug);
 
@@ -43,7 +58,30 @@ export default function AwardAdminPanel({ slug }: Props) {
                 if (data.error) {
                     setError(data.error);
                 } else {
-                    setApplicants(data.applications || []);
+                    const apps = data.applications || [];
+                    setApplicants(apps);
+
+                    // Initialize evaluation states from DB
+                    const initialScores: Record<string, number> = {};
+                    const initialDiscards: Record<string, Set<string>> = {};
+                    const initialVerified: Record<string, boolean> = {};
+
+                    apps.forEach((a: AwardApplicant) => {
+                        const regNo = a.personalDetails?.registerNumber;
+                        if (!regNo) return;
+                        if (a.facultyScore !== undefined) initialScores[regNo] = Number(a.facultyScore);
+                        if (a.verified !== undefined) initialVerified[regNo] = Boolean(a.verified);
+                        if (a.discardedItems) {
+                            try {
+                                const parsed = typeof a.discardedItems === 'string' ? JSON.parse(a.discardedItems) : a.discardedItems;
+                                if (Array.isArray(parsed)) initialDiscards[regNo] = new Set(parsed);
+                            } catch { /* ignore parse error */ }
+                        }
+                    });
+
+                    setScoreOverrides(initialScores);
+                    setVerifiedStatus(initialVerified);
+                    setDiscardedItems(initialDiscards);
                 }
             })
             .catch(err => setError(err.message))
@@ -152,6 +190,50 @@ export default function AwardAdminPanel({ slug }: Props) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const toggleSelection = (regNo: string) => {
+        const newSet = new Set(selectedRegNos);
+        if (newSet.has(regNo)) newSet.delete(regNo);
+        else {
+            if (newSet.size >= 5) {
+                alert('You can only compare up to 5 candidates at a time.');
+                return;
+            }
+            newSet.add(regNo);
+        }
+        setSelectedRegNos(newSet);
+    };
+
+    const saveAllChanges = async () => {
+        if (changedRegNos.size === 0) return;
+        setIsSaving(true);
+        try {
+            const updates = Array.from(changedRegNos).map(regNo => ({
+                regNo,
+                facultyScore: scoreOverrides[regNo] || 0,
+                isVerified: !!verifiedStatus[regNo],
+                discardedItems: Array.from(discardedItems[regNo] || [])
+            }));
+
+            const res = await fetch('/api/admin/evaluate-award', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ slug, updates }),
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || 'Failed to save changes');
+            }
+
+            setChangedRegNos(new Set());
+        } catch (err) {
+            console.error('Failed to save', err);
+            alert('Failed to save changes. Please try again.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     if (isLoading) {
@@ -280,9 +362,40 @@ export default function AwardAdminPanel({ slug }: Props) {
                     ))}
                 </select>
 
-                <button onClick={downloadCSV} className="btn-secondary" style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '10px 16px' }}>
-                    <Download size={18} /> Export CSV
-                </button>
+                <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                    <AnimatePresence>
+                        {selectedRegNos.size > 1 && (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                onClick={() => setIsCompareModalOpen(true)}
+                                className="btn-primary"
+                                style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '10px 16px' }}
+                            >
+                                <AwardIcon size={18} /> Compare ({selectedRegNos.size})
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
+
+                    <button onClick={downloadCSV} className="btn-secondary" style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '10px 16px' }}>
+                        <Download size={18} /> Export CSV
+                    </button>
+
+                    <button
+                        onClick={saveAllChanges}
+                        disabled={changedRegNos.size === 0 || isSaving}
+                        className={changedRegNos.size > 0 ? "btn-primary" : "btn-secondary"}
+                        style={{
+                            display: 'flex', gap: '8px', alignItems: 'center', padding: '10px 16px',
+                            background: changedRegNos.size > 0 ? '#10B981' : undefined,
+                            opacity: (changedRegNos.size === 0 || isSaving) ? 0.7 : 1,
+                            cursor: (changedRegNos.size === 0 || isSaving) ? 'not-allowed' : 'pointer',
+                        }}
+                    >
+                        {isSaving ? <Loader2 size={18} className="animate-spin" /> : <span>💾 Save Changes {changedRegNos.size > 0 ? `(${changedRegNos.size})` : ''}</span>}
+                    </button>
+                </div>
             </div>
 
             {/* Table */}
@@ -301,6 +414,21 @@ export default function AwardAdminPanel({ slug }: Props) {
                     <table className="data-table" style={{ minWidth: '800px' }}>
                         <thead>
                             <tr style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+                                <th style={{ width: '40px', textAlign: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedRegNos.size > 0 && selectedRegNos.size === filtered.length}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                const all = new Set(filtered.slice(0, 5).map(s => s.personalDetails?.registerNumber).filter(Boolean));
+                                                setSelectedRegNos(all as Set<string>);
+                                            } else {
+                                                setSelectedRegNos(new Set());
+                                            }
+                                        }}
+                                        style={{ cursor: 'pointer' }}
+                                    />
+                                </th>
                                 <th style={{ width: '50px' }}>#</th>
                                 <th>Name</th>
                                 <th>Department</th>
@@ -308,13 +436,14 @@ export default function AwardAdminPanel({ slug }: Props) {
                                 {(slug === 'highest-salary' || slug === 'core-salary') && <th>CTC (LPA)</th>}
                                 {(slug !== 'highest-salary' && slug !== 'core-salary') && <th>Overview</th>}
                                 <th>Submitted</th>
+                                <th>Score</th>
                                 <th style={{ width: '40px' }}></th>
                             </tr>
                         </thead>
                         <tbody>
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 7 : 6} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 9 : 8} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
                                         {applicants.length === 0 ? 'No applications yet for this award.' : 'No results found.'}
                                     </td>
                                 </tr>
@@ -323,19 +452,31 @@ export default function AwardAdminPanel({ slug }: Props) {
                                     const pd = applicant.personalDetails;
                                     const regNo = pd?.registerNumber || '';
                                     const isExpanded = expandedRow === regNo;
+                                    const isSelected = selectedRegNos.has(regNo);
+                                    const isVerified = verifiedStatus[regNo] || false;
+                                    const score = scoreOverrides[regNo] || 0;
 
                                     return (
                                         <React.Fragment key={regNo || index}>
                                             <tr
                                                 style={{
                                                     borderBottom: '1px solid var(--border-subtle)',
-                                                    background: isExpanded ? 'var(--bg-surface)' : 'transparent',
+                                                    background: isSelected ? 'rgba(3, 77, 161, 0.05)' : isExpanded ? 'var(--bg-surface)' : 'transparent',
                                                     cursor: 'pointer', transition: 'background 0.2s',
                                                 }}
                                                 onClick={() => setExpandedRow(isExpanded ? null : regNo)}
                                             >
+                                                <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => toggleSelection(regNo)}
+                                                        style={{ cursor: 'pointer' }}
+                                                    />
+                                                </td>
                                                 <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>
                                                     {index + 1}
+                                                    {isVerified && <span style={{ marginLeft: '4px' }}>✅</span>}
                                                 </td>
                                                 <td>
                                                     <div style={{ fontWeight: 600, fontSize: '14px' }}>{pd?.name || '—'}</div>
@@ -362,14 +503,42 @@ export default function AwardAdminPanel({ slug }: Props) {
                                                 <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                                                     {applicant.submittedAt ? new Date(applicant.submittedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
                                                 </td>
+                                                <td style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>
+                                                    {score > 0 ? score : '—'}
+                                                </td>
                                                 <td>
                                                     {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                                 </td>
                                             </tr>
                                             {isExpanded && (
                                                 <tr>
-                                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 7 : 6} style={{ padding: 0 }}>
-                                                        <AwardDetailPanel applicant={applicant} slug={slug} />
+                                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 9 : 8} style={{ padding: 0 }}>
+                                                        <AwardDetailPanel
+                                                            applicant={applicant}
+                                                            slug={slug}
+                                                            score={score}
+                                                            setScore={(s) => {
+                                                                setScoreOverrides(prev => ({ ...prev, [regNo]: s }));
+                                                                setChangedRegNos(prev => new Set(prev).add(regNo));
+                                                            }}
+                                                            isVerified={isVerified}
+                                                            setVerified={(v) => {
+                                                                setVerifiedStatus(prev => ({ ...prev, [regNo]: v }));
+                                                                setChangedRegNos(prev => new Set(prev).add(regNo));
+                                                            }}
+                                                            discardedSet={discardedItems[regNo] || new Set()}
+                                                            toggleDiscard={(section, itemId) => {
+                                                                const key = `${section}::${itemId}`;
+                                                                setDiscardedItems(prev => {
+                                                                    const currentSet = new Set(prev[regNo] || []);
+                                                                    if (currentSet.has(key)) currentSet.delete(key);
+                                                                    else currentSet.add(key);
+
+                                                                    setChangedRegNos(p => new Set(p).add(regNo));
+                                                                    return { ...prev, [regNo]: currentSet };
+                                                                });
+                                                            }}
+                                                        />
                                                     </td>
                                                 </tr>
                                             )}
@@ -381,18 +550,79 @@ export default function AwardAdminPanel({ slug }: Props) {
                     </table>
                 </div>
             </motion.div>
+
+            <AnimatePresence>
+                {isCompareModalOpen && selectedRegNos.size > 0 && (
+                    <ComparisonModal
+                        isOpen={isCompareModalOpen}
+                        onClose={() => setIsCompareModalOpen(false)}
+                        selectedStudents={filtered.filter(a => selectedRegNos.has(a.personalDetails?.registerNumber || '')) as any[]}
+                    />
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 }
 
 // ===== DETAIL PANEL for expanded rows =====
-function AwardDetailPanel({ applicant, slug }: { applicant: AwardApplicant; slug: AwardSlug }) {
+function AwardDetailPanel({
+    applicant, slug, score, setScore, isVerified, setVerified, discardedSet, toggleDiscard
+}: {
+    applicant: AwardApplicant;
+    slug: AwardSlug;
+    score: number;
+    setScore: (s: number) => void;
+    isVerified: boolean;
+    setVerified: (v: boolean) => void;
+    discardedSet: Set<string>;
+    toggleDiscard: (section: string, id: string) => void;
+}) {
     const pd = applicant.personalDetails;
     const labelStyle: React.CSSProperties = { fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 };
     const valueStyle: React.CSSProperties = { fontSize: '13px', color: 'var(--text-primary)' };
 
     return (
         <div style={{ padding: '24px 32px', background: 'rgba(3,77,161,0.02)', borderTop: '1px solid var(--border-subtle)' }}>
+
+            {/* Faculty Verification & Score Tool */}
+            <div style={{
+                marginBottom: '24px', padding: '16px', borderRadius: '8px',
+                background: isVerified ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-card)',
+                border: `1px solid ${isVerified ? '#10B981' : 'var(--border-subtle)'}`,
+                display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button
+                        onClick={() => setVerified(!isVerified)}
+                        style={{
+                            padding: '8px 16px', borderRadius: '6px', fontWeight: 600, fontSize: '13px',
+                            background: isVerified ? '#10B981' : 'transparent',
+                            color: isVerified ? 'white' : 'var(--text-primary)',
+                            border: `1px solid ${isVerified ? '#10B981' : 'var(--border-subtle)'}`,
+                            cursor: 'pointer', transition: 'all 0.2s',
+                            display: 'flex', alignItems: 'center', gap: '6px'
+                        }}
+                    >
+                        {isVerified ? '✅ Verified' : 'Mark as Verified'}
+                    </button>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        {isVerified ? 'Faculty has verified this application.' : 'Faculty verification pending.'}
+                    </span>
+                </div>
+
+                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={labelStyle}>Faculty Score Ovr:</div>
+                    <input
+                        type="number"
+                        value={score || ''}
+                        onChange={(e) => setScore(Number(e.target.value) || 0)}
+                        className="form-input"
+                        style={{ width: '80px', padding: '6px 10px' }}
+                        placeholder="0.0"
+                    />
+                </div>
+            </div>
+
             {/* Personal */}
             <div style={{ marginBottom: '20px' }}>
                 <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '10px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
@@ -416,94 +646,157 @@ function AwardDetailPanel({ applicant, slug }: { applicant: AwardApplicant; slug
                     📋 Award Details
                 </h4>
                 {slug === 'academic-excellence' && <AcademicExcellenceDetails applicant={applicant} />}
-                {slug === 'researcher' && <ResearcherDetails applicant={applicant} />}
-                {slug === 'hackathon' && <ListDetails items={applicant.wins as any[]} label="Win" fields={['eventName', 'level', 'position', 'teamSize', 'projectBuilt', 'proofLink']} />}
-                {slug === 'sports' && <ListDetails items={applicant.wins as any[]} label="Win" fields={['sportOrEvent', 'level', 'position', 'proofLink']} />}
+                {slug === 'researcher' && <ResearcherDetails applicant={applicant} discardedSet={discardedSet} toggleDiscard={toggleDiscard} />}
+                {slug === 'hackathon' && <ListDetails items={applicant.wins as any[]} label="Win" section="hackathon" discardedSet={discardedSet} toggleDiscard={toggleDiscard} fields={['eventName', 'level', 'position', 'teamSize', 'projectBuilt', 'proofLink']} />}
+                {slug === 'sports' && <ListDetails items={applicant.wins as any[]} label="Win" section="sports" discardedSet={discardedSet} toggleDiscard={toggleDiscard} fields={['sportOrEvent', 'level', 'position', 'proofLink']} />}
                 {slug === 'nss-ncc' && <NssNccDetails applicant={applicant} />}
-                {slug === 'dept-contribution' && <ListDetails items={applicant.contributions as any[]} label="Contribution" fields={['activityType', 'role', 'eventName', 'contributionDescription', 'proofLink']} />}
+                {slug === 'dept-contribution' && <ListDetails items={applicant.contributions as any[]} label="Contribution" section="dept-contribution" discardedSet={discardedSet} toggleDiscard={toggleDiscard} fields={['activityType', 'role', 'eventName', 'contributionDescription', 'proofLink']} />}
                 {(slug === 'highest-salary' || slug === 'core-salary') && <SalaryDetails applicant={applicant} slug={slug} />}
             </div>
 
-            {/* Proof folder */}
-            {Boolean(applicant.masterProofFolderUrl) && (
-                <div style={{ marginTop: '16px' }}>
+            {/* Actions */}
+            <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+                <a href={`/${pd?.registerNumber}/${slug}`} target="_blank" rel="noopener noreferrer"
+                    className="btn-secondary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', textDecoration: 'none' }}>
+                    <ExternalLink size={16} /> Open Public Portfolio
+                </a>
+
+                {Boolean(applicant.masterProofFolderUrl) && (
                     <a href={String(applicant.masterProofFolderUrl)} target="_blank" rel="noopener noreferrer"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', background: 'rgba(3,77,161,0.05)', color: 'var(--accent-primary)', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>
-                        Open Proof Folder <ExternalLink size={14} />
+                        className="btn-primary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: 'var(--srm-blue)', textDecoration: 'none' }}>
+                        View Master Proof Folder 📁
                     </a>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }
 
-function ResearcherDetails({ applicant }: { applicant: AwardApplicant }) {
+function ResearcherDetails({ applicant, discardedSet, toggleDiscard }: { applicant: AwardApplicant, discardedSet: Set<string>, toggleDiscard: (s: string, i: string) => void }) {
     const papers = (applicant.papers as any[]) || [];
     const patents = (applicant.patents as any[]) || [];
     const labelStyle: React.CSSProperties = { fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 };
     const valueStyle: React.CSSProperties = { fontSize: '13px', color: 'var(--text-primary)' };
 
+    const renderItem = (item: any, section: string, index: number, content: React.ReactNode) => {
+        const id = item.id || `research_${index}`;
+        const isDiscarded = discardedSet.has(`research::${id}`);
+
+        return (
+            <div key={index} style={{
+                padding: '12px', borderRadius: '6px', border: '1px solid var(--border-subtle)', marginTop: '8px',
+                background: isDiscarded ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-card)',
+                opacity: isDiscarded ? 0.6 : 1, transition: 'all 0.2s',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+                <div style={{ textDecoration: isDiscarded ? 'line-through' : 'none', flex: 1 }}>
+                    {content}
+                </div>
+                <button
+                    onClick={() => toggleDiscard('research', id)}
+                    className="btn-secondary"
+                    style={{
+                        padding: '4px 8px', fontSize: '11px',
+                        color: isDiscarded ? '#10B981' : '#EF4444',
+                        background: 'transparent', border: `1px solid ${isDiscarded ? '#10B981' : '#EF4444'}`,
+                        marginLeft: '16px'
+                    }}
+                >
+                    {isDiscarded ? 'Undo Discard' : 'Discard'}
+                </button>
+            </div>
+        );
+    };
+
     return (
         <>
             {papers.length > 0 && (
-                <div style={{ marginBottom: '12px' }}>
+                <div style={{ marginBottom: '16px' }}>
                     <strong style={{ fontSize: '13px' }}>Papers ({papers.length})</strong>
-                    {papers.map((p: any, i: number) => (
-                        <div key={i} style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-subtle)', marginTop: '6px' }}>
+                    {papers.map((p: any, i: number) => renderItem(p, 'papers', i,
+                        <>
                             <div style={valueStyle}><strong>{p.title}</strong></div>
                             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{p.journalOrConference} • {p.indexStatus?.toUpperCase()} • {p.publicationStatus}</div>
-                            {p.link && <a href={p.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--accent-primary)' }}>View Proof</a>}
-                        </div>
+                            {p.link && <a href={p.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--accent-primary)', textDecoration: 'none' }}>View Proof</a>}
+                        </>
                     ))}
                 </div>
             )}
             {patents.length > 0 && (
-                <div style={{ marginBottom: '12px' }}>
+                <div style={{ marginBottom: '16px' }}>
                     <strong style={{ fontSize: '13px' }}>Patents ({patents.length})</strong>
-                    {patents.map((p: any, i: number) => (
-                        <div key={i} style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-subtle)', marginTop: '6px' }}>
+                    {patents.map((p: any, i: number) => renderItem(p, 'patents', i,
+                        <>
                             <div style={valueStyle}><strong>{p.title}</strong> ({p.status})</div>
                             {p.patentNumber && <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Patent #: {p.patentNumber}</div>}
-                        </div>
+                            {p.proofLink && <a href={p.proofLink} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--accent-primary)', textDecoration: 'none' }}>View Proof</a>}
+                        </>
                     ))}
                 </div>
             )}
             {applicant.researchStatement && (
-                <div style={{ marginTop: '8px' }}>
+                <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
                     <div style={labelStyle}>Research Statement</div>
-                    <div style={{ ...valueStyle, marginTop: '4px', lineHeight: 1.6 }}>{String(applicant.researchStatement)}</div>
+                    <div style={{ ...valueStyle, marginTop: '8px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{String(applicant.researchStatement)}</div>
                 </div>
             )}
         </>
     );
 }
 
-function ListDetails({ items, label, fields }: { items: any[]; label: string; fields: string[] }) {
+function ListDetails({ items, label, fields, section, discardedSet, toggleDiscard }: { items: any[]; label: string; fields: string[], section: string, discardedSet: Set<string>, toggleDiscard: (s: string, i: string) => void }) {
     if (!items || items.length === 0) return <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No entries.</p>;
     const labelStyle: React.CSSProperties = { fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 };
     const valueStyle: React.CSSProperties = { fontSize: '13px', color: 'var(--text-primary)' };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {items.map((item: any, i: number) => (
-                <div key={i} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
-                    <strong style={{ fontSize: '13px', marginBottom: '6px', display: 'block' }}>{label} {i + 1}</strong>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(160px, 100%), 1fr))', gap: '6px' }}>
-                        {fields.map(field => (
-                            <div key={field}>
-                                <div style={labelStyle}>{field.replace(/([A-Z])/g, ' $1').trim()}</div>
-                                <div style={valueStyle}>
-                                    {field === 'proofLink' && item[field] ? (
-                                        <a href={item[field]} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'none' }}>View</a>
-                                    ) : (
-                                        String(item[field] ?? '—')
-                                    )}
+            {items.map((item: any, i: number) => {
+                const id = item.id || `${section}_${i}`;
+                const isDiscarded = discardedSet.has(`${section}::${id}`);
+
+                return (
+                    <div key={i} style={{
+                        padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-subtle)',
+                        background: isDiscarded ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-card)',
+                        opacity: isDiscarded ? 0.6 : 1, transition: 'all 0.2s'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <strong style={{ fontSize: '13px', textDecoration: isDiscarded ? 'line-through' : 'none' }}>{label} {i + 1}</strong>
+                            <button
+                                onClick={() => toggleDiscard(section, id)}
+                                className="btn-secondary"
+                                style={{
+                                    padding: '4px 8px', fontSize: '11px',
+                                    color: isDiscarded ? '#10B981' : '#EF4444',
+                                    background: 'transparent', border: `1px solid ${isDiscarded ? '#10B981' : '#EF4444'}`
+                                }}
+                            >
+                                {isDiscarded ? 'Undo Discard' : 'Discard'}
+                            </button>
+                        </div>
+                        <div style={{
+                            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(160px, 100%), 1fr))', gap: '8px',
+                            textDecoration: isDiscarded ? 'line-through' : 'none'
+                        }}>
+                            {fields.map(field => (
+                                <div key={field}>
+                                    <div style={labelStyle}>{field.replace(/([A-Z])/g, ' $1').trim()}</div>
+                                    <div style={valueStyle}>
+                                        {field === 'proofLink' && item[field] ? (
+                                            <a href={item[field]} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'none' }}>View</a>
+                                        ) : (
+                                            String(item[field] ?? '—')
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }

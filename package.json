@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:reset": "npx tsx scripts/reset-database.ts",
+    "db:seed": "npx tsx scripts/seed-sheets.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

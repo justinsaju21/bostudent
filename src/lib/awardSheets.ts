@@ -58,26 +58,27 @@ async function ensureSheet(sheetName: string, headers: string[]): Promise<void> 
 // ===== HEADERS for each award sheet =====
 function getHeadersForAward(slug: AwardSlug): string[] {
     const personal = ['Name', 'Register Number', 'Programme', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
+    const adminCols = ['Submitted At', 'Faculty Score', 'Verified', 'Discarded Items', 'JSON_Full_Data'];
 
     switch (slug) {
         case 'academic-excellence':
-            return [...personal, 'CGPA', 'Grade Sheet Link', 'Submitted At', 'JSON_Full_Data'];
+            return [...personal, 'CGPA', 'Grade Sheet Link', ...adminCols];
         case 'researcher':
-            return [...personal, 'Papers (Summary)', 'Patents (Summary)', 'Research Statement', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
+            return [...personal, 'Papers (Summary)', 'Patents (Summary)', 'Research Statement', 'Master Proof Folder', ...adminCols];
         case 'hackathon':
-            return [...personal, 'Wins (Summary)', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
+            return [...personal, 'Wins (Summary)', 'Master Proof Folder', ...adminCols];
         case 'sports':
-            return [...personal, 'Wins (Summary)', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
+            return [...personal, 'Wins (Summary)', 'Master Proof Folder', ...adminCols];
         case 'nss-ncc':
-            return [...personal, 'Organization', 'Other Organization', 'Role', 'Total Hours', 'Events Organized', 'Impact Description', 'Proof Link', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
+            return [...personal, 'Organization', 'Other Organization', 'Role', 'Total Hours', 'Events Organized', 'Impact Description', 'Proof Link', 'Master Proof Folder', ...adminCols];
         case 'dept-contribution':
-            return [...personal, 'Contributions (Summary)', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
+            return [...personal, 'Contributions (Summary)', 'Master Proof Folder', ...adminCols];
         case 'highest-salary':
-            return [...personal, 'Company Name', 'Job Role', 'CTC (LPA)', 'Offer Letter Link', 'Submitted At', 'JSON_Full_Data'];
+            return [...personal, 'Company Name', 'Job Role', 'CTC (LPA)', 'Offer Letter Link', ...adminCols];
         case 'core-salary':
-            return [...personal, 'Company Name', 'Job Role', 'CTC (LPA)', 'Core Domain', 'Offer Letter Link', 'Core Domain Proof', 'Submitted At', 'JSON_Full_Data'];
+            return [...personal, 'Company Name', 'Job Role', 'CTC (LPA)', 'Core Domain', 'Offer Letter Link', 'Core Domain Proof', ...adminCols];
         default:
-            return personal;
+            return [...personal, ...adminCols];
     }
 }
 
@@ -86,40 +87,42 @@ function getHeadersForAward(slug: AwardSlug): string[] {
 function awardApplicationToRow(slug: AwardSlug, app: any): string[] {
     const pd: BasePersonalDetails = app.personalDetails;
     const personal = [pd.name, pd.registerNumber, pd.department, pd.specialization, pd.personalEmail, pd.srmEmail, pd.mobileNumber, pd.section, pd.facultyAdvisor, pd.profilePhotoUrl || ''];
+    // Default admin block: Submitted At, Faculty Score, Verified, Discarded Items, JSON payload
+    const adminBlock = [app.submittedAt || new Date().toISOString(), '0', 'FALSE', '', JSON.stringify(app)];
 
     switch (slug) {
         case 'academic-excellence':
-            return [...personal, String(app.cgpa || 0), app.gradeSheetLink || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, String(app.cgpa || 0), app.gradeSheetLink || '', ...adminBlock];
         case 'researcher': {
             const papersSummary = (app.papers || []).map((p: { title: string; indexStatus: string }, i: number) =>
                 `${i + 1}. ${p.title} [${p.indexStatus?.toUpperCase()}]`).join('\n') || 'None';
             const patentsSummary = (app.patents || []).map((p: { title: string; status: string }, i: number) =>
                 `${i + 1}. ${p.title} (${p.status})`).join('\n') || 'None';
-            return [...personal, papersSummary, patentsSummary, app.researchStatement || '', app.masterProofFolderUrl || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, papersSummary, patentsSummary, app.researchStatement || '', app.masterProofFolderUrl || '', ...adminBlock];
         }
         case 'hackathon': {
             const summary = (app.wins || []).map((w: { eventName: string; level: string; position: string }, i: number) =>
                 `${i + 1}. ${w.eventName} (${w.level}) - ${w.position}`).join('\n') || 'None';
-            return [...personal, summary, app.masterProofFolderUrl || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, summary, app.masterProofFolderUrl || '', ...adminBlock];
         }
         case 'sports': {
             const summary = (app.wins || []).map((w: { sportOrEvent: string; level: string; position: string }, i: number) =>
                 `${i + 1}. ${w.sportOrEvent} (${w.level}) - ${w.position}`).join('\n') || 'None';
-            return [...personal, summary, app.masterProofFolderUrl || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, summary, app.masterProofFolderUrl || '', ...adminBlock];
         }
         case 'nss-ncc':
-            return [...personal, app.organization || '', app.otherOrganization || '', app.role || '', String(app.totalHoursServed || 0), app.eventsOrganized || '', app.impactDescription || '', app.proofLink || '', app.masterProofFolderUrl || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, app.organization || '', app.otherOrganization || '', app.role || '', String(app.totalHoursServed || 0), app.eventsOrganized || '', app.impactDescription || '', app.proofLink || '', app.masterProofFolderUrl || '', ...adminBlock];
         case 'dept-contribution': {
             const summary = (app.contributions || []).map((c: { activityType: string; role: string; eventName: string }, i: number) =>
                 `${i + 1}. ${c.eventName} (${c.activityType}) - ${c.role}`).join('\n') || 'None';
-            return [...personal, summary, app.masterProofFolderUrl || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, summary, app.masterProofFolderUrl || '', ...adminBlock];
         }
         case 'highest-salary':
-            return [...personal, app.companyName || '', app.jobRole || '', String(app.ctcLpa || 0), app.offerLetterLink || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, app.companyName || '', app.jobRole || '', String(app.ctcLpa || 0), app.offerLetterLink || '', ...adminBlock];
         case 'core-salary':
-            return [...personal, app.companyName || '', app.jobRole || '', String(app.ctcLpa || 0), app.coreDomain || '', app.offerLetterLink || '', app.coreDomainProofLink || '', app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, app.companyName || '', app.jobRole || '', String(app.ctcLpa || 0), app.coreDomain || '', app.offerLetterLink || '', app.coreDomainProofLink || '', ...adminBlock];
         default:
-            return [...personal, app.submittedAt || new Date().toISOString(), JSON.stringify(app)];
+            return [...personal, ...adminBlock];
     }
 }
 
@@ -208,4 +211,71 @@ export async function checkAwardDuplicate(slug: AwardSlug, regNo: string, email:
         }
     }
     return { exists: false };
+}
+
+export async function updateCustomAwardEvaluation(slug: AwardSlug, regNo: string, overrides: number, discards: string[], isVerified: boolean): Promise<void> {
+    const award = getAwardBySlug(slug);
+    if (!award) throw new Error(`Unknown award: ${slug}`);
+
+    const auth = getAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+    const sheetId = getSheetId();
+
+    // 1. Fetch current data to find the exact row
+    const res = await sheets.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        range: `${award.sheetName}!A:AZ`,
+    });
+
+    const rows = res.data.values || [];
+    if (rows.length < 2) return; // No data
+
+    // 2. Find row index (0-based array index, so Sheets Row is i + 1)
+    let targetRowIndex = -1;
+    for (let i = 1; i < rows.length; i++) {
+        const rowRegNo = rows[i][1]; // Assuming Register Number is column B (index 1)
+        if (rowRegNo && String(rowRegNo).toUpperCase() === regNo.toUpperCase()) {
+            targetRowIndex = i + 1; // Google sheets uses 1-based indexing for rows
+            break;
+        }
+    }
+
+    if (targetRowIndex === -1) {
+        throw new Error(`Applicant ${regNo} not found in ${award.title}`);
+    }
+
+    // Determine specific column letters dynamically based on headers
+    const headers = getHeadersForAward(slug);
+    const colScore = String.fromCharCode(65 + headers.indexOf('Faculty Score'));
+    const colVerified = String.fromCharCode(65 + headers.indexOf('Verified'));
+    const colDiscard = String.fromCharCode(65 + headers.indexOf('Discarded Items'));
+
+    if (!headers.includes('Faculty Score') || !headers.includes('Verified')) {
+        throw new Error(`Sheet ${award.title} is missing evaluation columns. Please re-seed the sheet.`);
+    }
+
+    // 3. Batch Update specific cells
+    await sheets.spreadsheets.values.batchUpdate({
+        spreadsheetId: sheetId,
+        requestBody: {
+            valueInputOption: 'RAW',
+            data: [
+                {
+                    range: `${award.sheetName}!${colScore}${targetRowIndex}`,
+                    values: [[(overrides || 0).toString()]]
+                },
+                {
+                    range: `${award.sheetName}!${colVerified}${targetRowIndex}`,
+                    values: [[isVerified ? 'TRUE' : 'FALSE']]
+                },
+                {
+                    range: `${award.sheetName}!${colDiscard}${targetRowIndex}`,
+                    values: [[JSON.stringify(discards)]]
+                }
+            ]
+        }
+    });
+
+    // Invalidate cache
+    delete _awardCaches[slug];
 }

@@ -72,6 +72,7 @@ const HEADERS = [
     'Master Proof Folder',
     'Submitted At',
     'Faculty_Score',
+    'Verified',
     'Discarded_Items',
     // JSON columns (hidden by faculty)
     'JSON_Full_Data',
@@ -207,6 +208,7 @@ function applicationToRow(app: StudentApplication): string[] {
         app.masterProofFolderUrl || '',
         app.submittedAt || new Date().toISOString(),
         app.facultyScore?.toString() || '',
+        app.verified ? 'TRUE' : 'FALSE',
         app.discardedItems ? JSON.stringify(app.discardedItems) : '[]',
         // JSON column
         JSON.stringify(app),
@@ -223,11 +225,15 @@ function rowToApplication(row: string[]): StudentApplication | null {
 
             // Enrich with sheet columns if JSON is stale (e.g. faculty made updates)
             const facultyScoreIdx = HEADERS.indexOf('Faculty_Score');
+            const verifiedIdx = HEADERS.indexOf('Verified');
             const discardedItemsIdx = HEADERS.indexOf('Discarded_Items');
 
             if (facultyScoreIdx !== -1 && row[facultyScoreIdx]) {
                 const score = parseFloat(row[facultyScoreIdx]);
                 if (!isNaN(score)) app.facultyScore = score;
+            }
+            if (verifiedIdx !== -1 && row[verifiedIdx] !== undefined) {
+                app.verified = row[verifiedIdx].toString().toUpperCase() === 'TRUE';
             }
             if (discardedItemsIdx !== -1 && row[discardedItemsIdx]) {
                 try {
@@ -443,7 +449,8 @@ export async function checkDuplicateRegNo(regNo: string): Promise<boolean> {
 export async function updateStudentEvaluation(
     regNo: string,
     facultyScore?: number,
-    discardedItems?: string[]
+    discardedItems?: string[],
+    isVerified?: boolean
 ): Promise<boolean> {
     const auth = getAuth();
     const sheets = google.sheets({ version: 'v4', auth });
@@ -478,11 +485,13 @@ export async function updateStudentEvaluation(
         // 2. Determine column indices
         const scoreColIndex = HEADERS.indexOf('Faculty_Score');
         const discardedColIndex = HEADERS.indexOf('Discarded_Items');
+        const verifiedColIndex = HEADERS.indexOf('Verified');
 
-        if (scoreColIndex === -1 || discardedColIndex === -1) return false;
+        if (scoreColIndex === -1 || discardedColIndex === -1 || verifiedColIndex === -1) return false;
 
         const scoreCol = getColLetter(scoreColIndex);
         const discardedCol = getColLetter(discardedColIndex);
+        const verifiedCol = getColLetter(verifiedColIndex);
 
         const updates = [];
 
@@ -497,6 +506,13 @@ export async function updateStudentEvaluation(
             updates.push({
                 range: `BO_Main!${discardedCol}${sheetRow}`,
                 values: [[JSON.stringify(discardedItems)]],
+            });
+        }
+
+        if (isVerified !== undefined) {
+            updates.push({
+                range: `BO_Main!${verifiedCol}${sheetRow}`,
+                values: [[isVerified ? 'TRUE' : 'FALSE']],
             });
         }
 
@@ -623,7 +639,7 @@ export async function setDeadline(dateStr: string): Promise<boolean> {
 }
 
 export async function batchUpdateStudentEvaluations(
-    updates: { regNo: string; facultyScore?: number; discardedItems?: string[] }[]
+    updates: { regNo: string; facultyScore?: number; discardedItems?: string[]; isVerified?: boolean; }[]
 ): Promise<boolean> {
     if (updates.length === 0) return true;
 
@@ -657,10 +673,12 @@ export async function batchUpdateStudentEvaluations(
         // 2. Prepare Updates
         const scoreColIndex = HEADERS.indexOf('Faculty_Score');
         const discardedColIndex = HEADERS.indexOf('Discarded_Items');
-        if (scoreColIndex === -1 || discardedColIndex === -1) return false;
+        const verifiedColIndex = HEADERS.indexOf('Verified');
+        if (scoreColIndex === -1 || discardedColIndex === -1 || verifiedColIndex === -1) return false;
 
         const scoreCol = getColLetter(scoreColIndex);
         const discardedCol = getColLetter(discardedColIndex);
+        const verifiedCol = getColLetter(verifiedColIndex);
 
         const sheetUpdates: any[] = [];
 
@@ -679,6 +697,13 @@ export async function batchUpdateStudentEvaluations(
                 sheetUpdates.push({
                     range: `BO_Main!${discardedCol}${sheetRow}`,
                     values: [[JSON.stringify(update.discardedItems)]],
+                });
+            }
+
+            if (update.isVerified !== undefined) {
+                sheetUpdates.push({
+                    range: `BO_Main!${verifiedCol}${sheetRow}`,
+                    values: [[update.isVerified ? 'TRUE' : 'FALSE']],
                 });
             }
         }

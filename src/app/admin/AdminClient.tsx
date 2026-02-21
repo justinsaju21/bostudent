@@ -84,6 +84,16 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
         return initial;
     });
 
+    const [verifiedStatus, setVerifiedStatus] = useState<Record<string, boolean>>(() => {
+        const initial: Record<string, boolean> = {};
+        fullStudents.forEach(s => {
+            if (s.verified && s.personalDetails?.registerNumber) {
+                initial[s.personalDetails.registerNumber] = true;
+            }
+        });
+        return initial;
+    });
+
     const [editingScore, setEditingScore] = useState<string | null>(null);
     const [tempScore, setTempScore] = useState('');
 
@@ -209,6 +219,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
             const updates = Array.from(changedRegNos).map(regNo => ({
                 regNo,
                 facultyScore: scoreOverrides[regNo],
+                isVerified: !!verifiedStatus[regNo],
                 discardedItems: Array.from(discardedItems[regNo] || [])
             }));
 
@@ -603,6 +614,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                                 const displayScore = getDisplayScore(student);
                                                 const isSelected = selectedStudents.includes(student.registerNumber);
                                                 const fullStudent = fullStudents.find(s => s.personalDetails?.registerNumber === student.registerNumber);
+                                                const isVerified = verifiedStatus[student.registerNumber] || false;
 
                                                 return (
                                                     <React.Fragment key={student.registerNumber}>
@@ -613,7 +625,10 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                                             <td style={{ textAlign: 'center' }} onClick={e => { e.stopPropagation(); toggleSelection(student.registerNumber); }}>
                                                                 {isSelected ? <CheckSquare size={16} color="var(--accent-primary)" /> : <Square size={16} color="var(--text-muted)" />}
                                                             </td>
-                                                            <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>#{index + 1}</td>
+                                                            <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                                                #{index + 1}
+                                                                {isVerified && <span style={{ marginLeft: '4px' }}>✅</span>}
+                                                            </td>
                                                             <td>
                                                                 <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>{student.name}</div>
                                                                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{student.registerNumber}</div>
@@ -676,6 +691,11 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                                                                         regNo={student.registerNumber}
                                                                         isDiscarded={isDiscarded}
                                                                         toggleDiscard={toggleDiscard}
+                                                                        isVerified={isVerified}
+                                                                        setVerified={(v: boolean) => {
+                                                                            setVerifiedStatus(prev => ({ ...prev, [student.registerNumber]: v }));
+                                                                            setChangedRegNos(prev => new Set(prev).add(student.registerNumber));
+                                                                        }}
                                                                     />
                                                                 </td>
                                                             </tr>
@@ -772,13 +792,18 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                         </AnimatePresence>
 
                         {/* Comparison Modal */}
-                        <ComparisonModal
-                            isOpen={isCompareModalOpen}
-                            onClose={() => setIsCompareModalOpen(false)}
-                            students={fullStudents.filter(s => s.personalDetails?.registerNumber && selectedStudents.includes(s.personalDetails.registerNumber))}
-                            rankedData={students}
-                            scoreOverrides={scoreOverrides}
-                        />
+                        <AnimatePresence>
+                            {isCompareModalOpen && selectedStudents.length > 0 && (
+                                <ComparisonModal
+                                    isOpen={isCompareModalOpen}
+                                    onClose={() => setIsCompareModalOpen(false)}
+                                    selectedStudents={filtered.filter(s => selectedStudents.includes(s.registerNumber)).map(s => {
+                                        const full = fullStudents.find(fs => fs.personalDetails?.registerNumber === s.registerNumber);
+                                        return { ...full, overallResults: s };
+                                    })}
+                                />
+                            )}
+                        </AnimatePresence>
                     </>
                 )}
             </main>
@@ -790,16 +815,13 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
 
 // ===== STUDENT DETAIL PANEL =====
-function StudentDetailPanel({
-    student,
-    regNo,
-    isDiscarded,
-    toggleDiscard,
-}: {
+function StudentDetailPanel({ student, regNo, isDiscarded, toggleDiscard, isVerified, setVerified }: {
     student: StudentApplication;
     regNo: string;
     isDiscarded: (regNo: string, section: string, itemId: string) => boolean;
     toggleDiscard: (regNo: string, section: string, itemId: string) => void;
+    isVerified: boolean;
+    setVerified: (v: boolean) => void;
 }) {
     const pd = student.personalDetails;
     const ac = student.academicRecord;
@@ -813,6 +835,34 @@ function StudentDetailPanel({
 
     return (
         <div style={{ padding: '24px 32px', background: 'rgba(3,77,161,0.02)', borderTop: '1px solid var(--border-subtle)' }}>
+
+            {/* Faculty Verification block */}
+            <div style={{
+                marginBottom: '20px', padding: '16px', borderRadius: '8px',
+                background: isVerified ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-card)',
+                border: `1px solid ${isVerified ? '#10B981' : 'var(--border-subtle)'}`,
+                display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button
+                        onClick={() => setVerified(!isVerified)}
+                        style={{
+                            padding: '8px 16px', borderRadius: '6px', fontWeight: 600, fontSize: '13px',
+                            background: isVerified ? '#10B981' : 'transparent',
+                            color: isVerified ? 'white' : 'var(--text-primary)',
+                            border: `1px solid ${isVerified ? '#10B981' : 'var(--border-subtle)'}`,
+                            cursor: 'pointer', transition: 'all 0.2s',
+                            display: 'flex', alignItems: 'center', gap: '6px'
+                        }}
+                    >
+                        {isVerified ? '✅ Verified' : 'Mark as Verified'}
+                    </button>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        {isVerified ? 'Faculty has verified this application.' : 'Faculty verification pending.'}
+                    </span>
+                </div>
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
                 <Link
                     href={`/${regNo}`}
