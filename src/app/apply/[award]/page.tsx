@@ -603,7 +603,7 @@ export default function AwardApplyPage() {
             setCurrentStep(1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        setIsNavigating(false);
+        setTimeout(() => setIsNavigating(false), 300);
     };
 
     const prevStep = () => {
@@ -739,11 +739,11 @@ export default function AwardApplyPage() {
                             <ChevronLeft size={18} /> Previous
                         </button>
                         {currentStep === 0 ? (
-                            <button type="button" className="btn-primary" onClick={nextStep} disabled={isNavigating}>
+                            <button key="next-step-btn" type="button" className="btn-primary" onClick={nextStep} disabled={isNavigating}>
                                 Next <ChevronRight size={18} />
                             </button>
                         ) : (
-                            <button type="submit" className="btn-primary" disabled={isSubmitting}>
+                            <button key="submit-application-btn" type="submit" className="btn-primary" disabled={isSubmitting}>
                                 {isSubmitting ? <><Loader2 size={18} className="animate-spin" /> Submitting...</> : <><Send size={18} /> Submit Application</>}
                             </button>
                         )}
