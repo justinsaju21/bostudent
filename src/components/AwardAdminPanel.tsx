@@ -136,15 +136,29 @@ export default function AwardAdminPanel({ slug }: Props) {
             list = list.filter(a => a.personalDetails?.facultyAdvisor === advisorFilter);
         }
 
-        // Auto-sort salary awards by CTC descending, academic excellence by CGPA descending
-        if (slug === 'highest-salary' || slug === 'core-salary') {
-            list = [...list].sort((a, b) => (Number(b.ctcLpa) || 0) - (Number(a.ctcLpa) || 0));
-        }
-        if (slug === 'academic-excellence') {
-            list = [...list].sort((a, b) => (Number(b.cgpa) || 0) - (Number(a.cgpa) || 0));
-        }
+        // Auto-sort algorithm: Faculty Score > Specific Fallbacks (CTC/CGPA) > Name Alphabetical
+        list = [...list].sort((a, b) => {
+            const scoreA = scoreOverrides[a.personalDetails?.registerNumber || ''] || 0;
+            const scoreB = scoreOverrides[b.personalDetails?.registerNumber || ''] || 0;
+
+            if (scoreA !== scoreB) {
+                return scoreB - scoreA;
+            }
+
+            if (slug === 'highest-salary' || slug === 'core-salary') {
+                return (Number(b.ctcLpa) || 0) - (Number(a.ctcLpa) || 0);
+            }
+            if (slug === 'academic-excellence') {
+                return (Number(b.cgpa) || 0) - (Number(a.cgpa) || 0);
+            }
+
+            const nameA = a.personalDetails?.name || '';
+            const nameB = b.personalDetails?.name || '';
+            return nameA.localeCompare(nameB);
+        });
+
         return list;
-    }, [applicants, search, deptFilter, sectionFilter, advisorFilter, slug]);
+    }, [applicants, search, deptFilter, sectionFilter, advisorFilter, slug, scoreOverrides]);
 
     const downloadCSV = () => {
         if (!award || applicants.length === 0) return;
@@ -610,16 +624,27 @@ function AwardDetailPanel({
                     </span>
                 </div>
 
-                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={labelStyle}>Faculty Score Ovr:</div>
-                    <input
-                        type="number"
-                        value={score || ''}
-                        onChange={(e) => setScore(Number(e.target.value) || 0)}
-                        className="form-input"
-                        style={{ width: '80px', padding: '6px 10px' }}
-                        placeholder="0.0"
-                    />
+                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={labelStyle}>Faculty Score Ovr:</div>
+                        <input
+                            type="number"
+                            value={score || ''}
+                            onChange={(e) => setScore(Number(e.target.value) || 0)}
+                            className="form-input"
+                            style={{ width: '80px', padding: '6px 10px' }}
+                            placeholder="0.0"
+                        />
+                    </div>
+                    <a
+                        href={`/${pd?.registerNumber}/${slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'var(--srm-blue)', border: 'none', color: 'white', textDecoration: 'none' }}
+                    >
+                        <ExternalLink size={16} /> View Profile
+                    </a>
                 </div>
             </div>
 
