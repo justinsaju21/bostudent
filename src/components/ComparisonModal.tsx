@@ -83,9 +83,9 @@ export default function ComparisonModal({ isOpen, onClose, students, rankedData,
                         <div className="compare-cell label">Internships</div>
                         {students.map(s => (
                             <div key={s.personalDetails.registerNumber} className="compare-cell value">
-                                <strong>{s.internships.length}</strong>
+                                <strong>{s.internships?.length || 0}</strong>
                                 <ul style={{ fontSize: '0.85rem', marginTop: '4px', paddingLeft: '20px', textAlign: 'left' }}>
-                                    {s.internships.map((i, idx) => (
+                                    {(s.internships || []).map((i, idx) => (
                                         <li key={idx}>{i.company} ({i.role})</li>
                                     ))}
                                 </ul>
@@ -96,9 +96,9 @@ export default function ComparisonModal({ isOpen, onClose, students, rankedData,
                         <div className="compare-cell label">Projects</div>
                         {students.map(s => (
                             <div key={s.personalDetails.registerNumber} className="compare-cell value">
-                                <strong>{s.projects.length}</strong>
+                                <strong>{s.projects?.length || 0}</strong>
                                 <ul style={{ fontSize: '0.85rem', marginTop: '4px', paddingLeft: '20px', textAlign: 'left' }}>
-                                    {s.projects.map((p, idx) => (
+                                    {(s.projects || []).map((p, idx) => (
                                         <li key={idx}>{p.title}</li>
                                     ))}
                                 </ul>
@@ -109,8 +109,8 @@ export default function ComparisonModal({ isOpen, onClose, students, rankedData,
                         <div className="compare-cell label">Research</div>
                         {students.map(s => (
                             <div key={s.personalDetails.registerNumber} className="compare-cell value">
-                                <strong>{s.research.length}</strong>
-                                {s.research.map((r, idx) => (
+                                <strong>{s.research?.length || 0}</strong>
+                                {(s.research || []).map((r, idx) => (
                                     <div key={idx} style={{ fontSize: '0.8rem', marginTop: '4px' }}>
                                         {r.title} ({r.publicationStatus})
                                     </div>
@@ -122,8 +122,8 @@ export default function ComparisonModal({ isOpen, onClose, students, rankedData,
                         <div className="compare-cell label">Hackathons</div>
                         {students.map(s => (
                             <div key={s.personalDetails.registerNumber} className="compare-cell value">
-                                <strong>{s.hackathons.length}</strong>
-                                {s.hackathons.map((h, idx) => (
+                                <strong>{s.hackathons?.length || 0}</strong>
+                                {(s.hackathons || []).map((h, idx) => (
                                     <div key={idx} style={{ fontSize: '0.8rem', marginTop: '4px' }}>
                                         {h.name} - {h.position}
                                     </div>

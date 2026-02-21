@@ -306,6 +306,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                                 <th>Department</th>
                                 {(slug === 'highest-salary' || slug === 'core-salary') && <th>Company</th>}
                                 {(slug === 'highest-salary' || slug === 'core-salary') && <th>CTC (LPA)</th>}
+                                {(slug !== 'highest-salary' && slug !== 'core-salary') && <th>Overview</th>}
                                 <th>Submitted</th>
                                 <th style={{ width: '40px' }}></th>
                             </tr>
@@ -313,7 +314,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                         <tbody>
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 7 : 5} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 7 : 6} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
                                         {applicants.length === 0 ? 'No applications yet for this award.' : 'No results found.'}
                                     </td>
                                 </tr>
@@ -349,6 +350,15 @@ export default function AwardAdminPanel({ slug }: Props) {
                                                         ₹{Number(applicant.ctcLpa || 0).toFixed(2)}
                                                     </td>
                                                 )}
+                                                {(slug !== 'highest-salary' && slug !== 'core-salary') && (
+                                                    <td style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                                                        {slug === 'academic-excellence' && <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>CGPA: {String(applicant.cgpa || '—')}</span>}
+                                                        {slug === 'researcher' && <span>Papers: {((applicant.papers as any[]) || []).length} | Patents: {((applicant.patents as any[]) || []).length}</span>}
+                                                        {(slug === 'hackathon' || slug === 'sports') && <span>Wins: {((applicant.wins as any[]) || []).length}</span>}
+                                                        {slug === 'nss-ncc' && <span>{String(applicant.organization || '—').toUpperCase()} • {String(applicant.totalHoursServed || '0')} Hrs</span>}
+                                                        {slug === 'dept-contribution' && <span>Contributions: {((applicant.contributions as any[]) || []).length}</span>}
+                                                    </td>
+                                                )}
                                                 <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                                                     {applicant.submittedAt ? new Date(applicant.submittedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
                                                 </td>
@@ -358,7 +368,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                                             </tr>
                                             {isExpanded && (
                                                 <tr>
-                                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 7 : 5} style={{ padding: 0 }}>
+                                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 7 : 6} style={{ padding: 0 }}>
                                                         <AwardDetailPanel applicant={applicant} slug={slug} />
                                                     </td>
                                                 </tr>

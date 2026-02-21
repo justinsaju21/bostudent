@@ -87,9 +87,9 @@ export default function PortfolioClient({ student }: Props) {
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', maxWidth: '600px' }}>
                                 <StatMini label="Score" value={`${totalScore.toFixed(1)}/100`} />
                                 <StatMini label="CGPA" value={ac.cgpa.toString()} />
-                                <StatMini label="Projects" value={student.projects.length.toString()} />
-                                <StatMini label="Internships" value={student.internships.length.toString()} />
-                                <StatMini label="Papers" value={student.research.length.toString()} />
+                                <StatMini label="Projects" value={((student.projects?.length) || 0).toString()} />
+                                <StatMini label="Internships" value={((student.internships?.length) || 0).toString()} />
+                                <StatMini label="Papers" value={((student.research?.length) || 0).toString()} />
                             </div>
                         </motion.div>
                     </div>
@@ -117,9 +117,9 @@ export default function PortfolioClient({ student }: Props) {
                     </PortfolioSection>
 
                     {/* Internships */}
-                    {student.internships.length > 0 && (
+                    {(student.internships?.length || 0) > 0 && (
                         <PortfolioSection title="Internships" icon={<Briefcase size={18} />} index={1}>
-                            {student.internships.map((item, i) => (
+                            {(student.internships || []).map((item, i) => (
                                 <ItemCard key={i}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                                         <div>
@@ -136,10 +136,10 @@ export default function PortfolioClient({ student }: Props) {
                     )}
 
                     {/* Projects */}
-                    {student.projects.length > 0 && (
+                    {(student.projects?.length || 0) > 0 && (
                         <PortfolioSection title="Projects" icon={<Code size={18} />} index={2}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                                {student.projects.map((item, i) => (
+                                {(student.projects || []).map((item, i) => (
                                     <div key={i} className="glass-card" style={{ padding: '24px' }}>
                                         <h4 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>{item.title}</h4>
                                         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: 1.5 }}>{item.description}</p>
@@ -161,9 +161,9 @@ export default function PortfolioClient({ student }: Props) {
                     )}
 
                     {/* Hackathons */}
-                    {student.hackathons.length > 0 && (
+                    {(student.hackathons?.length || 0) > 0 && (
                         <PortfolioSection title="Hackathons" icon={<Rocket size={18} />} index={3}>
-                            {student.hackathons.map((item, i) => (
+                            {(student.hackathons || []).map((item, i) => (
                                 <ItemCard key={i}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                                         <div>
@@ -179,9 +179,9 @@ export default function PortfolioClient({ student }: Props) {
                     )}
 
                     {/* Research */}
-                    {student.research.length > 0 && (
+                    {(student.research?.length || 0) > 0 && (
                         <PortfolioSection title="Research & Publications" icon={<BookOpen size={18} />} index={4}>
-                            {student.research.map((item, i) => (
+                            {(student.research || []).map((item, i) => (
                                 <ItemCard key={i}>
                                     <h4 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>{item.title}</h4>
                                     <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>{item.journalOrConference}</p>
@@ -198,10 +198,10 @@ export default function PortfolioClient({ student }: Props) {
                     )}
 
                     {/* Certifications */}
-                    {student.certifications.length > 0 && (
+                    {(student.certifications?.length || 0) > 0 && (
                         <PortfolioSection title="Global Certifications" icon={<ShieldCheck size={18} />} index={5}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
-                                {student.certifications.map((item, i) => (
+                                {(student.certifications || []).map((item, i) => (
                                     <div key={i} className="glass-card" style={{ padding: '20px' }}>
                                         <h4 style={{ fontSize: '15px', fontWeight: 600 }}>{item.certificateName}</h4>
                                         <p style={{ fontSize: '13px', color: 'var(--accent-primary)', marginBottom: '8px' }}>{item.provider}</p>
@@ -214,9 +214,9 @@ export default function PortfolioClient({ student }: Props) {
                     )}
 
                     {/* Sports */}
-                    {student.sportsOrCultural.length > 0 && (
+                    {(student.sportsOrCultural?.length || 0) > 0 && (
                         <PortfolioSection title="Sports & Cultural" icon={<Trophy size={18} />} index={6}>
-                            {student.sportsOrCultural.map((item, i) => (
+                            {(student.sportsOrCultural || []).map((item, i) => (
                                 <ItemCard key={i}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                                         <div>
@@ -232,9 +232,9 @@ export default function PortfolioClient({ student }: Props) {
                     )}
 
                     {/* Volunteering */}
-                    {student.volunteering.length > 0 && (
+                    {(student.volunteering?.length || 0) > 0 && (
                         <PortfolioSection title="Volunteering & Social Service" icon={<Heart size={18} />} index={7}>
-                            {student.volunteering.map((item, i) => (
+                            {(student.volunteering || []).map((item, i) => (
                                 <ItemCard key={i}>
                                     <h4 style={{ fontSize: '15px', fontWeight: 600 }}>{item.organization}</h4>
                                     <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{item.role} {item.hoursServed ? `• ${item.hoursServed}h` : ''}</p>
@@ -246,9 +246,9 @@ export default function PortfolioClient({ student }: Props) {
                     )}
 
                     {/* Clubs */}
-                    {student.clubActivities.length > 0 && (
+                    {(student.clubActivities?.length || 0) > 0 && (
                         <PortfolioSection title="Clubs & Leadership" icon={<Users size={18} />} index={8}>
-                            {student.clubActivities.map((item, i) => (
+                            {(student.clubActivities || []).map((item, i) => (
                                 <ItemCard key={i}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                                         <div>
@@ -265,9 +265,9 @@ export default function PortfolioClient({ student }: Props) {
                     )}
 
                     {/* Dept Contributions */}
-                    {student.departmentContributions.length > 0 && (
+                    {(student.departmentContributions?.length || 0) > 0 && (
                         <PortfolioSection title="Department Contributions" icon={<Building size={18} />} index={9}>
-                            {student.departmentContributions.map((item, i) => (
+                            {(student.departmentContributions || []).map((item, i) => (
                                 <ItemCard key={i}>
                                     <h4 style={{ fontSize: '15px', fontWeight: 600 }}>{item.eventName}</h4>
                                     <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{item.role}</p>
