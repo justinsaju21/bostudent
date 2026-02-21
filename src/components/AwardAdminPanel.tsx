@@ -451,13 +451,14 @@ export default function AwardAdminPanel({ slug }: Props) {
                                 {(slug !== 'highest-salary' && slug !== 'core-salary') && <th>Overview</th>}
                                 <th>Submitted</th>
                                 <th>Score</th>
+                                <th style={{ width: '80px', textAlign: 'center' }}>Profile</th>
                                 <th style={{ width: '40px' }}></th>
                             </tr>
                         </thead>
                         <tbody>
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 9 : 8} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 10 : 9} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
                                         {applicants.length === 0 ? 'No applications yet for this award.' : 'No results found.'}
                                     </td>
                                 </tr>
@@ -520,13 +521,18 @@ export default function AwardAdminPanel({ slug }: Props) {
                                                 <td style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>
                                                     {score > 0 ? score : '—'}
                                                 </td>
+                                                <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                                                    <a href={`/${regNo}/${slug}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--srm-blue)' }}>
+                                                        <ExternalLink size={18} />
+                                                    </a>
+                                                </td>
                                                 <td>
                                                     {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                                 </td>
                                             </tr>
                                             {isExpanded && (
                                                 <tr>
-                                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 9 : 8} style={{ padding: 0 }}>
+                                                    <td colSpan={(slug === 'highest-salary' || slug === 'core-salary') ? 10 : 9} style={{ padding: 0 }}>
                                                         <AwardDetailPanel
                                                             applicant={applicant}
                                                             slug={slug}
