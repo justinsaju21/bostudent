@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { AWARD_CATEGORIES, AwardSlug } from '@/lib/awards';
-import { appendAwardApplication } from '@/lib/awardSheets';
+import { appendAwardApplication, getHeadersForAward } from '@/lib/awardSheets';
 
 function getAuth() {
     const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -15,33 +15,6 @@ function getSheetId(): string {
     const id = process.env.GOOGLE_SHEET_ID;
     if (!id) throw new Error('GOOGLE_SHEET_ID not set');
     return id;
-}
-
-// Headers for each award (matches awardSheets.ts getHeadersForAward)
-function getHeadersForAward(slug: AwardSlug): string[] {
-    const personal = ['Name', 'Register Number', 'Programme', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
-    switch (slug) {
-        case 'best-outgoing':
-            return []; // BO uses the existing BO_Main tab — skip
-        case 'academic-excellence':
-            return [...personal, 'CGPA', 'Grade Sheet Link', 'Submitted At', 'JSON_Full_Data'];
-        case 'researcher':
-            return [...personal, 'Papers (Summary)', 'Patents (Summary)', 'Research Statement', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
-        case 'hackathon':
-            return [...personal, 'Wins (Summary)', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
-        case 'sports':
-            return [...personal, 'Wins (Summary)', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
-        case 'nss-ncc':
-            return [...personal, 'Organization', 'Role', 'Total Hours', 'Events Organized', 'Impact Description', 'Proof Link', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
-        case 'dept-contribution':
-            return [...personal, 'Contributions (Summary)', 'Master Proof Folder', 'Submitted At', 'JSON_Full_Data'];
-        case 'highest-salary':
-            return [...personal, 'Company Name', 'Job Role', 'CTC (LPA)', 'Offer Letter Link', 'Submitted At', 'JSON_Full_Data'];
-        case 'core-salary':
-            return [...personal, 'Company Name', 'Job Role', 'CTC (LPA)', 'Core Domain', 'Offer Letter Link', 'Core Domain Proof', 'Submitted At', 'JSON_Full_Data'];
-        default:
-            return personal;
-    }
 }
 
 // Sample data generators for each award

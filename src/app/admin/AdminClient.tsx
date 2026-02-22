@@ -457,7 +457,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
                     {AWARD_CATEGORIES.map(award => (
                         <button
                             key={award.slug}
-                            onClick={() => { setActiveAward(award.slug); setSearch(''); setDeptFilter(''); setSectionFilter(''); setAdvisorFilter(''); }}
+                            onClick={() => { setActiveAward(award.slug); setSearch(''); setDeptFilter(''); setSectionFilter(''); setAdvisorFilter(''); setSelectedStudents([]); setVisibleCount(50); }}
                             style={{
                                 padding: '10px 16px', borderRadius: '8px', border: 'none',
                                 background: activeAward === award.slug ? award.color : 'transparent',
@@ -474,7 +474,7 @@ export default function AdminClient({ students, fullStudents, error }: Props) {
 
                 {/* Show AwardAdminPanel for non-BO awards */}
                 {activeAward !== 'best-outgoing' ? (
-                    <AwardAdminPanel slug={activeAward} />
+                    <AwardAdminPanel key={activeAward} slug={activeAward} />
                 ) : (
                     <>
 

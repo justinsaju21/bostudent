@@ -56,7 +56,7 @@ async function ensureSheet(sheetName: string, headers: string[]): Promise<void> 
 }
 
 // ===== HEADERS for each award sheet =====
-function getHeadersForAward(slug: AwardSlug): string[] {
+export function getHeadersForAward(slug: AwardSlug): string[] {
     const personal = ['Name', 'Register Number', 'Programme', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
     const adminCols = ['Submitted At', 'Faculty Score', 'Verified', 'Discarded Items', 'JSON_Full_Data'];
 
