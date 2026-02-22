@@ -233,6 +233,7 @@ function HackathonFields({ register, errors, control }: { register: any; errors:
                     <div className="form-grid-3">
                         <Field label="Level" error={errors?.wins?.[i]?.level?.message}>
                             <select className="form-input" {...register(`wins.${i}.level`)}>
+                                <option value="college">College/Inter-College</option>
                                 <option value="state">State</option>
                                 <option value="national">National</option>
                             </select>

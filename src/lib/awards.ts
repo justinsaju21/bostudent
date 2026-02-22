@@ -53,7 +53,7 @@ export const AWARD_CATEGORIES: AwardCategory[] = [
         slug: 'hackathon',
         title: 'Prize Winner — Hackathon/Ideathon',
         shortTitle: 'Hackathon Winner',
-        description: 'Prize-winning performances in State or National level hackathons and ideathons.',
+        description: 'Prize-winning performances in College, State, or National level hackathons and ideathons.',
         sheetName: 'Hackathon_Winners',
         icon: 'Trophy',
         color: '#F59E0B',

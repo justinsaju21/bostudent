@@ -48,7 +48,7 @@ export interface ResearcherApplication {
 export interface HackathonWinEntry {
     id: string;
     eventName: string;
-    level: 'state' | 'national';
+    level: 'college' | 'state' | 'national';
     position: string; // 1st, 2nd, 3rd, Finalist
     teamSize: number;
     projectBuilt: string;

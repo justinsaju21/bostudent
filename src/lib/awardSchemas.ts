@@ -61,7 +61,7 @@ export const researcherSchema = z.object({
 const hackathonWinSchema = z.object({
     id: z.string(),
     eventName: z.string().min(1, 'Event name is required'),
-    level: z.enum(['state', 'national']),
+    level: z.enum(['college', 'state', 'national']),
     position: z.string().min(1, 'Position is required'),
     teamSize: z.coerce.number().min(1, 'Team size must be at least 1'),
     projectBuilt: z.string().min(1, 'Project description is required'),
