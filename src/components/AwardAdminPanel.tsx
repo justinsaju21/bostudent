@@ -41,6 +41,10 @@ export default function AwardAdminPanel({ slug }: Props) {
     const [changedRegNos, setChangedRegNos] = useState<Set<string>>(new Set());
     const [isSaving, setIsSaving] = useState(false);
 
+    // Pagination State
+    const [visibleCount, setVisibleCount] = useState(50);
+    const loadMore = () => setVisibleCount(prev => prev + 50);
+
     const award = AWARD_CATEGORIES.find(a => a.slug === slug);
 
     useEffect(() => {
@@ -51,6 +55,7 @@ export default function AwardAdminPanel({ slug }: Props) {
         setSectionFilter('');
         setAdvisorFilter('');
         setExpandedRow(null);
+        setVisibleCount(50);
 
         fetch(`/api/admin/awards?slug=${slug}`)
             .then(res => res.json())
@@ -414,9 +419,10 @@ export default function AwardAdminPanel({ slug }: Props) {
                                         style={{ cursor: 'pointer' }}
                                     />
                                 </th>
-                                <th style={{ width: '50px' }}>#</th>
+                                <th style={{ width: '50px' }}>Rank</th>
                                 <th>Name</th>
-                                <th>Department</th>
+                                <th className="hide-on-mobile">Department</th>
+                                <th style={{ width: '60px' }}>Sec</th>
                                 {(slug === 'highest-salary' || slug === 'core-salary') && <th>Company</th>}
                                 {(slug === 'highest-salary' || slug === 'core-salary') && <th>CTC (LPA)</th>}
                                 {(slug !== 'highest-salary' && slug !== 'core-salary') && <th>Overview</th>}
@@ -434,7 +440,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                                     </td>
                                 </tr>
                             ) : (
-                                filtered.map((applicant, index) => {
+                                filtered.slice(0, visibleCount).map((applicant, index) => {
                                     const pd = applicant.personalDetails;
                                     const regNo = pd?.registerNumber || '';
                                     const isExpanded = expandedRow === regNo;
@@ -468,7 +474,8 @@ export default function AwardAdminPanel({ slug }: Props) {
                                                     <div style={{ fontWeight: 600, fontSize: '14px' }}>{pd?.name || '—'}</div>
                                                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{regNo}</div>
                                                 </td>
-                                                <td style={{ fontSize: '13px' }}>{pd?.department || '—'}</td>
+                                                <td className="hide-on-mobile" style={{ fontSize: '13px' }}>{pd?.department || '—'}</td>
+                                                <td style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{pd?.section || '—'}</td>
                                                 {(slug === 'highest-salary' || slug === 'core-salary') && (
                                                     <td style={{ fontSize: '13px' }}>{String(applicant.companyName || '—')}</td>
                                                 )}
@@ -540,6 +547,19 @@ export default function AwardAdminPanel({ slug }: Props) {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Load More Button */}
+                {visibleCount < filtered.length && (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '24px', borderTop: '1px solid var(--border-subtle)' }}>
+                        <button
+                            onClick={loadMore}
+                            className="btn-secondary"
+                            style={{ padding: '12px 32px' }}
+                        >
+                            Load More ({filtered.length - visibleCount} remaining)
+                        </button>
+                    </div>
+                )}
             </motion.div>
 
             {/* Floating Save Button */}
