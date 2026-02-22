@@ -562,6 +562,47 @@ export default function AwardAdminPanel({ slug }: Props) {
                 )}
             </motion.div>
 
+
+
+            {/* Compare Button */}
+            <AnimatePresence>
+                {selectedRegNos.size > 0 && (
+                    <motion.div
+                        initial={{ y: 100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 100, opacity: 0 }}
+                        style={{
+                            position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+                            background: 'var(--accent-primary)', color: 'white',
+                            padding: '12px 24px', borderRadius: 'var(--radius-full)',
+                            boxShadow: '0 8px 32px rgba(3, 77, 161, 0.4)',
+                            display: 'flex', alignItems: 'center', gap: '12px', zIndex: 50,
+                            cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)'
+                        }}
+                        onClick={() => setIsCompareModalOpen(true)}
+                    >
+                        <BarChart2 size={20} />
+                        <span style={{ fontWeight: 600 }}>Compare {selectedRegNos.size} Candidates</span>
+                        <div style={{
+                            background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px'
+                        }} onClick={(e) => { e.stopPropagation(); setSelectedRegNos(new Set()); }}>
+                            <X size={12} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {isCompareModalOpen && selectedRegNos.size > 0 && (
+                    <ComparisonModal
+                        isOpen={isCompareModalOpen}
+                        onClose={() => setIsCompareModalOpen(false)}
+                        selectedStudents={filtered.filter(a => selectedRegNos.has(a.personalDetails?.registerNumber || '')) as any[]}
+                    />
+                )}
+            </AnimatePresence>
+
             {/* Floating Save Button */}
             <AnimatePresence>
                 {(changedRegNos.size > 0 || isSaving) && (
@@ -602,45 +643,7 @@ export default function AwardAdminPanel({ slug }: Props) {
                 )}
             </AnimatePresence>
 
-            {/* Compare Button */}
-            <AnimatePresence>
-                {selectedRegNos.size > 0 && (
-                    <motion.div
-                        initial={{ y: 100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 100, opacity: 0 }}
-                        style={{
-                            position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
-                            background: 'var(--accent-primary)', color: 'white',
-                            padding: '12px 24px', borderRadius: 'var(--radius-full)',
-                            boxShadow: '0 8px 32px rgba(3, 77, 161, 0.4)',
-                            display: 'flex', alignItems: 'center', gap: '12px', zIndex: 50,
-                            cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)'
-                        }}
-                        onClick={() => setIsCompareModalOpen(true)}
-                    >
-                        <BarChart2 size={20} />
-                        <span style={{ fontWeight: 600 }}>Compare {selectedRegNos.size} Candidates</span>
-                        <div style={{
-                            background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px'
-                        }} onClick={(e) => { e.stopPropagation(); setSelectedRegNos(new Set()); }}>
-                            <X size={12} />
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-                {isCompareModalOpen && selectedRegNos.size > 0 && (
-                    <ComparisonModal
-                        isOpen={isCompareModalOpen}
-                        onClose={() => setIsCompareModalOpen(false)}
-                        selectedStudents={filtered.filter(a => selectedRegNos.has(a.personalDetails?.registerNumber || '')) as any[]}
-                    />
-                )}
-            </AnimatePresence>
-        </motion.div >
+        </motion.div>
     );
 }
 
