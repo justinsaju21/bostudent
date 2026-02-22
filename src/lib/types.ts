@@ -205,7 +205,7 @@ export interface StudentApplication {
     videoPitchUrl: string;
     masterProofFolderUrl?: string;
     consentGiven: boolean;
-    termsAccepted: boolean;
+    termsAccepted?: boolean;
     submittedAt?: string;
     // Admin Overrides
     facultyScore?: number;

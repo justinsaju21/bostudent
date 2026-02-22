@@ -1,14 +1,15 @@
 'use client';
 
-import { AwardConfig } from '@/lib/awards';
+import { AwardCategory } from '@/lib/awards';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { Award, Briefcase, FileText, Globe, Medal, Star, Github, Linkedin, ExternalLink, FolderOpen } from 'lucide-react';
 import React, { useMemo } from 'react';
+import Link from 'next/link';
 
 interface Props {
     student: any;
-    award: AwardConfig;
+    award: AwardCategory;
 }
 
 const fadeIn = {
@@ -68,6 +69,24 @@ export default function CustomAwardClient({ student, award }: Props) {
                             <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '24px' }}>
                                 {pd.registerNumber} • {pd.srmEmail}
                             </p>
+
+                            {/* Social / Quick Links */}
+                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '32px' }}>
+                                {student.masterProofFolderUrl && <SocialLink href={student.masterProofFolderUrl} icon={<FolderOpen size={16} />} label="All Proofs" />}
+                            </div>
+
+                            {/* Score & Stats */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', maxWidth: '600px' }}>
+                                {student.facultyScore !== undefined && <StatMini label="Score Ovr" value={Number(student.facultyScore).toFixed(1)} />}
+                                {student.cgpa !== undefined && <StatMini label="CGPA" value={String(student.cgpa)} />}
+                                {student.ctcLpa !== undefined && <StatMini label="CTC" value={`${String(student.ctcLpa)} LPA`} />}
+                                {customSections.map(sec => {
+                                    if (Array.isArray(sec.value)) {
+                                        return <StatMini key={sec.key} label={formatTitle(sec.key)} value={String(sec.value.length)} />;
+                                    }
+                                    return null;
+                                })}
+                            </div>
                         </motion.div>
                     </div>
                 </section>
@@ -124,18 +143,41 @@ export default function CustomAwardClient({ student, award }: Props) {
                         </motion.div>
                     ))}
 
-                    {/* Master Proof Folder */}
-                    {student.masterProofFolderUrl && (
-                        <motion.div custom={customSections.length + 1} initial="hidden" animate="visible" variants={fadeIn} style={{ marginTop: '48px', padding: '24px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-subtle)', textAlign: 'center' }}>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '8px' }}>Master Proof Folder</h3>
-                            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px' }}>Contains official verification documents provided by the applicant.</p>
-                            <a href={student.masterProofFolderUrl} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 24px', background: award.color, border: 'none', color: 'white' }}>
-                                <FolderOpen size={18} /> Open Folder Server
-                            </a>
-                        </motion.div>
-                    )}
                 </div>
+
+                {/* Footer */}
+                <footer style={{ padding: '40px 24px', borderTop: '1px solid var(--border-subtle)', textAlign: 'center' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                        Custom Award Portal • <Link href="/" style={{ color: award.color }}>SRM IST KTR</Link>
+                    </p>
+                </footer>
             </main>
         </>
+    );
+}
+
+// ===== Helpers =====
+function StatMini({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="stat-card" style={{ background: 'var(--bg-card)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }}>
+            <div className="stat-number" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px' }}>{value}</div>
+            <div className="stat-label" style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+        </div>
+    );
+}
+
+function SocialLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
+    return (
+        <a href={href} target="_blank" rel="noopener noreferrer" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px',
+            borderRadius: '20px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
+            color: 'var(--text-secondary)', fontSize: '13px', textDecoration: 'none',
+            transition: 'all 0.2s ease',
+        }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+        >
+            {icon} {label}
+        </a>
     );
 }
