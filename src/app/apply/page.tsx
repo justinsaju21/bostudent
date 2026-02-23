@@ -32,7 +32,7 @@ export default function AwardSelectionPage() {
     return (
         <>
             <Navbar />
-            <main style={{ paddingTop: '100px', padding: '100px 24px 60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+            <main style={{ paddingTop: '100px', padding: '100px clamp(16px, 4vw, 24px) 60px', maxWidth: '1200px', margin: '0 auto' }}>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

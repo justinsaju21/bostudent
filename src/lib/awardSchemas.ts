@@ -28,6 +28,8 @@ export const basePersonalSchema = z.object({
     section: z.string().min(1, 'Section is required').max(3, 'Section too long'),
     facultyAdvisor: z.string().min(2, 'Faculty Advisor name is required'),
     profilePhotoUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+    linkedInUrl: z.string().url('Invalid LinkedIn URL').optional().or(z.literal('')),
+    githubUrl: z.string().url('Invalid GitHub/Portfolio URL').optional().or(z.literal('')),
 });
 
 // ===== Award #2: Best Undergraduate Researcher =====
@@ -44,7 +46,7 @@ const patentEntrySchema = z.object({
     id: z.string(),
     title: z.string().min(1, 'Patent title is required'),
     patentNumber: z.string().optional().or(z.literal('')),
-    status: z.enum(['filed', 'granted']),
+    status: z.enum(['filed', 'published', 'granted']),
     proofLink: z.string().url('Please provide a valid proof link'),
 });
 
@@ -61,7 +63,7 @@ export const researcherSchema = z.object({
 const hackathonWinSchema = z.object({
     id: z.string(),
     eventName: z.string().min(1, 'Event name is required'),
-    level: z.enum(['college', 'state', 'national']),
+    level: z.enum(['college', 'state', 'national', 'international']),
     position: z.string().min(1, 'Position is required'),
     teamSize: z.coerce.number().min(1, 'Team size must be at least 1'),
     projectBuilt: z.string().min(1, 'Project description is required'),
@@ -79,7 +81,7 @@ export const hackathonWinnerSchema = z.object({
 const sportsWinSchema = z.object({
     id: z.string(),
     sportOrEvent: z.string().min(1, 'Sport/Event name is required'),
-    level: z.enum(['state', 'national']),
+    level: z.enum(['zone', 'district', 'state', 'national', 'international']),
     position: z.string().min(1, 'Position is required'),
     proofLink: z.string().url('Please provide a valid proof link'),
 });
@@ -97,6 +99,7 @@ export const nssNccSchema = z.object({
     organization: z.string().min(1, 'Organization name is required'),
     otherOrganization: z.string().optional().or(z.literal('')),
     role: z.string().min(1, 'Role is required'),
+    highestCertificate: z.enum(['None', 'A', 'B', 'C', 'Camp']),
     totalHoursServed: z.coerce.number().min(0, 'Hours must be 0 or above'),
     eventsOrganized: z.string().optional().or(z.literal('')),
     impactDescription: z.string().min(20, 'Please describe your impact (min 20 chars)'),
@@ -127,7 +130,9 @@ export const highestSalarySchema = z.object({
     personalDetails: basePersonalSchema,
     companyName: z.string().min(1, 'Company name is required'),
     jobRole: z.string().min(1, 'Job role is required'),
+    placementType: z.enum(['on-campus', 'off-campus']),
     ctcLpa: z.coerce.number().min(0.1, 'CTC must be greater than 0'),
+    basePayLpa: z.coerce.number().min(0.1, 'Base pay must be greater than 0'),
     offerLetterLink: z.string().url('Please provide a valid offer letter link'),
     consentGiven: z.literal(true, { message: 'You must consent to data accuracy' }),
 });
@@ -137,7 +142,9 @@ export const coreSalarySchema = z.object({
     personalDetails: basePersonalSchema,
     companyName: z.string().min(1, 'Company name is required'),
     jobRole: z.string().min(1, 'Job role is required'),
+    placementType: z.enum(['on-campus', 'off-campus']),
     ctcLpa: z.coerce.number().min(0.1, 'CTC must be greater than 0'),
+    basePayLpa: z.coerce.number().min(0.1, 'Base pay must be greater than 0'),
     coreDomain: z.string().min(1, 'Core domain is required'),
     offerLetterLink: z.string().url('Please provide a valid offer letter link'),
     coreDomainProofLink: z.string().url('Please provide a valid core domain proof link'),
@@ -148,6 +155,7 @@ export const coreSalarySchema = z.object({
 export const academicExcellenceSchema = z.object({
     personalDetails: basePersonalSchema,
     cgpa: z.coerce.number().min(0, 'CGPA must be 0 or above').max(10, 'CGPA cannot exceed 10'),
+    hasArrears: z.enum(['yes', 'no'], { message: 'Please declare if you have standing or historical arrears' }),
     gradeSheetLink: z.string().url('Please provide a valid grade sheet link'),
     consentGiven: z.literal(true, { message: 'You must consent to data accuracy' }),
 });

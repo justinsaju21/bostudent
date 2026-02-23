@@ -57,12 +57,12 @@ async function ensureSheet(sheetName: string, headers: string[]): Promise<void> 
 
 // ===== HEADERS for each award sheet =====
 export function getHeadersForAward(slug: AwardSlug): string[] {
-    const personal = ['Name', 'Register Number', 'Programme', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL'];
+    const personal = ['Name', 'Register Number', 'Programme', 'Specialization', 'Personal Email', 'SRM Email', 'Mobile Number', 'Section', 'Faculty Advisor', 'Profile Photo URL', 'LinkedIn Profile', 'GitHub / Portfolio'];
     const adminCols = ['Submitted At', 'Faculty Score', 'Verified', 'Discarded Items', 'JSON_Full_Data'];
 
     switch (slug) {
         case 'academic-excellence':
-            return [...personal, 'CGPA', 'Grade Sheet Link', ...adminCols];
+            return [...personal, 'CGPA', 'History of Arrears', 'Grade Sheet Link', ...adminCols];
         case 'researcher':
             return [...personal, 'Papers (Summary)', 'Patents (Summary)', 'Research Statement', 'Master Proof Folder', ...adminCols];
         case 'hackathon':
@@ -70,13 +70,13 @@ export function getHeadersForAward(slug: AwardSlug): string[] {
         case 'sports':
             return [...personal, 'Wins (Summary)', 'Master Proof Folder', ...adminCols];
         case 'nss-ncc':
-            return [...personal, 'Organization', 'Other Organization', 'Role', 'Total Hours', 'Events Organized', 'Impact Description', 'Proof Link', 'Master Proof Folder', ...adminCols];
+            return [...personal, 'Organization', 'Other Organization', 'Role', 'Highest Certificate', 'Total Hours', 'Events Organized', 'Impact Description', 'Proof Link', 'Master Proof Folder', ...adminCols];
         case 'dept-contribution':
             return [...personal, 'Contributions (Summary)', 'Master Proof Folder', ...adminCols];
         case 'highest-salary':
-            return [...personal, 'Company Name', 'Job Role', 'CTC (LPA)', 'Offer Letter Link', ...adminCols];
+            return [...personal, 'Company Name', 'Job Role', 'Placement Type', 'Base Pay (LPA)', 'Total CTC (LPA)', 'Offer Letter Link', ...adminCols];
         case 'core-salary':
-            return [...personal, 'Company Name', 'Job Role', 'CTC (LPA)', 'Core Domain', 'Offer Letter Link', 'Core Domain Proof', ...adminCols];
+            return [...personal, 'Company Name', 'Job Role', 'Placement Type', 'Base Pay (LPA)', 'Total CTC (LPA)', 'Core Domain', 'Offer Letter Link', 'Core Domain Proof', ...adminCols];
         default:
             return [...personal, ...adminCols];
     }
@@ -86,13 +86,13 @@ export function getHeadersForAward(slug: AwardSlug): string[] {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function awardApplicationToRow(slug: AwardSlug, app: any): string[] {
     const pd: BasePersonalDetails = app.personalDetails;
-    const personal = [pd.name, pd.registerNumber, pd.department, pd.specialization, pd.personalEmail, pd.srmEmail, pd.mobileNumber, pd.section, pd.facultyAdvisor, pd.profilePhotoUrl || ''];
+    const personal = [pd.name, pd.registerNumber, pd.department, pd.specialization, pd.personalEmail, pd.srmEmail, pd.mobileNumber, pd.section, pd.facultyAdvisor, pd.profilePhotoUrl || '', pd.linkedInUrl || '', pd.githubUrl || ''];
     // Default admin block: Submitted At, Faculty Score, Verified, Discarded Items, JSON payload
     const adminBlock = [app.submittedAt || new Date().toISOString(), '0', 'FALSE', '', JSON.stringify(app)];
 
     switch (slug) {
         case 'academic-excellence':
-            return [...personal, String(app.cgpa || 0), app.gradeSheetLink || '', ...adminBlock];
+            return [...personal, String(app.cgpa || 0), app.hasArrears === 'yes' ? 'YES' : 'NO', app.gradeSheetLink || '', ...adminBlock];
         case 'researcher': {
             const papersSummary = (app.papers || []).map((p: { title: string; indexStatus: string }, i: number) =>
                 `${i + 1}. ${p.title} [${p.indexStatus?.toUpperCase()}]`).join('\n') || 'None';
@@ -111,16 +111,16 @@ function awardApplicationToRow(slug: AwardSlug, app: any): string[] {
             return [...personal, summary, app.masterProofFolderUrl || '', ...adminBlock];
         }
         case 'nss-ncc':
-            return [...personal, app.organization || '', app.otherOrganization || '', app.role || '', String(app.totalHoursServed || 0), app.eventsOrganized || '', app.impactDescription || '', app.proofLink || '', app.masterProofFolderUrl || '', ...adminBlock];
+            return [...personal, app.organization || '', app.otherOrganization || '', app.role || '', app.highestCertificate || 'None', String(app.totalHoursServed || 0), app.eventsOrganized || '', app.impactDescription || '', app.proofLink || '', app.masterProofFolderUrl || '', ...adminBlock];
         case 'dept-contribution': {
             const summary = (app.contributions || []).map((c: { activityType: string; role: string; eventName: string }, i: number) =>
                 `${i + 1}. ${c.eventName} (${c.activityType}) - ${c.role}`).join('\n') || 'None';
             return [...personal, summary, app.masterProofFolderUrl || '', ...adminBlock];
         }
         case 'highest-salary':
-            return [...personal, app.companyName || '', app.jobRole || '', String(app.ctcLpa || 0), app.offerLetterLink || '', ...adminBlock];
+            return [...personal, app.companyName || '', app.jobRole || '', app.placementType === 'off-campus' ? 'Off-Campus' : 'On-Campus', String(app.basePayLpa || 0), String(app.ctcLpa || 0), app.offerLetterLink || '', ...adminBlock];
         case 'core-salary':
-            return [...personal, app.companyName || '', app.jobRole || '', String(app.ctcLpa || 0), app.coreDomain || '', app.offerLetterLink || '', app.coreDomainProofLink || '', ...adminBlock];
+            return [...personal, app.companyName || '', app.jobRole || '', app.placementType === 'off-campus' ? 'Off-Campus' : 'On-Campus', String(app.basePayLpa || 0), String(app.ctcLpa || 0), app.coreDomain || '', app.offerLetterLink || '', app.coreDomainProofLink || '', ...adminBlock];
         default:
             return [...personal, ...adminBlock];
     }

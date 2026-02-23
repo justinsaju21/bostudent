@@ -36,11 +36,11 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function PersonalStep({ register, errors }: { register: any; errors: any }) {
     return (
-        <div className="glass-card" style={{ padding: '32px', borderRadius: 'var(--radius-md)' }}>
+        <div className="glass-card" style={{ padding: 'clamp(20px, 5vw, 32px)', borderRadius: 'var(--radius-md)' }}>
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.4rem', fontWeight: 600, marginBottom: '24px' }}>
                 Personal Details
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0 24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '0 24px' }}>
                 <Field label="Full Name" error={errors?.personalDetails?.name?.message}>
                     <input className="form-input" {...register('personalDetails.name')} placeholder="Your full name" />
                 </Field>
@@ -76,6 +76,12 @@ function PersonalStep({ register, errors }: { register: any; errors: any }) {
                 <Field label="Profile Photo URL (Optional)" error={errors?.personalDetails?.profilePhotoUrl?.message}>
                     <input className="form-input" {...register('personalDetails.profilePhotoUrl')} placeholder="https://drive.google.com/..." />
                 </Field>
+                <Field label="LinkedIn Profile URL (Optional)" error={errors?.personalDetails?.linkedInUrl?.message}>
+                    <input className="form-input" {...register('personalDetails.linkedInUrl')} placeholder="https://linkedin.com/..." />
+                </Field>
+                <Field label="GitHub / Portfolio URL (Optional)" error={errors?.personalDetails?.githubUrl?.message}>
+                    <input className="form-input" {...register('personalDetails.githubUrl')} placeholder="https://github.com/..." />
+                </Field>
             </div>
         </div>
     );
@@ -87,7 +93,7 @@ function AwardDetailsStep({ slug, register, errors, control }: { slug: AwardSlug
     const award = getAwardBySlug(slug)!;
 
     return (
-        <div className="glass-card" style={{ padding: '32px', borderRadius: 'var(--radius-md)' }}>
+        <div className="glass-card" style={{ padding: 'clamp(20px, 5vw, 32px)', borderRadius: 'var(--radius-md)' }}>
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.4rem', fontWeight: 600, marginBottom: '24px' }}>
                 {award.title} — Details
             </h2>
@@ -188,6 +194,7 @@ function ResearcherFields({ register, errors, control }: { register: any; errors
                         <Field label="Status" error={errors?.patents?.[i]?.status?.message}>
                             <select className="form-input" {...register(`patents.${i}.status`)}>
                                 <option value="filed">Filed</option>
+                                <option value="published">Published</option>
                                 <option value="granted">Granted</option>
                             </select>
                         </Field>
@@ -236,6 +243,7 @@ function HackathonFields({ register, errors, control }: { register: any; errors:
                                 <option value="college">College/Inter-College</option>
                                 <option value="state">State</option>
                                 <option value="national">National</option>
+                                <option value="international">International</option>
                             </select>
                         </Field>
                         <Field label="Position" error={errors?.wins?.[i]?.position?.message}>
@@ -286,8 +294,11 @@ function SportsFields({ register, errors, control }: { register: any; errors: an
                     <div className="form-grid-2">
                         <Field label="Level" error={errors?.wins?.[i]?.level?.message}>
                             <select className="form-input" {...register(`wins.${i}.level`)}>
+                                <option value="zone">Zonal Level</option>
+                                <option value="district">District Level</option>
                                 <option value="state">State</option>
                                 <option value="national">National</option>
+                                <option value="international">International</option>
                             </select>
                         </Field>
                         <Field label="Position" error={errors?.wins?.[i]?.position?.message}>
@@ -330,9 +341,21 @@ function NssNccFields({ register, errors, control }: { register: any; errors: an
                     <input className="form-input" {...register('role')} placeholder="e.g., Volunteer, Leader" />
                 </Field>
             </div>
-            <Field label="Total Hours Served" error={errors?.totalHoursServed?.message}>
-                <input className="form-input" type="number" {...register('totalHoursServed', { valueAsNumber: true })} />
-            </Field>
+            <div className="form-grid-2">
+                <Field label="Highest Certificate / Camp" error={errors?.highestCertificate?.message}>
+                    <select className="form-input" {...register('highestCertificate')}>
+                        <option value="">Select Certificate</option>
+                        <option value="None">None</option>
+                        <option value="Camp">Special Camp Certificate</option>
+                        <option value="A">'A' Certificate</option>
+                        <option value="B">'B' Certificate</option>
+                        <option value="C">'C' Certificate</option>
+                    </select>
+                </Field>
+                <Field label="Total Hours Served" error={errors?.totalHoursServed?.message}>
+                    <input className="form-input" type="number" {...register('totalHoursServed', { valueAsNumber: true })} />
+                </Field>
+            </div>
             <Field label="Events Organized" error={errors?.eventsOrganized?.message}>
                 <textarea className="form-input" rows={2} {...register('eventsOrganized')} placeholder="List the events you organized..." />
             </Field>
@@ -413,12 +436,26 @@ function SalaryFields({ register, errors }: { register: any; errors: any }) {
                     <input className="form-input" {...register('jobRole')} />
                 </Field>
             </div>
-            <Field label="CTC (LPA)" error={errors?.ctcLpa?.message}>
-                <input className="form-input" type="number" step="0.01" {...register('ctcLpa', { valueAsNumber: true })} placeholder="e.g., 12.50" />
-            </Field>
-            <Field label="Offer Letter Link" error={errors?.offerLetterLink?.message}>
-                <input className="form-input" {...register('offerLetterLink')} placeholder="https://drive.google.com/..." />
-            </Field>
+            <div className="form-grid-2">
+                <Field label="Placement Type" error={errors?.placementType?.message}>
+                    <select className="form-input" {...register('placementType')}>
+                        <option value="">Select...</option>
+                        <option value="on-campus">On-Campus</option>
+                        <option value="off-campus">Off-Campus</option>
+                    </select>
+                </Field>
+                <Field label="Offer Letter Link" error={errors?.offerLetterLink?.message}>
+                    <input className="form-input" {...register('offerLetterLink')} placeholder="https://drive.google.com/..." />
+                </Field>
+            </div>
+            <div className="form-grid-2">
+                <Field label="Base / Fixed Pay (LPA)" error={errors?.basePayLpa?.message}>
+                    <input className="form-input" type="number" step="0.01" {...register('basePayLpa', { valueAsNumber: true })} placeholder="e.g., 10.00" />
+                </Field>
+                <Field label="Total CTC (LPA)" error={errors?.ctcLpa?.message}>
+                    <input className="form-input" type="number" step="0.01" {...register('ctcLpa', { valueAsNumber: true })} placeholder="e.g., 12.50" />
+                </Field>
+            </div>
         </>
     );
 }
@@ -435,18 +472,34 @@ function CoreSalaryFields({ register, errors }: { register: any; errors: any }) 
                     <input className="form-input" {...register('jobRole')} />
                 </Field>
             </div>
-            <Field label="CTC (LPA)" error={errors?.ctcLpa?.message}>
-                <input className="form-input" type="number" step="0.01" {...register('ctcLpa', { valueAsNumber: true })} placeholder="e.g., 12.50" />
-            </Field>
-            <Field label="Core Domain" error={errors?.coreDomain?.message}>
-                <input className="form-input" {...register('coreDomain')} placeholder="e.g., VLSI, Embedded Systems" />
-            </Field>
-            <Field label="Offer Letter Link" error={errors?.offerLetterLink?.message}>
-                <input className="form-input" {...register('offerLetterLink')} placeholder="https://drive.google.com/..." />
-            </Field>
-            <Field label="Core Domain Proof Link" error={errors?.coreDomainProofLink?.message}>
-                <input className="form-input" {...register('coreDomainProofLink')} placeholder="https://..." />
-            </Field>
+            <div className="form-grid-2">
+                <Field label="Placement Type" error={errors?.placementType?.message}>
+                    <select className="form-input" {...register('placementType')}>
+                        <option value="">Select...</option>
+                        <option value="on-campus">On-Campus</option>
+                        <option value="off-campus">Off-Campus</option>
+                    </select>
+                </Field>
+                <Field label="Core Domain" error={errors?.coreDomain?.message}>
+                    <input className="form-input" {...register('coreDomain')} placeholder="e.g., VLSI, Embedded Systems" />
+                </Field>
+            </div>
+            <div className="form-grid-2">
+                <Field label="Base / Fixed Pay (LPA)" error={errors?.basePayLpa?.message}>
+                    <input className="form-input" type="number" step="0.01" {...register('basePayLpa', { valueAsNumber: true })} placeholder="e.g., 10.00" />
+                </Field>
+                <Field label="Total CTC (LPA)" error={errors?.ctcLpa?.message}>
+                    <input className="form-input" type="number" step="0.01" {...register('ctcLpa', { valueAsNumber: true })} placeholder="e.g., 12.50" />
+                </Field>
+            </div>
+            <div className="form-grid-2">
+                <Field label="Offer Letter Link" error={errors?.offerLetterLink?.message}>
+                    <input className="form-input" {...register('offerLetterLink')} placeholder="https://drive.google.com/..." />
+                </Field>
+                <Field label="Core Domain Proof Link" error={errors?.coreDomainProofLink?.message}>
+                    <input className="form-input" {...register('coreDomainProofLink')} placeholder="https://..." />
+                </Field>
+            </div>
         </>
     );
 }
@@ -455,9 +508,18 @@ function CoreSalaryFields({ register, errors }: { register: any; errors: any }) 
 function AcademicExcellenceFields({ register, errors }: { register: any; errors: any }) {
     return (
         <>
-            <Field label="Overall CGPA (out of 10)" error={errors?.cgpa?.message}>
-                <input className="form-input" type="number" step="0.01" min="0" max="10" {...register('cgpa', { valueAsNumber: true })} placeholder="e.g., 9.25" />
-            </Field>
+            <div className="form-grid-2">
+                <Field label="History of Arrears?" error={errors?.hasArrears?.message}>
+                    <select className="form-input" {...register('hasArrears')}>
+                        <option value="">Select...</option>
+                        <option value="no">No, I have clean records</option>
+                        <option value="yes">Yes, I have historical arrears</option>
+                    </select>
+                </Field>
+                <Field label="Overall CGPA (out of 10)" error={errors?.cgpa?.message}>
+                    <input className="form-input" type="number" step="0.01" min="0" max="10" {...register('cgpa', { valueAsNumber: true })} placeholder="e.g., 9.25" />
+                </Field>
+            </div>
             <Field label="Grade Sheet / Transcript Link" error={errors?.gradeSheetLink?.message}>
                 <input className="form-input" {...register('gradeSheetLink')} placeholder="https://drive.google.com/..." />
             </Field>
@@ -544,7 +606,7 @@ export default function AwardApplyPage() {
         return (
             <>
                 <Navbar />
-                <main style={{ paddingTop: '100px', textAlign: 'center', padding: '100px 24px' }}>
+                <main style={{ paddingTop: '100px', textAlign: 'center', padding: '100px clamp(16px, 4vw, 24px)' }}>
                     <h1>Award Not Found</h1>
                     <p style={{ color: 'var(--text-secondary)', marginTop: '12px' }}>The award category &quot;{slug}&quot; does not exist.</p>
                     <Link href="/apply" style={{ textDecoration: 'none' }}>
@@ -666,7 +728,7 @@ export default function AwardApplyPage() {
     return (
         <>
             <Navbar />
-            <main style={{ paddingTop: '80px', padding: '80px 24px 60px 24px', maxWidth: '900px', margin: '0 auto' }}>
+            <main style={{ paddingTop: '80px', padding: '80px clamp(16px, 4vw, 24px) 60px', maxWidth: '900px', margin: '0 auto' }}>
                 {/* Award badge */}
                 <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                     <span style={{

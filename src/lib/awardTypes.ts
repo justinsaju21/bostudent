@@ -14,6 +14,8 @@ export interface BasePersonalDetails {
     section: string;
     facultyAdvisor: string;
     profilePhotoUrl?: string;
+    linkedInUrl?: string;
+    githubUrl?: string;
 }
 
 // ---- Award #2: Best Undergraduate Researcher ----
@@ -30,7 +32,7 @@ export interface PatentEntry {
     id: string;
     title: string;
     patentNumber: string;
-    status: 'filed' | 'granted';
+    status: 'filed' | 'published' | 'granted';
     proofLink: string;
 }
 
@@ -48,7 +50,7 @@ export interface ResearcherApplication {
 export interface HackathonWinEntry {
     id: string;
     eventName: string;
-    level: 'college' | 'state' | 'national';
+    level: 'college' | 'state' | 'national' | 'international';
     position: string; // 1st, 2nd, 3rd, Finalist
     teamSize: number;
     projectBuilt: string;
@@ -67,7 +69,7 @@ export interface HackathonWinnerApplication {
 export interface SportsWinEntry {
     id: string;
     sportOrEvent: string;
-    level: 'state' | 'national';
+    level: 'zone' | 'district' | 'state' | 'national' | 'international';
     position: string;
     proofLink: string;
 }
@@ -86,6 +88,7 @@ export interface NssNccApplication {
     organization: string; // NSS, NCC, or other
     otherOrganization?: string;
     role: string;
+    highestCertificate: 'None' | 'A' | 'B' | 'C' | 'Camp';
     totalHoursServed: number;
     eventsOrganized: string;
     impactDescription: string;
@@ -118,7 +121,9 @@ export interface HighestSalaryApplication {
     personalDetails: BasePersonalDetails;
     companyName: string;
     jobRole: string;
+    placementType: 'on-campus' | 'off-campus';
     ctcLpa: number;
+    basePayLpa: number;
     offerLetterLink: string;
     consentGiven: boolean;
     submittedAt?: string;
@@ -129,7 +134,9 @@ export interface CoreSalaryApplication {
     personalDetails: BasePersonalDetails;
     companyName: string;
     jobRole: string;
+    placementType: 'on-campus' | 'off-campus';
     ctcLpa: number;
+    basePayLpa: number;
     coreDomain: string;
     offerLetterLink: string;
     coreDomainProofLink: string;
@@ -141,6 +148,7 @@ export interface CoreSalaryApplication {
 export interface AcademicExcellenceApplication {
     personalDetails: BasePersonalDetails;
     cgpa: number;
+    hasArrears: 'yes' | 'no';
     gradeSheetLink: string;
     consentGiven: boolean;
     submittedAt?: string;
